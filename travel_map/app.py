@@ -8,7 +8,7 @@ import osmnx as ox
 
 from fastapi.middleware.cors import CORSMiddleware
 
-from travel_map.utils import route_to_x_y
+from travel_map import utils
 
 
 origins = ["*"]
@@ -33,6 +33,7 @@ class Route(BaseModel):
     rec: tuple[float, float, float, float]
     x: list[float]
     y: list[float]
+    distance: float
 
 
 @dataclass
@@ -76,6 +77,7 @@ def route(
     G = ox.graph_from_bbox(CITY_BBOX, network_type="drive")
     start_node_id = ox.distance.nearest_nodes(G, X=start_x, Y=start_y)
     route = RandomRoute(G).generate(start_node_id)
-    x, y = route_to_x_y(G, route)
+    x, y = utils.route_to_x_y(G, route)
+    distance = utils.get_route_distance(G, route)
 
-    return Route(rec=CITY_BBOX, x=x, y=y)
+    return Route(rec=CITY_BBOX, x=x, y=y, distance=distance)
