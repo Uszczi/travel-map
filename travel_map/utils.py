@@ -23,6 +23,12 @@ def route_to_x_y(
     return x, y
 
 
+def get_distance_between(graph: MultiDiGraph, start: int, end: int):
+    print(start, end)
+    data = min(graph.get_edge_data(start, end).values(), key=lambda d: d["length"])
+    return data["length"]
+
+
 def get_route_distance(graph: MultiDiGraph, route: list[int]) -> float:
     distance = 0
     for u, v in zip(route[:-1], route[1:]):
