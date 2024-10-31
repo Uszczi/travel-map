@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from fastapi import FastAPI
 
-from pydantic import BaseModel
 import networkx as nx
 import random
 import osmnx as ox
@@ -9,6 +8,12 @@ import osmnx as ox
 from fastapi.middleware.cors import CORSMiddleware
 
 from travel_map import utils
+from travel_map.models import Route
+from travel_map.visited_edges import (
+    get_visited_segments,
+    mark_edges_visited,
+    visited_edges,
+)
 
 
 origins = ["*"]
@@ -27,13 +32,6 @@ app.add_middleware(
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
-
-
-class Route(BaseModel):
-    rec: tuple[float, float, float, float]
-    x: list[float]
-    y: list[float]
-    distance: float
 
 
 @dataclass
@@ -89,4 +87,7 @@ def route(
     x, y = utils.route_to_x_y(G, route)
     distance = utils.get_route_distance(G, route)
 
-    return Route(rec=CITY_BBOX, x=x, y=y, distance=distance)
+    segments = get_visited_segments(G, route, visited_edges)
+    mark_edges_visited(G, route, visited_edges)
+
+    return Route(rec=CITY_BBOX, x=x, y=y, distance=distance, segments=segments)

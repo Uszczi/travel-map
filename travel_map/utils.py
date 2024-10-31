@@ -24,7 +24,6 @@ def route_to_x_y(
 
 
 def get_distance_between(graph: MultiDiGraph, start: int, end: int):
-    print(start, end)
     data = min(graph.get_edge_data(start, end).values(), key=lambda d: d["length"])
     return data["length"]
 
@@ -32,7 +31,6 @@ def get_distance_between(graph: MultiDiGraph, start: int, end: int):
 def get_route_distance(graph: MultiDiGraph, route: list[int]) -> float:
     distance = 0
     for u, v in zip(route[:-1], route[1:]):
-        # if there are parallel edges, select the shortest in length
         data = min(graph.get_edge_data(u, v).values(), key=lambda d: d["length"])
         distance += data["length"]
     return distance
