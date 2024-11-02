@@ -1,6 +1,5 @@
 from fastapi import FastAPI, Request
 import time
-from contextlib import contextmanager
 
 import osmnx as ox
 from loguru import logger
@@ -66,11 +65,11 @@ def route(
         start_x + CITY_BBOX_DEFAULT_SIZE * 2,
         start_y + CITY_BBOX_DEFAULT_SIZE,
     )
-    with time_measure("ox.graph_from_bbox took: "):
+    with utils.time_measure("ox.graph_from_bbox took: "):
         G = ox.graph_from_bbox(CITY_BBOX, network_type="drive")
 
     start_node_id = ox.distance.nearest_nodes(G, X=start_x, Y=start_y)
-    with time_measure("Genereting route took: "):
+    with utils.time_measure("Genereting route took: "):
         route = RandomRoute(G).generate(start_node_id, distance)
 
     x, y = utils.route_to_x_y(G, route)
