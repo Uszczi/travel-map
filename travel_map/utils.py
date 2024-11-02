@@ -1,4 +1,17 @@
+import time
+from contextlib import contextmanager
+
 from networkx import MultiDiGraph
+from loguru import logger
+
+
+@contextmanager
+def time_measure(msg: str):
+    start_time = time.time()
+    yield
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    logger.info(msg + f"{elapsed_time:.4f} sec.")
 
 
 def route_to_x_y(

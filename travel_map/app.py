@@ -1,6 +1,9 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+import time
+from contextlib import contextmanager
 
 import osmnx as ox
+from loguru import logger
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -27,6 +30,18 @@ app.add_middleware(
 )
 
 
+@app.middleware("http")
+async def measure_execution_time(request: Request, call_next):
+    start_time = time.time()
+
+    response = await call_next(request)
+
+    process_time = time.time() - start_time
+    logger.info(f"{request.url} took {process_time:.4f} sec.")
+
+    return response
+
+
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
@@ -51,9 +66,12 @@ def route(
         start_x + CITY_BBOX_DEFAULT_SIZE * 2,
         start_y + CITY_BBOX_DEFAULT_SIZE,
     )
-    G = ox.graph_from_bbox(CITY_BBOX, network_type="drive")
+    with time_measure("ox.graph_from_bbox took: "):
+        G = ox.graph_from_bbox(CITY_BBOX, network_type="drive")
+
     start_node_id = ox.distance.nearest_nodes(G, X=start_x, Y=start_y)
-    route = RandomRoute(G).generate(start_node_id, distance)
+    with time_measure("Genereting route took: "):
+        route = RandomRoute(G).generate(start_node_id, distance)
 
     x, y = utils.route_to_x_y(G, route)
     distance = utils.get_route_distance(G, route)
