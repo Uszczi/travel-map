@@ -1,13 +1,11 @@
-from dataclasses import dataclass
 from fastapi import FastAPI
 
-import networkx as nx
-import random
 import osmnx as ox
 
 from fastapi.middleware.cors import CORSMiddleware
 
 from travel_map import utils
+from travel_map.generator.random import RandomRoute
 from travel_map.models import Route
 from travel_map.visited_edges import (
     get_visited_segments,
@@ -34,36 +32,9 @@ def read_root():
     return {"Hello": "World"}
 
 
-@dataclass
-class RandomRoute:
-    graph: nx.MultiDiGraph
-
-    def generate(self, start_node_id: int, distance: int) -> list[int]:
-        route = [start_node_id]
-        current_distance, i = 0, 0
-        current_node = start_node_id
-        previous_node = None
-
-        while (current_distance <= distance) and i < 1000:
-            i += 1
-
-            neighbors = [
-                n for n in self.graph.neighbors(current_node) if n != previous_node
-            ]
-            if not neighbors:
-                next_node = previous_node
-            else:
-                next_node = random.choice(neighbors)
-
-            current_distance += utils.get_distance_between(
-                self.graph, current_node, next_node
-            )
-
-            route.append(next_node)
-            previous_node = current_node
-            current_node = next_node
-
-        return route
+@app.get("/clear")
+def clear():
+    visited_edges.clear()
 
 
 @app.get("/route/{algorithm_type}")

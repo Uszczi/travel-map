@@ -16,6 +16,9 @@ class VisitedEdges:
     def __len__(self):
         return len(self._map)
 
+    def clear(self):
+        self._map = {}
+
     def add(self, key):
         if key in self._map:
             self._map[key] += 1
