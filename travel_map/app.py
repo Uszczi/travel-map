@@ -19,6 +19,7 @@ from travel_map.visited_edges import (
 origins = ["*"]
 
 app = FastAPI()
+graphs = {}
 
 app.add_middleware(
     CORSMiddleware,
@@ -65,8 +66,12 @@ def route(
         start_x + CITY_BBOX_DEFAULT_SIZE * 2,
         start_y + CITY_BBOX_DEFAULT_SIZE,
     )
-    with utils.time_measure("ox.graph_from_bbox took: "):
-        G = ox.graph_from_bbox(CITY_BBOX, network_type="drive")
+    if CITY_BBOX in graphs:
+        G = graphs[CITY_BBOX]
+    else:
+        with utils.time_measure("ox.graph_from_bbox took: "):
+            G = ox.graph_from_bbox(CITY_BBOX, network_type="drive")
+            graphs[CITY_BBOX] = G
 
     start_node_id = ox.distance.nearest_nodes(G, X=start_x, Y=start_y)
     with utils.time_measure("Genereting route took: "):
