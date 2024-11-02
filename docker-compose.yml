@@ -7,3 +7,9 @@ services:
       - "8000:8000"
     volumes:
       - .:/app
+
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    ports:
+      - "27017:27017"

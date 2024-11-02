@@ -3,3 +3,4 @@ uvicorn
 osmnx>=2.0.0b3
 matplotlib
 scikit-learn
+pymongo
