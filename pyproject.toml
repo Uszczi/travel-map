@@ -2,5 +2,8 @@
 name = "travel_map"
 version = "0.0.1"
 
+[tool.ruff]
+line-length = 120
+
 [tool.setuptools.packages.find]
 include = ["travel_map*"]
