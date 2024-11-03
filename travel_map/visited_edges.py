@@ -16,6 +16,9 @@ class VisitedEdges:
     def __len__(self):
         return len(self._map)
 
+    def __iter__(self):
+        return iter(self._map)
+
     def clear(self):
         self._map = {}
 

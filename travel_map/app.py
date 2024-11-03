@@ -67,12 +67,12 @@ def route(
         start_x + CITY_BBOX_DEFAULT_SIZE * 2,
         start_y + CITY_BBOX_DEFAULT_SIZE,
     )
-    if CITY_BBOX in graphs:
-        G = graphs[CITY_BBOX]
+    if "refactor" in graphs:
+        G = graphs["refactor"]
     else:
         with utils.time_measure("ox.graph_from_bbox took: "):
             G = ox.graph_from_bbox(CITY_BBOX, network_type="drive")
-            graphs[CITY_BBOX] = G
+            graphs["refactor"] = G
 
     start_node_id = ox.distance.nearest_nodes(G, X=start_x, Y=start_y)
     with utils.time_measure("Genereting route took: "):
@@ -93,6 +93,48 @@ def get_strava_routes() -> list[StravaRoute]:
     routes = collection.find()
     result = [StravaRoute(**route) for route in routes]
     for route in result:
-        route.xy = route.xy[::20]
+        route.xy = route.xy[::2]
+
+    return result[:10]
+
+
+@app.get("/visited-routes")
+def get_visited_routes() -> list[list[tuple[float, float]]]:
+    start_x: float = 19.1999532
+    start_y: float = 51.6101241
+    CITY_BBOX_DEFAULT_SIZE = 0.04
+    CITY_BBOX = (
+        start_x - CITY_BBOX_DEFAULT_SIZE * 2,
+        start_y - CITY_BBOX_DEFAULT_SIZE,
+        start_x + CITY_BBOX_DEFAULT_SIZE * 2,
+        start_y + CITY_BBOX_DEFAULT_SIZE,
+    )
+    if "refactor" in graphs:
+        G = graphs["refactor"]
+    else:
+        with utils.time_measure("ox.graph_from_bbox took: "):
+            G = ox.graph_from_bbox(CITY_BBOX, network_type="drive")
+            graphs["refactor"] = G
+
+    result = []
+
+    for u, v in visited_edges:
+        data = min(G.get_edge_data(u, v).values(), key=lambda d: d["length"])
+        if "geometry" in data:
+            xs, ys = data["geometry"].xy
+            result.append([[y, x] for (x, y) in zip(xs, ys)])
+        else:
+            result.append(
+                [
+                    [
+                        G.nodes[u]["y"],
+                        G.nodes[u]["x"],
+                    ],
+                    [
+                        G.nodes[v]["y"],
+                        G.nodes[v]["x"],
+                    ],
+                ]
+            )
 
     return result
