@@ -3,12 +3,13 @@ import time
 
 import osmnx as ox
 from loguru import logger
+from travel_map.db import mongo_db
 
 from fastapi.middleware.cors import CORSMiddleware
 
 from travel_map import utils
 from travel_map.generator.random import RandomRoute
-from travel_map.models import Route
+from travel_map.models import Route, StravaRoute
 from travel_map.visited_edges import (
     get_visited_segments,
     mark_edges_visited,
@@ -84,3 +85,14 @@ def route(
     mark_edges_visited(G, route, visited_edges)
 
     return Route(rec=CITY_BBOX, x=x, y=y, distance=distance, segments=segments)
+
+
+@app.get("/strava/routes")
+def get_strava_routes() -> list[StravaRoute]:
+    collection = mongo_db["routes"]
+    routes = collection.find()
+    result = [StravaRoute(**route) for route in routes]
+    for route in result:
+        route.xy = route.xy[::20]
+
+    return result
