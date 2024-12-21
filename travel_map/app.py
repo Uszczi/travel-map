@@ -8,6 +8,7 @@ from travel_map.db import mongo_db
 from fastapi.middleware.cors import CORSMiddleware
 
 from travel_map import utils
+from travel_map.generator.dfs import DfsRoute
 from travel_map.generator.random import RandomRoute
 from travel_map.models import Route, StravaRoute
 from travel_map.visited_edges import (
@@ -21,6 +22,7 @@ origins = ["*"]
 
 app = FastAPI()
 graphs = {}
+generated_routes = []
 
 app.add_middleware(
     CORSMiddleware,
@@ -51,6 +53,63 @@ def read_root():
 @app.get("/clear")
 def clear():
     visited_edges.clear()
+    generated_routes.clear()
+
+
+@app.get("/route/dfs")
+def route_dfs(
+    start_x: float = 19.1999532,
+    start_y: float = 51.6101241,
+    end_x: float = 19.1999532,
+    end_y: float = 51.6101241,
+    distance: int = 5000,
+) -> Route:
+    # ) -> list[list[tuple[float, float]]]:
+    CITY_BBOX_DEFAULT_SIZE = 0.04
+    CITY_BBOX = (
+        start_x - CITY_BBOX_DEFAULT_SIZE * 2,
+        start_y - CITY_BBOX_DEFAULT_SIZE,
+        start_x + CITY_BBOX_DEFAULT_SIZE * 2,
+        start_y + CITY_BBOX_DEFAULT_SIZE,
+    )
+    if "refactor" in graphs:
+        G = graphs["refactor"]
+    else:
+        with utils.time_measure("ox.graph_from_bbox took: "):
+            G = ox.graph_from_bbox(CITY_BBOX, network_type="drive")
+            graphs["refactor"] = G
+
+    start_node_id = ox.distance.nearest_nodes(G, X=start_x, Y=start_y)
+    end_node_id = ox.distance.nearest_nodes(G, X=end_x, Y=end_y)
+    with utils.time_measure("Genereting routes took: "):
+        routes = DfsRoute(G).generate(start_node_id, end_node_id, distance)
+        print(f"Generated {len(routes)} routes.")
+
+    route = routes[0]
+    generated_routes.clear()
+    generated_routes.extend(routes[1:])
+
+    x, y = utils.route_to_x_y(G, route)
+    distance = utils.get_route_distance(G, route)
+
+    segments = get_visited_segments(G, route, visited_edges)
+    mark_edges_visited(G, route, visited_edges)
+
+    return Route(rec=CITY_BBOX, x=x, y=y, distance=distance, segments=segments)
+
+
+@app.get("/route/next")
+def get_next_route() -> Route:
+    G = graphs["refactor"]
+    route = generated_routes.pop(0)
+
+    x, y = utils.route_to_x_y(G, route)
+    distance = utils.get_route_distance(G, route)
+
+    segments = get_visited_segments(G, route, visited_edges)
+    mark_edges_visited(G, route, visited_edges)
+
+    return Route(rec=[0, 0, 0, 0], x=x, y=y, distance=distance, segments=segments)
 
 
 @app.get("/route/{algorithm_type}")
