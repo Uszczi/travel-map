@@ -37,6 +37,7 @@ app.add_middleware(
 async def measure_execution_time(request: Request, call_next):
     start_time = time.time()
 
+    logger.info(f"{request.url} start.")
     response = await call_next(request)
 
     process_time = time.time() - start_time
