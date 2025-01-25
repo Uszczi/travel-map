@@ -14,6 +14,7 @@ from travel_map.models import Route, StravaRoute
 from travel_map.visited_edges import (
     get_visited_segments,
     mark_edges_visited,
+    strava_route_to_route,
     visited_edges,
 )
 
@@ -155,7 +156,7 @@ def get_strava_routes() -> list[StravaRoute]:
     for route in result:
         route.xy = route.xy[::2]
 
-    return result[:10]
+    return result[:1]
 
 
 @app.get("/visited-routes")
@@ -179,22 +180,54 @@ def get_visited_routes() -> list[list[tuple[float, float]]]:
     result = []
 
     for u, v in visited_edges:
-        data = min(G.get_edge_data(u, v).values(), key=lambda d: d["length"])
-        if "geometry" in data:
-            xs, ys = data["geometry"].xy
-            result.append([[y, x] for (x, y) in zip(xs, ys)])
-        else:
-            result.append(
-                [
+        try:
+            data = min(G.get_edge_data(u, v).values(), key=lambda d: d["length"])
+            if "geometry" in data:
+                xs, ys = data["geometry"].xy
+                result.append([[y, x] for (x, y) in zip(xs, ys)])
+            else:
+                result.append(
                     [
-                        G.nodes[u]["y"],
-                        G.nodes[u]["x"],
-                    ],
-                    [
-                        G.nodes[v]["y"],
-                        G.nodes[v]["x"],
-                    ],
-                ]
-            )
+                        [
+                            G.nodes[u]["y"],
+                            G.nodes[u]["x"],
+                        ],
+                        [
+                            G.nodes[v]["y"],
+                            G.nodes[v]["x"],
+                        ],
+                    ]
+                )
+        except Exception:
+            pass
 
     return result
+
+
+@app.get("/strava-to-visited")
+def strava_to_visited():
+    start_x: float = 19.1999532
+    start_y: float = 51.6101241
+    CITY_BBOX_DEFAULT_SIZE = 0.04
+    CITY_BBOX = (
+        start_x - CITY_BBOX_DEFAULT_SIZE * 2,
+        start_y - CITY_BBOX_DEFAULT_SIZE,
+        start_x + CITY_BBOX_DEFAULT_SIZE * 2,
+        start_y + CITY_BBOX_DEFAULT_SIZE,
+    )
+    if "refactor" in graphs:
+        G = graphs["refactor"]
+    else:
+        with utils.time_measure("ox.graph_from_bbox took: "):
+            G = ox.graph_from_bbox(CITY_BBOX, network_type="drive")
+            graphs["refactor"] = G
+
+    collection = mongo_db["routes"]
+    routes = collection.find()
+    result = [StravaRoute(**route) for route in routes]
+    for strava_route in result:
+        route = strava_route_to_route(G, strava_route)
+        route = list(dict.fromkeys(route))
+        mark_edges_visited(G, route, visited_edges)
+
+    return "ok"
