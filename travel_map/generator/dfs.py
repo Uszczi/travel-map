@@ -15,13 +15,15 @@ class DfsRoute:
         tolerance=0.15,
         depth_limit=100,
         allow_first_n=10,
-        not_allow_last_n=10,
+        not_allow_last_n=5,
     ) -> list[list[int]]:
         result_paths = []
         min_length = target_length * (1 - tolerance)
         max_length = target_length * (1 + tolerance)
 
         def dfs(current_node, path, current_length):
+            # print(end_node, current_node, len(path), current_length, len(result_paths))
+
             if len(result_paths) >= 10:
                 return
 
@@ -29,8 +31,8 @@ class DfsRoute:
                 result_paths.append(path)
                 return
 
-            if current_node == end_node and current_length != 0:
-                return
+            # if current_node == end_node and current_length != 0:
+            #     return
 
             if len(path) > depth_limit or current_length > max_length:
                 return
