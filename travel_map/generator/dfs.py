@@ -22,8 +22,6 @@ class DfsRoute:
         max_length = target_length * (1 + tolerance)
 
         def dfs(current_node, path, current_length):
-            # print(end_node, current_node, len(path), current_length, len(result_paths))
-
             if len(result_paths) >= 10:
                 return
 
