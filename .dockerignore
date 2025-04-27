@@ -1,0 +1,44 @@
+# Ignoruj pliki i katalogi związane z wersjonowaniem
+.git
+.gitignore
+
+# Ignoruj pliki tymczasowe edytorów
+*.swp
+*.swo
+*.idea
+.vscode
+
+# Ignoruj pliki i katalogi kompilacji Pythona
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ignoruj środowiska wirtualne
+venv/
+env/
+.venv/
+.env/
+
+# Ignoruj pliki tymczasowe systemu operacyjnego
+.DS_Store
+Thumbs.db
+
+# Ignoruj pliki logów
+*.log
+
+# Ignoruj pliki wynikowe testów
+.coverage
+htmlcov/
+.tox/
+.nox/
+.pytest_cache/
+
+# Ignoruj pliki i katalogi związane z budowaniem paczek
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Ignoruj pliki konfiguracyjne lokalne
+.env
+*.env
