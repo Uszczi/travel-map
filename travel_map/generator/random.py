@@ -1,7 +1,8 @@
+import random
 from dataclasses import dataclass
 
 import networkx as nx
-import random
+
 from travel_map import utils
 
 

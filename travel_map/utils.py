@@ -1,8 +1,8 @@
 import time
 from contextlib import contextmanager
 
-from networkx import MultiDiGraph
 from loguru import logger
+from networkx import MultiDiGraph
 
 
 @contextmanager

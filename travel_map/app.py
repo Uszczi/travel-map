@@ -1,10 +1,8 @@
+import osmnx as ox
 from fastapi import FastAPI
 
-import osmnx as ox
-from travel_map.db import mongo_db
-
-
 from travel_map import utils
+from travel_map.db import mongo_db
 from travel_map.generator.dfs import DfsRoute
 from travel_map.generator.random import RandomRoute
 from travel_map.middlewares import setup_middlewares
@@ -15,7 +13,6 @@ from travel_map.visited_edges import (
     strava_route_to_route,
     visited_edges,
 )
-
 
 app = FastAPI()
 setup_middlewares(app)
