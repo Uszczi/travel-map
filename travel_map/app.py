@@ -54,6 +54,7 @@ def read_root():
 
 @app.get("/clear")
 def clear():
+    graphs.clear()
     visited_edges.clear()
     generated_routes.clear()
 
