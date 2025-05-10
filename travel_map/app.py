@@ -14,6 +14,20 @@ from travel_map.visited_edges import (
     visited_edges,
 )
 
+DEFAULT_START_X = 19.1999532
+DEFAULT_START_Y = 51.6101241
+CITY_BBOX_DEFAULT_SIZE = 0.04
+
+
+def get_city_bbox(start_x=DEFAULT_START_X, start_y=DEFAULT_START_Y):
+    return (
+        start_x - CITY_BBOX_DEFAULT_SIZE * 2,
+        start_y - CITY_BBOX_DEFAULT_SIZE,
+        start_x + CITY_BBOX_DEFAULT_SIZE * 2,
+        start_y + CITY_BBOX_DEFAULT_SIZE,
+    )
+
+
 app = FastAPI()
 setup_middlewares(app)
 
@@ -35,20 +49,13 @@ def clear():
 
 @app.get("/route/dfs")
 def route_dfs(
-    start_x: float = 19.1999532,
-    start_y: float = 51.6101241,
-    end_x: float = 19.1999532,
-    end_y: float = 51.6101241,
+    start_x: float = DEFAULT_START_X,
+    start_y: float = DEFAULT_START_Y,
+    end_x: float = DEFAULT_START_X,
+    end_y: float = DEFAULT_START_Y,
     distance: int = 5000,
 ) -> Route:
-    # ) -> list[list[tuple[float, float]]]:
-    CITY_BBOX_DEFAULT_SIZE = 0.04
-    CITY_BBOX = (
-        start_x - CITY_BBOX_DEFAULT_SIZE * 2,
-        start_y - CITY_BBOX_DEFAULT_SIZE,
-        start_x + CITY_BBOX_DEFAULT_SIZE * 2,
-        start_y + CITY_BBOX_DEFAULT_SIZE,
-    )
+    CITY_BBOX = get_city_bbox(start_x, start_y)
     if "refactor" in graphs:
         G = graphs["refactor"]
     else:
@@ -92,17 +99,11 @@ def get_next_route() -> Route:
 @app.get("/route/{algorithm_type}")
 def route(
     algorithm_type: str,
-    start_x: float = 19.1999532,
-    start_y: float = 51.6101241,
+    start_x: float = DEFAULT_START_X,
+    start_y: float = DEFAULT_START_Y,
     distance: int = 5000,
 ) -> Route:
-    CITY_BBOX_DEFAULT_SIZE = 0.04
-    CITY_BBOX = (
-        start_x - CITY_BBOX_DEFAULT_SIZE * 2,
-        start_y - CITY_BBOX_DEFAULT_SIZE,
-        start_x + CITY_BBOX_DEFAULT_SIZE * 2,
-        start_y + CITY_BBOX_DEFAULT_SIZE,
-    )
+    CITY_BBOX = get_city_bbox(start_x, start_y)
     if "refactor" in graphs:
         G = graphs["refactor"]
     else:
@@ -136,15 +137,9 @@ def get_strava_routes() -> list[StravaRoute]:
 
 @app.get("/visited-routes")
 def get_visited_routes() -> list[list[tuple[float, float]]]:
-    start_x: float = 19.1999532
-    start_y: float = 51.6101241
-    CITY_BBOX_DEFAULT_SIZE = 0.04
-    CITY_BBOX = (
-        start_x - CITY_BBOX_DEFAULT_SIZE * 2,
-        start_y - CITY_BBOX_DEFAULT_SIZE,
-        start_x + CITY_BBOX_DEFAULT_SIZE * 2,
-        start_y + CITY_BBOX_DEFAULT_SIZE,
-    )
+    start_x: float = DEFAULT_START_X
+    start_y: float = DEFAULT_START_Y
+    CITY_BBOX = get_city_bbox(start_x, start_y)
     if "refactor" in graphs:
         G = graphs["refactor"]
     else:
@@ -181,15 +176,9 @@ def get_visited_routes() -> list[list[tuple[float, float]]]:
 
 @app.get("/strava-to-visited")
 def strava_to_visited():
-    start_x: float = 19.1999532
-    start_y: float = 51.6101241
-    CITY_BBOX_DEFAULT_SIZE = 0.04
-    CITY_BBOX = (
-        start_x - CITY_BBOX_DEFAULT_SIZE * 2,
-        start_y - CITY_BBOX_DEFAULT_SIZE,
-        start_x + CITY_BBOX_DEFAULT_SIZE * 2,
-        start_y + CITY_BBOX_DEFAULT_SIZE,
-    )
+    start_x: float = DEFAULT_START_X
+    start_y: float = DEFAULT_START_Y
+    CITY_BBOX = get_city_bbox(start_x, start_y)
     if "refactor" in graphs:
         G = graphs["refactor"]
     else:
