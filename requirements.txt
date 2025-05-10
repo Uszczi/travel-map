@@ -5,3 +5,5 @@ matplotlib
 scikit-learn
 pymongo
 loguru
+ruff
+black
