@@ -1,15 +1,13 @@
-from fastapi import FastAPI, Request
-import time
+from fastapi import FastAPI
 
 import osmnx as ox
-from loguru import logger
 from travel_map.db import mongo_db
 
-from fastapi.middleware.cors import CORSMiddleware
 
 from travel_map import utils
 from travel_map.generator.dfs import DfsRoute
 from travel_map.generator.random import RandomRoute
+from travel_map.middlewares import setup_middlewares
 from travel_map.models import Route, StravaRoute
 from travel_map.visited_edges import (
     get_visited_segments,
@@ -19,32 +17,11 @@ from travel_map.visited_edges import (
 )
 
 
-origins = ["*"]
-
 app = FastAPI()
+setup_middlewares(app)
+
 graphs = {}
 generated_routes = []
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-
-@app.middleware("http")
-async def measure_execution_time(request: Request, call_next):
-    start_time = time.time()
-
-    logger.info(f"{request.url} start.")
-    response = await call_next(request)
-
-    process_time = time.time() - start_time
-    logger.info(f"{request.url} took {process_time:.4f} sec.")
-
-    return response
 
 
 @app.get("/")
