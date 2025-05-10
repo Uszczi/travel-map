@@ -28,6 +28,16 @@ def get_city_bbox(start_x=DEFAULT_START_X, start_y=DEFAULT_START_Y):
     )
 
 
+def get_or_create_graph(start_x: float, start_y: float) -> ox.Graph:
+    CITY_BBOX = get_city_bbox(start_x, start_y)
+    if "refactor" in graphs:
+        return graphs["refactor"]
+    with utils.time_measure("ox.graph_from_bbox took: "):
+        G = ox.graph_from_bbox(CITY_BBOX, network_type="drive")
+        graphs["refactor"] = G
+        return G
+
+
 app = FastAPI()
 setup_middlewares(app)
 
@@ -56,12 +66,7 @@ def route_dfs(
     distance: int = 5000,
 ) -> Route:
     CITY_BBOX = get_city_bbox(start_x, start_y)
-    if "refactor" in graphs:
-        G = graphs["refactor"]
-    else:
-        with utils.time_measure("ox.graph_from_bbox took: "):
-            G = ox.graph_from_bbox(CITY_BBOX, network_type="drive")
-            graphs["refactor"] = G
+    G = get_or_create_graph(start_x, start_y)
 
     start_node_id = ox.distance.nearest_nodes(G, X=start_x, Y=start_y)
     end_node_id = ox.distance.nearest_nodes(G, X=end_x, Y=end_y)
@@ -104,12 +109,7 @@ def route(
     distance: int = 5000,
 ) -> Route:
     CITY_BBOX = get_city_bbox(start_x, start_y)
-    if "refactor" in graphs:
-        G = graphs["refactor"]
-    else:
-        with utils.time_measure("ox.graph_from_bbox took: "):
-            G = ox.graph_from_bbox(CITY_BBOX, network_type="drive")
-            graphs["refactor"] = G
+    G = get_or_create_graph(start_x, start_y)
 
     start_node_id = ox.distance.nearest_nodes(G, X=start_x, Y=start_y)
     with utils.time_measure("Genereting route took: "):
@@ -140,12 +140,7 @@ def get_visited_routes() -> list[list[tuple[float, float]]]:
     start_x: float = DEFAULT_START_X
     start_y: float = DEFAULT_START_Y
     CITY_BBOX = get_city_bbox(start_x, start_y)
-    if "refactor" in graphs:
-        G = graphs["refactor"]
-    else:
-        with utils.time_measure("ox.graph_from_bbox took: "):
-            G = ox.graph_from_bbox(CITY_BBOX, network_type="drive")
-            graphs["refactor"] = G
+    G = get_or_create_graph(start_x, start_y)
 
     result = []
 
@@ -179,12 +174,7 @@ def strava_to_visited():
     start_x: float = DEFAULT_START_X
     start_y: float = DEFAULT_START_Y
     CITY_BBOX = get_city_bbox(start_x, start_y)
-    if "refactor" in graphs:
-        G = graphs["refactor"]
-    else:
-        with utils.time_measure("ox.graph_from_bbox took: "):
-            G = ox.graph_from_bbox(CITY_BBOX, network_type="drive")
-            graphs["refactor"] = G
+    G = get_or_create_graph(start_x, start_y)
 
     collection = mongo_db["routes"]
     routes = collection.find()
