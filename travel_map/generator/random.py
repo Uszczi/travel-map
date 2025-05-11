@@ -10,7 +10,9 @@ from travel_map import utils
 class RandomRoute:
     graph: nx.MultiDiGraph
 
-    def generate(self, start_node_id: int, distance: int) -> list[int]:
+    def generate(
+        self, start_node_id: int, end_node_id: int | None, distance: int
+    ) -> list[list[int]]:
         route = [start_node_id]
         current_distance, i = 0, 0
         current_node = start_node_id
@@ -35,4 +37,4 @@ class RandomRoute:
             previous_node = current_node
             current_node = next_node
 
-        return route
+        return [route]

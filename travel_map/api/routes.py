@@ -1,5 +1,5 @@
-from fastapi import APIRouter
 import osmnx as ox
+from fastapi import APIRouter
 
 from travel_map import utils
 from travel_map.db import mongo_db
@@ -55,35 +55,6 @@ def clear():
     generated_routes.clear()
 
 
-@router.get("/route/dfs")
-def route_dfs(
-    start_x: float = DEFAULT_START_X,
-    start_y: float = DEFAULT_START_Y,
-    end_x: float = DEFAULT_START_X,
-    end_y: float = DEFAULT_START_Y,
-    distance: int = 5000,
-) -> Route:
-    CITY_BBOX = get_city_bbox(start_x, start_y)
-    G = get_or_create_graph(start_x, start_y)
-
-    start_node_id = ox.distance.nearest_nodes(G, X=start_x, Y=start_y)
-    end_node_id = ox.distance.nearest_nodes(G, X=end_x, Y=end_y)
-    with utils.time_measure("Genereting routes took: "):
-        routes = DfsRoute(G).generate(start_node_id, end_node_id, distance)
-
-    route = routes[0]
-    generated_routes.clear()
-    generated_routes.extend(routes[1:])
-
-    x, y = utils.route_to_x_y(G, route)
-    distance = utils.get_route_distance(G, route)
-
-    segments = get_visited_segments(G, route, visited_edges)
-    mark_edges_visited(G, route, visited_edges)
-
-    return Route(rec=CITY_BBOX, x=x, y=y, distance=distance, segments=segments)
-
-
 @router.get("/route/next")
 def get_next_route() -> Route:
     G = graphs["refactor"]
@@ -103,22 +74,39 @@ def route(
     algorithm_type: str,
     start_x: float = DEFAULT_START_X,
     start_y: float = DEFAULT_START_Y,
+    end_x: float = DEFAULT_START_X,
+    end_y: float = DEFAULT_START_Y,
     distance: int = 5000,
 ) -> Route:
     CITY_BBOX = get_city_bbox(start_x, start_y)
     G = get_or_create_graph(start_x, start_y)
 
+    algorithm_map = {
+        "random": RandomRoute,
+        "dfs": DfsRoute,
+        # for future
+        # "astar": AStarRoute
+    }
+
+    generator_class = algorithm_map.get(algorithm_type.lower())
+    if not generator_class:
+        raise ValueError(f"Unsupported algorithm type: {algorithm_type}")
+
     start_node_id = ox.distance.nearest_nodes(G, X=start_x, Y=start_y)
-    with utils.time_measure("Genereting route took: "):
-        route = RandomRoute(G).generate(start_node_id, distance)
+    end_node_id = ox.distance.nearest_nodes(G, X=end_x, Y=end_y)
+
+    with utils.time_measure("Generating route took: "):
+        routes = generator_class(G).generate(start_node_id, end_node_id, distance)
+        route = routes[0]
+        generated_routes.clear()
+        generated_routes.extend(routes[1:])
 
     x, y = utils.route_to_x_y(G, route)
-    distance = utils.get_route_distance(G, route)
-
+    route_distance = utils.get_route_distance(G, route)
     segments = get_visited_segments(G, route, visited_edges)
     mark_edges_visited(G, route, visited_edges)
 
-    return Route(rec=CITY_BBOX, x=x, y=y, distance=distance, segments=segments)
+    return Route(rec=CITY_BBOX, x=x, y=y, distance=route_distance, segments=segments)
 
 
 @router.get("/strava/routes")
