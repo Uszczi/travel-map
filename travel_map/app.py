@@ -1,9 +1,7 @@
 from fastapi import FastAPI
 
-from travel_map.api.routes import router
-from travel_map.middlewares import setup_middlewares
+from travel_map.api import include_routers, setup_middlewares
 
 app = FastAPI()
 setup_middlewares(app)
-
-app.include_router(router)
+include_routers(app)

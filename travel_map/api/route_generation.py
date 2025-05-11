@@ -2,6 +2,13 @@ import osmnx as ox
 from fastapi import APIRouter
 
 from travel_map import utils
+from travel_map.api.common import (
+    DEFAULT_START_X,
+    DEFAULT_START_Y,
+    get_city_bbox,
+    get_or_create_graph,
+    graphs,
+)
 from travel_map.db import mongo_db
 from travel_map.generator.dfs import DfsRoute
 from travel_map.generator.random import RandomRoute
@@ -13,34 +20,9 @@ from travel_map.visited_edges import (
     visited_edges,
 )
 
-DEFAULT_START_X = 19.1999532
-DEFAULT_START_Y = 51.6101241
-CITY_BBOX_DEFAULT_SIZE = 0.04
-
 router = APIRouter()
 
-graphs = {}
 generated_routes = []
-
-
-def get_city_bbox(start_x=DEFAULT_START_X, start_y=DEFAULT_START_Y):
-    return (
-        start_x - CITY_BBOX_DEFAULT_SIZE * 2,
-        start_y - CITY_BBOX_DEFAULT_SIZE,
-        start_x + CITY_BBOX_DEFAULT_SIZE * 2,
-        start_y + CITY_BBOX_DEFAULT_SIZE,
-    )
-
-
-def get_or_create_graph(start_x: float, start_y: float) -> ox.Graph:
-    if g := graphs.get("refactor"):
-        return g
-
-    with utils.time_measure("ox.graph_from_bbox took: "):
-        CITY_BBOX = get_city_bbox(start_x, start_y)
-        G = ox.graph_from_bbox(CITY_BBOX, network_type="drive")
-        graphs["refactor"] = G
-        return G
 
 
 @router.get("/")
@@ -121,11 +103,11 @@ def get_strava_routes() -> list[StravaRoute]:
 
 
 @router.get("/visited-routes")
-def get_visited_routes() -> list[list[tuple[float, float]]]:
-    start_x: float = DEFAULT_START_X
-    start_y: float = DEFAULT_START_Y
+def get_visited_routes(
+    start_x: float = DEFAULT_START_X,
+    start_y: float = DEFAULT_START_Y,
+) -> list[list[tuple[float, float]]]:
     G = get_or_create_graph(start_x, start_y)
-
     result = []
 
     for u, v in visited_edges:
@@ -148,9 +130,10 @@ def get_visited_routes() -> list[list[tuple[float, float]]]:
 
 
 @router.get("/strava-to-visited")
-def strava_to_visited():
-    start_x: float = DEFAULT_START_X
-    start_y: float = DEFAULT_START_Y
+def strava_to_visited(
+    start_x: float = DEFAULT_START_X,
+    start_y: float = DEFAULT_START_Y,
+):
     G = get_or_create_graph(start_x, start_y)
 
     collection = mongo_db["routes"]
