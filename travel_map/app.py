@@ -29,10 +29,11 @@ def get_city_bbox(start_x=DEFAULT_START_X, start_y=DEFAULT_START_Y):
 
 
 def get_or_create_graph(start_x: float, start_y: float) -> ox.Graph:
-    CITY_BBOX = get_city_bbox(start_x, start_y)
-    if "refactor" in graphs:
-        return graphs["refactor"]
+    if g := graphs.get("refactor"):
+        return g
+
     with utils.time_measure("ox.graph_from_bbox took: "):
+        CITY_BBOX = get_city_bbox(start_x, start_y)
         G = ox.graph_from_bbox(CITY_BBOX, network_type="drive")
         graphs["refactor"] = G
         return G
@@ -139,7 +140,6 @@ def get_strava_routes() -> list[StravaRoute]:
 def get_visited_routes() -> list[list[tuple[float, float]]]:
     start_x: float = DEFAULT_START_X
     start_y: float = DEFAULT_START_Y
-    CITY_BBOX = get_city_bbox(start_x, start_y)
     G = get_or_create_graph(start_x, start_y)
 
     result = []
@@ -173,7 +173,6 @@ def get_visited_routes() -> list[list[tuple[float, float]]]:
 def strava_to_visited():
     start_x: float = DEFAULT_START_X
     start_y: float = DEFAULT_START_Y
-    CITY_BBOX = get_city_bbox(start_x, start_y)
     G = get_or_create_graph(start_x, start_y)
 
     collection = mongo_db["routes"]
