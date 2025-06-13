@@ -2,7 +2,7 @@ build:
 	docker compose build
 
 run:
-	uvicorn travel_map.app:app --reload
+	uv run uvicorn travel_map.app:app --reload
 
 run_docker:
 	docker compose up --detach
