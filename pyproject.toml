@@ -23,3 +23,8 @@ known-first-party = ["travel_map"]
 
 [tool.setuptools.packages.find]
 include = ["travel_map*"]
+
+[dependency-groups]
+dev = [
+    "debugpy>=1.8.14",
+]

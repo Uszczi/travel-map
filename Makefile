@@ -1,3 +1,6 @@
+%:
+	@:
+
 build:
 	docker compose build
 
@@ -35,10 +38,17 @@ lock_dependencies:
 	docker compose run --rm --no-deps app uv lock
 
 add_dependency:
-	docker compose run --rm --no-deps app uv add
+	@name=$$(echo $(MAKECMDGOALS) | cut -d' ' -f2); \
+	docker compose run --rm --no-deps app uv add $$name
 
 add_dev_dependency:
-	docker compose run --rm --no-deps app uv add --dev
+	@name=$$(echo $(MAKECMDGOALS) | cut -d' ' -f2); \
+	docker compose run --rm --no-deps app uv add --dev $$name
 
 remove_dependency:
-	docker compose run --rm --no-deps app uv remove
+	@name=$$(echo $(MAKECMDGOALS) | cut -d' ' -f2); \
+	docker compose run --rm --no-deps app uv remove $$name
+
+remove_dev_dependency:
+	@name=$$(echo $(MAKECMDGOALS) | cut -d' ' -f2); \
+	docker compose run --rm --no-deps app uv remove --dev $$name
