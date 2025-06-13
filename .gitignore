@@ -1,3 +1,6 @@
 cache/
 .ipynb_checkpoints
+.venv/
 .env
+
+**/__pycache__/
