@@ -29,6 +29,7 @@ class RandomRoute:
             else:
                 next_node = random.choice(neighbors)
 
+            next_node = int(next_node)
             current_distance += utils.get_distance_between(
                 self.graph, current_node, next_node
             )

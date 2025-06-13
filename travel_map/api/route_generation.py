@@ -48,7 +48,7 @@ def get_next_route() -> Route:
     segments = get_visited_segments(G, route, visited_edges)
     mark_edges_visited(G, route, visited_edges)
 
-    return Route(rec=[0, 0, 0, 0], x=x, y=y, distance=distance, segments=segments)
+    return Route(rec=(0, 0, 0, 0), x=x, y=y, distance=distance, segments=segments)
 
 
 @router.get("/route/{algorithm_type}")
@@ -74,8 +74,8 @@ def route(
     if not generator_class:
         raise ValueError(f"Unsupported algorithm type: {algorithm_type}")
 
-    start_node_id = ox.distance.nearest_nodes(G, X=start_x, Y=start_y)
-    end_node_id = ox.distance.nearest_nodes(G, X=end_x, Y=end_y)
+    start_node_id = ox.nearest_nodes(G, X=start_x, Y=start_y)
+    end_node_id = ox.nearest_nodes(G, X=end_x, Y=end_y)
 
     with utils.time_measure("Generating route took: "):
         routes = generator_class(G).generate(start_node_id, end_node_id, distance)
@@ -95,7 +95,7 @@ def route(
 def get_strava_routes() -> list[StravaRoute]:
     collection = mongo_db["routes"]
     routes = collection.find()
-    result = [StravaRoute(**route) for route in routes]
+    result = [StravaRoute(**route) for route in routes]  # type: ignore[missing-argument]
     for route in result:
         route.xy = route.xy[::2]
 
@@ -138,7 +138,7 @@ def strava_to_visited(
 
     collection = mongo_db["routes"]
     routes = collection.find()
-    result = [StravaRoute(**route) for route in routes]
+    result = [StravaRoute(**route) for route in routes]  # type: ignore[missing-argument]
     for strava_route in result:
         route = strava_route_to_route(G, strava_route)
         route = list(dict.fromkeys(route))

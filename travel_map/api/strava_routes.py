@@ -17,7 +17,7 @@ router = APIRouter(prefix="/strava")
 def get_strava_routes() -> list[StravaRoute]:
     collection = mongo_db["routes"]
     routes = collection.find()
-    result = [StravaRoute(**route) for route in routes]
+    result = [StravaRoute(**route) for route in routes]  # type: ignore[missing-argument]
     for route in result:
         route.xy = route.xy[::2]
     return result[:1]
@@ -32,7 +32,7 @@ def mark_as_visited(
 
     collection = mongo_db["routes"]
     routes = collection.find()
-    result = [StravaRoute(**route) for route in routes]
+    result = [StravaRoute(**route) for route in routes]  # type: ignore[missing-argument]
     for strava_route in result:
         route = strava_route_to_route(G, strava_route)
         route = list(dict.fromkeys(route))

@@ -17,6 +17,7 @@ lint:
 	uv run ruff check --fix .
 	uv run ruff check --fix --select I .
 	uv run black .
+	uv run ty check
 
 check:
 	TODO
@@ -25,7 +26,8 @@ docker_lint:
 	docker compose run --rm --no-deps app sh -c "\
 		uv run ruff check --fix . && \
 		uv run ruff check --fix --select I . && \
-		uv run black ."
+		uv run black . && \
+		uv run ty check"
 
 docker_check:
 	TODO

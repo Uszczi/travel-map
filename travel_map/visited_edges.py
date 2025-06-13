@@ -55,13 +55,13 @@ def mark_edges_visited(
 
 
 def strava_route_to_route(graph: nx.MultiDiGraph, strava_route: StravaRoute) -> Route:
-    nodes = [ox.distance.nearest_nodes(graph, x, y) for y, x in strava_route.xy]
+    nodes = [ox.nearest_nodes(graph, x, y) for y, x in strava_route.xy]
     return nodes
 
     segments = [(nodes[i], nodes[i + 1]) for i in range(len(nodes) - 1)]
 
     return Route(
-        rec=[0, 0, 0, 0],
+        rec=(0, 0, 0, 0),
         x=[coord[0] for coord in strava_route.xy],
         y=[coord[1] for coord in strava_route.xy],
         # Możesz obliczyć dystans używając `utils.get_route_distance`
