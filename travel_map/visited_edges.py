@@ -51,6 +51,7 @@ class VisitedEdges(Generic[K]):
             self.add((u, v))
 
 
+# For more users it has to be refactored
 visited_edges = VisitedEdges[tuple[int, int]]()
 
 

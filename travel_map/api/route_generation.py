@@ -9,7 +9,7 @@ from travel_map.api.common import (
     get_or_create_graph,
     graphs,
 )
-from travel_map.db import mongo_db
+from travel_map.db import strava_db
 from travel_map.generator.dfs import DfsRoute
 from travel_map.generator.random import RandomRoute
 from travel_map.models import Route, StravaRoute
@@ -88,7 +88,7 @@ def route(
 
 @router.get("/strava/routes")
 def get_strava_routes() -> list[StravaRoute]:
-    collection = mongo_db["routes"]
+    collection = strava_db["routes"]
     routes = collection.find()
     result = [StravaRoute(**route) for route in routes]  # type: ignore[missing-argument]
     for route in result:
@@ -131,7 +131,7 @@ def strava_to_visited(
 ):
     G = get_or_create_graph(start_x, start_y)
 
-    collection = mongo_db["routes"]
+    collection = strava_db["routes"]
     routes = collection.find()
     result = [StravaRoute(**route) for route in routes]  # type: ignore[missing-argument]
     for strava_route in result:

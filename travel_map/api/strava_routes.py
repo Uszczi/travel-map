@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from travel_map.db import mongo_db
+from travel_map.db import strava_db
 from travel_map.models import StravaRoute
 from travel_map.visited_edges import strava_route_to_route, visited_edges
 
@@ -11,7 +11,7 @@ router = APIRouter(prefix="/strava")
 
 @router.get("/routes")
 def get_strava_routes() -> list[StravaRoute]:
-    collection = mongo_db["routes"]
+    collection = strava_db["routes"]
     routes = collection.find()
     result = [StravaRoute(**route) for route in routes]  # type: ignore[missing-argument]
     for route in result:
@@ -26,7 +26,7 @@ def mark_as_visited(
 ):
     G = common.get_or_create_graph(start_x, start_y)
 
-    collection = mongo_db["routes"]
+    collection = strava_db["routes"]
     routes = collection.find()
     result = [StravaRoute(**route) for route in routes]  # type: ignore[missing-argument]
     for strava_route in result:
