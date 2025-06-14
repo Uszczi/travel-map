@@ -9,11 +9,10 @@ from travel_map.api.common import (
     get_or_create_graph,
     graphs,
 )
-from travel_map.db import strava_db
 from travel_map.generator.dfs import DfsRoute
 from travel_map.generator.random import RandomRoute
-from travel_map.models import Route, StravaRoute
-from travel_map.visited_edges import strava_route_to_route, visited_edges
+from travel_map.models import Route
+from travel_map.visited_edges import visited_edges
 
 router = APIRouter()
 
@@ -86,17 +85,6 @@ def route(
     return Route(rec=CITY_BBOX, x=x, y=y, distance=route_distance, segments=segments)
 
 
-@router.get("/strava/routes")
-def get_strava_routes() -> list[StravaRoute]:
-    collection = strava_db["routes"]
-    routes = collection.find()
-    result = [StravaRoute(**route) for route in routes]  # type: ignore[missing-argument]
-    for route in result:
-        route.xy = route.xy[::2]
-
-    return result[:1]
-
-
 @router.get("/visited-routes")
 def get_visited_routes(
     start_x: float = DEFAULT_START_X,
@@ -122,21 +110,3 @@ def get_visited_routes(
             pass
 
     return result
-
-
-@router.get("/strava-to-visited")
-def strava_to_visited(
-    start_x: float = DEFAULT_START_X,
-    start_y: float = DEFAULT_START_Y,
-):
-    G = get_or_create_graph(start_x, start_y)
-
-    collection = strava_db["routes"]
-    routes = collection.find()
-    result = [StravaRoute(**route) for route in routes]  # type: ignore[missing-argument]
-    for strava_route in result:
-        route = strava_route_to_route(G, strava_route)
-        route = list(dict.fromkeys(route))
-        visited_edges.mark_edges_visited(route)
-
-    return "ok"

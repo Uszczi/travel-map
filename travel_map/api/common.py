@@ -10,17 +10,22 @@ DEFAULT_START_Y = 51.6101241
 CITY_BBOX_DEFAULT_SIZE = 0.04
 
 
-def get_city_bbox(start_x=DEFAULT_START_X, start_y=DEFAULT_START_Y):
+def get_city_bbox(
+    start_x=DEFAULT_START_X,
+    start_y=DEFAULT_START_Y,
+    size=CITY_BBOX_DEFAULT_SIZE,
+):
     return (
-        start_x - CITY_BBOX_DEFAULT_SIZE * 2,
-        start_y - CITY_BBOX_DEFAULT_SIZE,
-        start_x + CITY_BBOX_DEFAULT_SIZE * 2,
-        start_y + CITY_BBOX_DEFAULT_SIZE,
+        start_x - size * 2,
+        start_y - size,
+        start_x + size * 2,
+        start_y + size,
     )
 
 
 def get_or_create_graph(
-    start_x: float = DEFAULT_START_X, start_y: float = DEFAULT_START_Y
+    start_x: float = DEFAULT_START_X,
+    start_y: float = DEFAULT_START_Y,
 ) -> MultiDiGraph:
     if g := graphs.get("refactor"):
         return g
