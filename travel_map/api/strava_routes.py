@@ -2,11 +2,7 @@ from fastapi import APIRouter
 
 from travel_map.db import mongo_db
 from travel_map.models import StravaRoute
-from travel_map.visited_edges import (
-    mark_edges_visited,
-    strava_route_to_route,
-    visited_edges,
-)
+from travel_map.visited_edges import strava_route_to_route, visited_edges
 
 from . import common
 
@@ -36,6 +32,6 @@ def mark_as_visited(
     for strava_route in result:
         route = strava_route_to_route(G, strava_route)
         route = list(dict.fromkeys(route))
-        mark_edges_visited(G, route, visited_edges)
+        visited_edges.mark_edges_visited(route)
 
     return "ok"

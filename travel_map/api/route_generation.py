@@ -13,12 +13,7 @@ from travel_map.db import mongo_db
 from travel_map.generator.dfs import DfsRoute
 from travel_map.generator.random import RandomRoute
 from travel_map.models import Route, StravaRoute
-from travel_map.visited_edges import (
-    get_visited_segments,
-    mark_edges_visited,
-    strava_route_to_route,
-    visited_edges,
-)
+from travel_map.visited_edges import strava_route_to_route, visited_edges
 
 router = APIRouter()
 
@@ -45,8 +40,8 @@ def get_next_route() -> Route:
     x, y = utils.route_to_x_y(G, route)
     distance = utils.get_route_distance(G, route)
 
-    segments = get_visited_segments(G, route, visited_edges)
-    mark_edges_visited(G, route, visited_edges)
+    segments = visited_edges.get_visited_segments(G, route)
+    visited_edges.mark_edges_visited(route)
 
     return Route(rec=(0, 0, 0, 0), x=x, y=y, distance=distance, segments=segments)
 
@@ -85,8 +80,8 @@ def route(
 
     x, y = utils.route_to_x_y(G, route)
     route_distance = utils.get_route_distance(G, route)
-    segments = get_visited_segments(G, route, visited_edges)
-    mark_edges_visited(G, route, visited_edges)
+    segments = visited_edges.get_visited_segments(G, route)
+    visited_edges.mark_edges_visited(route)
 
     return Route(rec=CITY_BBOX, x=x, y=y, distance=route_distance, segments=segments)
 
@@ -142,6 +137,6 @@ def strava_to_visited(
     for strava_route in result:
         route = strava_route_to_route(G, strava_route)
         route = list(dict.fromkeys(route))
-        mark_edges_visited(G, route, visited_edges)
+        visited_edges.mark_edges_visited(route)
 
     return "ok"
