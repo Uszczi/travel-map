@@ -14,12 +14,13 @@ class RandomRoute:
         self, start_node_id: int, end_node_id: int | None, distance: int
     ) -> list[list[int]]:
         route = [start_node_id]
-        current_distance, i = 0, 0
+        current_distance = 0
+        iterations = 0
         current_node = start_node_id
         previous_node = None
 
-        while (current_distance <= distance) and i < 1000:
-            i += 1
+        while (current_distance <= distance) and iterations < 1000:
+            iterations += 1
 
             neighbors = [
                 n for n in self.graph.neighbors(current_node) if n != previous_node

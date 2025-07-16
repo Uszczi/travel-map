@@ -9,4 +9,4 @@ RUN uv sync
 
 COPY . .
 
-CMD ["uvicorn", "travel_map.app:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+CMD ["uv", "run", "uvicorn", "travel_map.app:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

@@ -1,6 +1,7 @@
 cache/
 .ipynb_checkpoints
 .venv/
+.venv2/
 .env
 
 .ruff_cache/

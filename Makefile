@@ -4,14 +4,11 @@
 build:
 	docker compose build
 
+install:
+	uv sync
+
 run:
 	uv run uvicorn travel_map.app:app --reload
-
-run_docker:
-	docker compose up --detach
-
-run_docker_fg:
-	docker compose up
 
 lint:
 	uv run ruff check --fix .
@@ -22,19 +19,37 @@ lint:
 check:
 	TODO
 
+benchmarks:
+	uv run pytest -s tests/benchmarks
+
+docker_run:
+	docker compose up --detach
+
+docker_fg_run:
+	docker compose up
+
 docker_lint:
 	docker compose run --rm --no-deps app sh -c "\
-		uv run ruff check --fix . && \
-		uv run ruff check --fix --select I . && \
-		uv run black . && \
-		uv run ty check"
+		ruff check --fix . && \
+		ruff check --fix --select I . && \
+		black . && \
+		ty check"
 
 docker_check:
 	TODO
 
+docker_benchamark:
+	docker compose run --rm --no-deps app pytest -v -s tests/benchmarks
+
+d-benchmark: docker_benchamark
+
 d-lint: docker_lint
 
 d-check: docker_check
+
+d-run: docker_run
+
+d-fg-run: docker_fg_run
 
 lock_dependencies:
 	docker compose run --rm --no-deps app uv lock
