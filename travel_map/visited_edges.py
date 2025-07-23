@@ -4,6 +4,7 @@ import networkx as nx
 import osmnx as ox
 
 from travel_map.models import Segment, StravaRoute
+from travel_map.utils import get_distance_between
 
 K = TypeVar("K")
 
@@ -47,6 +48,15 @@ class VisitedEdges(Generic[K]):
                 segment = Segment(new=True, distance=data["length"])
             result.append(segment)
         return result
+
+    def get_visited_distance(self, graph: nx.MultiDiGraph) -> float:
+        visited_routes_distance = 0
+
+        for start, end, _ in graph.edges:
+            if (start, end) in self._map or (end, start) in self._map:
+                visited_routes_distance += get_distance_between(graph, start, end)
+
+        return visited_routes_distance
 
     def mark_edges_visited(self, route: list[int]):
         for u, v in zip(route[:-1], route[1:]):
