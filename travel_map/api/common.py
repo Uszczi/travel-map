@@ -27,6 +27,7 @@ def get_or_create_graph(
     start_x: float = DEFAULT_START_X,
     start_y: float = DEFAULT_START_Y,
 ) -> MultiDiGraph:
+    # TODO remove this
     if g := graphs.get("refactor"):
         return g
 

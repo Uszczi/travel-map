@@ -27,6 +27,7 @@ include = ["travel_map*"]
 [dependency-groups]
 dev = [
     "debugpy>=1.8.14",
+    "folium>=0.20.0",
     "pytest>=8.4.0",
     "ty>=0.0.1a9",
 ]

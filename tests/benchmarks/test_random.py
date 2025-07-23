@@ -26,6 +26,7 @@ def test_10_random_route(graph):
     print(f"\nGenerating random route at avg took: {statistics.mean(times):.6f}s")
 
 
+# TODO
 def test_10_random_route_start_end(graph):
     start_node_id = ox.nearest_nodes(graph, X=DEFAULT_START_X, Y=DEFAULT_START_Y)
 
@@ -47,6 +48,7 @@ def test_10_random_route_start_end(graph):
     )
 
 
+# TODO
 def test_10_random_route_round(graph):
     start_node_id = ox.nearest_nodes(graph, X=DEFAULT_START_X, Y=DEFAULT_START_Y)
 

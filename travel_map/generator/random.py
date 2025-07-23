@@ -19,7 +19,7 @@ class RandomRoute:
         current_node = start_node_id
         previous_node = None
 
-        while (current_distance <= distance) and iterations < 1000:
+        while iterations < 100_000:
             iterations += 1
 
             neighbors = [
@@ -39,4 +39,16 @@ class RandomRoute:
             previous_node = current_node
             current_node = next_node
 
-        return [route]
+            if end_node_id:
+                if current_distance > distance * 1.4:
+                    route = [start_node_id]
+                    current_distance = 0
+                    current_node = start_node_id
+                    previous_node = None
+                    continue
+
+                if distance * 0.8 < current_distance and end_node_id == current_node:
+                    return [route]
+            else:
+                if current_distance > distance:
+                    return [route]

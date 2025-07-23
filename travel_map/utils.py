@@ -17,7 +17,8 @@ def time_measure(msg: str):
 def route_to_x_y(
     graph: MultiDiGraph,
     route: list[int],
-) -> tuple[list[float], list[float]]:
+    reversed: bool = False,
+) -> tuple[list[float], list[float]] | list[tuple[float, float]]:
     x = []
     y = []
     for u, v in zip(route[:-1], route[1:]):
@@ -33,7 +34,19 @@ def route_to_x_y(
             x.extend((graph.nodes[u]["x"], graph.nodes[v]["x"]))
             y.extend((graph.nodes[u]["y"], graph.nodes[v]["y"]))
 
+    if reversed:
+        return y, x
     return x, y
+
+
+def route_to_zip_x_y(
+    graph: MultiDiGraph,
+    route: list[int],
+    reversed: bool = False,
+):
+    x, y = route_to_x_y(graph, route, reversed)
+
+    return list(zip(x, y))
 
 
 def get_distance_between(graph: MultiDiGraph, start: int, end: int) -> float:
