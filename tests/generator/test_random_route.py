@@ -63,10 +63,7 @@ def test_random_route_coverage(graph, fm, start_node_id):
     graph_distance = get_graph_distance(graph)
     visited_routes_distance = visited_edges.get_visited_distance(graph)
 
-    print(graph_distance)
-    print(visited_routes_distance)
     print(visited_routes_distance / graph_distance * 100)
-    assert 0
 
 
 def test_random_route_end_coverage(graph, fm, start_node_id, end_node_id):
@@ -85,10 +82,7 @@ def test_random_route_end_coverage(graph, fm, start_node_id, end_node_id):
     graph_distance = get_graph_distance(graph)
     visited_routes_distance = visited_edges.get_visited_distance(graph)
 
-    print(graph_distance)
-    print(visited_routes_distance)
     print(visited_routes_distance / graph_distance * 100)
-    assert 0
 
 
 def test_random_prefer_new_route_coverage(graph, fm, start_node_id):
@@ -108,8 +102,6 @@ def test_random_prefer_new_route_coverage(graph, fm, start_node_id):
     graph_distance = get_graph_distance(graph)
     visited_routes_distance = visited_edges.get_visited_distance(graph)
 
-    print(graph_distance)
-    print(visited_routes_distance)
     print(visited_routes_distance / graph_distance * 100)
     assert 0
 
@@ -119,7 +111,7 @@ def test_random_prefer_new_route_end_coverage(graph, fm, start_node_id, end_node
     visited_edges = VisitedEdges[tuple[int, int]]()
 
     for _ in range(10):
-        [route] = RandomRoute(graph).generate(
+        [route] = RandomRoute(graph=graph, v_edges=visited_edges).generate(
             start_node_id=start_node_id,
             end_node_id=end_node_id,
             distance=6_000,
@@ -131,7 +123,4 @@ def test_random_prefer_new_route_end_coverage(graph, fm, start_node_id, end_node
     graph_distance = get_graph_distance(graph)
     visited_routes_distance = visited_edges.get_visited_distance(graph)
 
-    print(graph_distance)
-    print(visited_routes_distance)
     print(visited_routes_distance / graph_distance * 100)
-    assert 0
