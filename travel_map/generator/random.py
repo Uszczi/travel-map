@@ -11,7 +11,11 @@ class RandomRoute:
     graph: nx.MultiDiGraph
 
     def generate(
-        self, start_node_id: int, end_node_id: int | None, distance: int
+        self,
+        start_node_id: int,
+        end_node_id: int | None,
+        distance: int,
+        prefer_new: bool = False,
     ) -> list[list[int]]:
         route = [start_node_id]
         current_distance = 0
@@ -28,7 +32,11 @@ class RandomRoute:
             if not neighbors:
                 next_node = previous_node
             else:
-                next_node = random.choice(neighbors)
+                if prefer_new:
+                    # TODO
+                    ...
+                else:
+                    next_node = random.choice(neighbors)
 
             next_node = int(next_node)
             current_distance += utils.get_distance_between(
@@ -52,3 +60,5 @@ class RandomRoute:
             else:
                 if current_distance > distance:
                     return [route]
+
+        return []
