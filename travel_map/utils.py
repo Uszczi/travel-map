@@ -18,7 +18,7 @@ def route_to_x_y(
     graph: MultiDiGraph,
     route: list[int],
     reversed: bool = False,
-) -> tuple[list[float], list[float]] | list[tuple[float, float]]:
+) -> tuple[list[float], list[float]]:
     x = []
     y = []
     for u, v in zip(route[:-1], route[1:]):
@@ -43,7 +43,7 @@ def route_to_zip_x_y(
     graph: MultiDiGraph,
     route: list[int],
     reversed: bool = False,
-):
+) -> list[tuple[int, int]]:
     x, y = route_to_x_y(graph, route, reversed)
 
     return list(zip(x, y))
@@ -60,3 +60,11 @@ def get_route_distance(graph: MultiDiGraph, route: list[int]) -> float:
         data = min(graph.get_edge_data(u, v).values(), key=lambda d: d["length"])
         distance += data["length"]
     return distance
+
+
+def get_graph_distance(graph: MultiDiGraph) -> float:
+    total = 0
+    for start, end, _ in graph.edges:
+        distance = get_distance_between(graph, start, end)
+        total += distance
+    return total

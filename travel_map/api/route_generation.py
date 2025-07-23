@@ -94,19 +94,16 @@ def get_visited_routes(
     result = []
 
     for u, v in visited_edges:
-        try:
-            data = min(G.get_edge_data(u, v).values(), key=lambda d: d["length"])
-            if "geometry" in data:
-                xs, ys = data["geometry"].xy
-                result.append([[y, x] for (x, y) in zip(xs, ys)])
-            else:
-                result.append(
-                    [
-                        [G.nodes[u]["y"], G.nodes[u]["x"]],
-                        [G.nodes[v]["y"], G.nodes[v]["x"]],
-                    ]
-                )
-        except Exception:
-            pass
+        data = min(G.get_edge_data(u, v).values(), key=lambda d: d["length"])
+        if "geometry" in data:
+            xs, ys = data["geometry"].xy
+            result.append([[y, x] for (x, y) in zip(xs, ys)])
+        else:
+            result.append(
+                [
+                    [G.nodes[u]["y"], G.nodes[u]["x"]],
+                    [G.nodes[v]["y"], G.nodes[v]["x"]],
+                ]
+            )
 
     return result
