@@ -3,7 +3,7 @@ from typing import Generic, Iterator, TypeVar
 import networkx as nx
 import osmnx as ox
 
-from travel_map.models import Route, Segment, StravaRoute
+from travel_map.models import Segment, StravaRoute
 
 K = TypeVar("K")
 
@@ -55,19 +55,8 @@ class VisitedEdges(Generic[K]):
 visited_edges = VisitedEdges[tuple[int, int]]()
 
 
-# TODO co z tym
-def strava_route_to_route(graph: nx.MultiDiGraph, strava_route: StravaRoute) -> Route:
+def strava_route_to_nodes(
+    graph: nx.MultiDiGraph, strava_route: StravaRoute
+) -> list[int]:
     nodes = [ox.nearest_nodes(graph, x, y) for y, x in strava_route.xy]
     return nodes
-
-    segments = [(nodes[i], nodes[i + 1]) for i in range(len(nodes) - 1)]
-
-    return Route(
-        # TODO wyznaczyć rec przy pomocy cords
-        rec=(0, 0, 0, 0),
-        x=[coord[0] for coord in strava_route.xy],
-        y=[coord[1] for coord in strava_route.xy],
-        # Możesz obliczyć dystans używając `utils.get_route_distance`
-        distance=0,
-        segments=segments,
-    )
