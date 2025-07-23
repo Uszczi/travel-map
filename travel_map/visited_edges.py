@@ -42,8 +42,10 @@ class VisitedEdges(Generic[K]):
         for u, v in zip(route[:-1], route[1:]):
             data = min(graph.get_edge_data(u, v).values(), key=lambda d: d["length"])
             if (u, v) in self._map or (v, u) in self._map:
+                segment = Segment(new=False, distance=data["length"])
+            else:
                 segment = Segment(new=True, distance=data["length"])
-                result.append(segment)
+            result.append(segment)
         return result
 
     def mark_edges_visited(self, route: list[int]):
