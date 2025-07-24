@@ -1,5 +1,5 @@
 import osmnx as ox
-from fastapi import APIRouter
+from fastapi import APIRouter, Response
 
 from travel_map import utils
 from travel_map.api.common import (
@@ -33,7 +33,11 @@ def clear():
 
 @router.get("/route/next")
 def get_next_route() -> Route:
+    if not generated_routes:
+        return Response("No more routes.", status_code=400)
+
     G = graphs["refactor"]
+
     route = generated_routes.pop(0)
 
     x, y = utils.route_to_x_y(G, route)
