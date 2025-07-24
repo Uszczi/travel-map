@@ -52,7 +52,8 @@ def route(
     start_y: float = DEFAULT_START_Y,
     end_x: float = DEFAULT_START_X,
     end_y: float = DEFAULT_START_Y,
-    distance: int = 5000,
+    distance: int = 6000,
+    prefer_new: bool = False,
 ) -> Route:
     CITY_BBOX = get_city_bbox(start_x, start_y)
     G = get_or_create_graph(start_x, start_y)
@@ -68,11 +69,21 @@ def route(
     if not generator_class:
         raise ValueError(f"Unsupported algorithm type: {algorithm_type}")
 
+    if generator_class is RandomRoute:
+        kwargs = {"prefer_new": prefer_new}
+    else:
+        kwargs = {}
+
     start_node_id = ox.nearest_nodes(G, X=start_x, Y=start_y)
     end_node_id = ox.nearest_nodes(G, X=end_x, Y=end_y)
 
     with utils.time_measure("Generating route took: "):
-        routes = generator_class(G).generate(start_node_id, end_node_id, distance)
+        routes = generator_class(G, visited_edges).generate(
+            start_node_id,
+            end_node_id,
+            distance,
+            **kwargs,
+        )
         route = routes[0]
         generated_routes.clear()
         generated_routes.extend(routes[1:])

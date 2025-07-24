@@ -29,9 +29,6 @@ class DfsRoute:
                 result_paths.append(path)
                 return
 
-            # if current_node == end_node and current_length != 0:
-            #     return
-
             if len(path) > depth_limit or current_length > max_length:
                 return
 

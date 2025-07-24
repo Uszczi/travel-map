@@ -32,3 +32,9 @@ dev = [
     "pytest>=8.4.0",
     "ty>=0.0.1a9",
 ]
+
+[tool.pytest.ini_options]
+addopts = [
+    "-v",
+    "-s"
+]
