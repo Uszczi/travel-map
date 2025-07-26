@@ -54,8 +54,8 @@ def route(
     algorithm_type: str,
     start_x: float = DEFAULT_START_X,
     start_y: float = DEFAULT_START_Y,
-    end_x: float = DEFAULT_START_X,
-    end_y: float = DEFAULT_START_Y,
+    end_x: float | None = None,
+    end_y: float | None = None,
     distance: int = 6000,
     prefer_new: bool = False,
 ) -> Route:
@@ -73,13 +73,17 @@ def route(
     if not generator_class:
         raise ValueError(f"Unsupported algorithm type: {algorithm_type}")
 
+    # TODO
     if generator_class is RandomRoute:
         kwargs = {"prefer_new": prefer_new}
     else:
-        kwargs = {}
+        kwargs = {"prefer_new": prefer_new}
 
     start_node_id = ox.nearest_nodes(G, X=start_x, Y=start_y)
-    end_node_id = ox.nearest_nodes(G, X=end_x, Y=end_y)
+    if end_x:
+        end_node_id = ox.nearest_nodes(G, X=end_x, Y=end_y)
+    else:
+        end_node_id = None
 
     with utils.time_measure("Generating route took: "):
         routes = generator_class(G, visited_edges).generate(
