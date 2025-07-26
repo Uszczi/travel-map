@@ -14,18 +14,18 @@ class RandomRoute:
 
     def generate(
         self,
-        start_node_id: int,
-        end_node_id: int | None,
+        start_node: int,
+        end_node: int | None,
         distance: int,
         prefer_new: bool = False,
     ) -> list[list[int]]:
         if prefer_new and self.v_edges is None:
             raise Exception("Visited Edges is required when prefering new routes.")
 
-        route = [start_node_id]
+        route = [start_node]
         current_distance = 0
         iterations = 0
-        current_node = start_node_id
+        current_node = start_node
         previous_node = None
 
         while iterations < 100_000_000:
@@ -60,15 +60,15 @@ class RandomRoute:
             previous_node = current_node
             current_node = next_node
 
-            if end_node_id:
+            if end_node:
                 if current_distance > distance * 1.4:
-                    route = [start_node_id]
+                    route = [start_node]
                     current_distance = 0
-                    current_node = start_node_id
+                    current_node = start_node
                     previous_node = None
                     continue
 
-                if distance * 0.8 < current_distance and end_node_id == current_node:
+                if distance * 0.8 < current_distance and end_node == current_node:
                     return [route]
             else:
                 if current_distance > distance:

@@ -79,16 +79,16 @@ def route(
     else:
         kwargs = {"prefer_new": prefer_new}
 
-    start_node_id = ox.nearest_nodes(G, X=start_x, Y=start_y)
+    start_node = ox.nearest_nodes(G, X=start_x, Y=start_y)
     if end_x:
-        end_node_id = ox.nearest_nodes(G, X=end_x, Y=end_y)
+        end_node = ox.nearest_nodes(G, X=end_x, Y=end_y)
     else:
-        end_node_id = None
+        end_node = None
 
     with utils.time_measure("Generating route took: "):
         routes = generator_class(G, visited_edges).generate(
-            start_node_id,
-            end_node_id,
+            start_node,
+            end_node,
             distance,
             **kwargs,
         )

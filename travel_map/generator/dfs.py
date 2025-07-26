@@ -16,14 +16,14 @@ class DfsRoute:
         self,
         start_node: int,
         end_node: int | None,
-        target_length: int,
+        distance: int,
         tolerance: float = 0.15,
         depth_limit: int = 100,
         prefer_new: bool = False,
     ) -> list[list[int]]:
         result_paths = []
-        min_length = target_length * (1 - tolerance)
-        max_length = target_length * (1 + tolerance)
+        min_length = distance * (1 - tolerance)
+        max_length = distance * (1 + tolerance)
 
         def dfs(current_node, path, current_length):
             if len(result_paths) >= 1:
