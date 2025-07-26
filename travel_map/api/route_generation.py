@@ -33,7 +33,7 @@ def clear():
 
 
 @router.get("/route/next")
-def get_next_route() -> Route | Response:
+def get_next_route() -> Route:
     if not generated_routes:
         return Response("No more routes.", status_code=400)
 

@@ -24,7 +24,7 @@ class Benchamarks:
     generator_class: Any
 
     NUMBER_OF_ROUTES = 12
-    DISTANCE = 25_000
+    DISTANCE = 5_000
 
     @pytest.fixture()
     def times(self):
@@ -40,47 +40,46 @@ class Benchamarks:
             f"\nGenerating {self.generator_class.__name__} route at avg took: {statistics.mean(times):.6f}s"
         )
 
-    def test_start_generate(self, graph, start_node, times):
+    def test_start(self, graph, start_node, times):
         for _ in range(self.NUMBER_OF_ROUTES):
             with save_time(times):
                 self.generator_class(graph, visited_edges).generate(
                     start_node=start_node,
                     end_node=None,
-                    distance=10000,
+                    distance=self.DISTANCE,
                 )
 
         self.show_times(times)
 
-    def test_start_end_(self, graph, start_node, times):
+    def test_start_end(self, graph, start_node, end_node, times):
         for _ in range(self.NUMBER_OF_ROUTES):
             with save_time(times):
                 self.generator_class(graph, visited_edges).generate(
                     start_node=start_node,
-                    end_node=None,
-                    distance=10000,
+                    end_node=end_node,
+                    distance=self.DISTANCE,
                 )
 
         self.show_times(times)
 
-    # TODO
     def test_start_prefer_new(self, graph, start_node, times):
         for _ in range(self.NUMBER_OF_ROUTES):
             with save_time(times):
                 self.generator_class(graph, visited_edges).generate(
                     start_node=start_node,
                     end_node=None,
-                    distance=10000,
+                    distance=self.DISTANCE,
                 )
 
         self.show_times(times)
 
-    def test_start_end_prefer_new(self, graph, start_node, times):
+    def test_start_end_prefer_new(self, graph, start_node, end_node, times):
         for _ in range(self.NUMBER_OF_ROUTES):
             with save_time(times):
                 self.generator_class(graph, visited_edges).generate(
                     start_node=start_node,
-                    end_node=None,
-                    distance=10000,
+                    end_node=end_node,
+                    distance=self.DISTANCE,
                 )
 
         self.show_times(times)

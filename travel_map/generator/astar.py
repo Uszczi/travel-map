@@ -58,14 +58,26 @@ class AStarRoute:
 
         while open_set:
             _, current = heapq.heappop(open_set)
+            previous_node = came_from.get(current)
 
-            # if current == end_node:
-            #     return [to_route(current, came_from)]
+            if current == end_node:
+                return [to_route(current, came_from)]
 
             if current == end_node and g_score[current] >= min_length:
                 return [to_route(current, came_from)]
 
-            for neighbor in self.graph.neighbors(current):
+            neighbors = [n for n in self.graph.neighbors(current) if n != previous_node]
+            if prefer_new:
+                n_neighbors = [
+                    n
+                    for n in neighbors
+                    if (n, current) not in self.v_edges
+                    and (current, n) not in self.v_edges
+                ]
+                if n_neighbors:
+                    neighbors = n_neighbors
+
+            for neighbor in neighbors:
                 tmp_g_score = g_score[current] + utils.get_distance_between(
                     self.graph, current, neighbor
                 )
