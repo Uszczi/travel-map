@@ -10,7 +10,7 @@ from travel_map.visited_edges import VisitedEdges
 @dataclass
 class RandomRoute:
     graph: nx.MultiDiGraph
-    v_edges: VisitedEdges | None = None
+    v_edges: VisitedEdges
 
     def generate(
         self,
@@ -19,9 +19,6 @@ class RandomRoute:
         distance: int,
         prefer_new: bool = False,
     ) -> list[list[int]]:
-        if prefer_new and self.v_edges is None:
-            raise Exception("Visited Edges is required when prefering new routes.")
-
         route = [start_node]
         current_distance = 0
         iterations = 0

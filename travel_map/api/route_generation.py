@@ -9,6 +9,7 @@ from travel_map.api.common import (
     get_or_create_graph,
     graphs,
 )
+from travel_map.generator.astar import AStarRoute
 from travel_map.generator.dfs import DfsRoute
 from travel_map.generator.random import RandomRoute
 from travel_map.models import Route
@@ -65,8 +66,7 @@ def route(
     algorithm_map = {
         "random": RandomRoute,
         "dfs": DfsRoute,
-        # for future
-        # "astar": AStarRoute
+        "astar": AStarRoute,
     }
 
     generator_class = algorithm_map.get(algorithm_type.lower())
@@ -80,7 +80,7 @@ def route(
         kwargs = {"prefer_new": prefer_new}
 
     start_node = ox.nearest_nodes(G, X=start_x, Y=start_y)
-    if end_x:
+    if end_x and end_y:
         end_node = ox.nearest_nodes(G, X=end_x, Y=end_y)
     else:
         end_node = None
