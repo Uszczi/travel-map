@@ -1,5 +1,4 @@
 from tests.generator.routes import Routes
-
 from travel_map.generator.dfs import DfsRoute
 
 

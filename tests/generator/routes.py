@@ -1,4 +1,5 @@
 from typing import Any
+
 import folium as fl
 
 from tests.conftest import (
@@ -66,63 +67,3 @@ class Routes:
         assert route
 
         show(fm, graph, route, default_end=True)
-
-    def test_start_coverage(self, graph, fm, start_node, v_edges):
-        routes = []
-
-        for _ in range(10):
-            [route] = self.generator_class(graph, v_edges).generate(
-                start_node=start_node,
-                end_node=None,
-                distance=self.DISTANCE,
-            )
-            v_edges.mark_edges_visited(route)
-            routes.append(route)
-
-        print_coverage(graph, v_edges)
-
-    def test_start_end_coverage(self, graph, fm, start_node, end_node, v_edges):
-        routes = []
-
-        for _ in range(10):
-            [route] = self.generator_class(graph, v_edges).generate(
-                start_node=start_node,
-                end_node=end_node,
-                distance=self.DISTANCE,
-            )
-            v_edges.mark_edges_visited(route)
-            routes.append(route)
-
-        print_coverage(graph, v_edges)
-
-    def test_start_prefer_new_coverage(self, graph, fm, start_node, v_edges):
-        routes = []
-
-        for _ in range(10):
-            [route] = self.generator_class(graph, v_edges=v_edges).generate(
-                start_node=start_node,
-                end_node=None,
-                distance=self.DISTANCE,
-                prefer_new=True,
-            )
-            v_edges.mark_edges_visited(route)
-            routes.append(route)
-
-        print_coverage(graph, v_edges)
-
-    def test_start_end_prefer_new_coverage(
-        self, graph, fm, start_node, end_node, v_edges
-    ):
-        routes = []
-
-        for _ in range(10):
-            [route] = self.generator_class(graph, v_edges=v_edges).generate(
-                start_node=start_node,
-                end_node=end_node,
-                distance=self.DISTANCE,
-                prefer_new=True,
-            )
-            v_edges.mark_edges_visited(route)
-            routes.append(route)
-
-        print_coverage(graph, v_edges)

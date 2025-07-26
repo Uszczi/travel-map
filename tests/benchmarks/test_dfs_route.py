@@ -1,5 +1,4 @@
 from tests.benchmarks.benchmark import Benchamarks
-
 from travel_map.generator.dfs import DfsRoute
 
 

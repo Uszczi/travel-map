@@ -11,7 +11,7 @@ from travel_map.api.common import (
 )
 from travel_map.generator.astar import AStarRoute
 from travel_map.generator.dfs import DfsRoute
-from travel_map.generator.random import RandomRoute
+from travel_map.generator.random_route import RandomRoute
 from travel_map.models import Route
 from travel_map.visited_edges import visited_edges
 
@@ -33,7 +33,7 @@ def clear():
 
 
 @router.get("/route/next")
-def get_next_route() -> Route:
+def get_next_route() -> Route | Response:
     if not generated_routes:
         return Response("No more routes.", status_code=400)
 

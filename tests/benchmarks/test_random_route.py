@@ -1,6 +1,5 @@
 from tests.benchmarks.benchmark import Benchamarks
-
-from travel_map.generator.random import RandomRoute
+from travel_map.generator.random_route import RandomRoute
 
 
 class TestRandomRoute(Benchamarks):

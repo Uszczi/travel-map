@@ -1,9 +1,9 @@
-from contextlib import contextmanager
-from typing import Any
-import pytest
 import statistics
 import time
+from contextlib import contextmanager
+from typing import Any
 
+import pytest
 
 from travel_map.visited_edges import VisitedEdges
 

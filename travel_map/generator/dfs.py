@@ -1,9 +1,8 @@
 from dataclasses import dataclass
 
-from travel_map import utils
-
 import networkx as nx
 
+from travel_map import utils
 from travel_map.visited_edges import VisitedEdges
 
 

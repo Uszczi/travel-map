@@ -1,19 +1,11 @@
-import random
 import heapq
 from dataclasses import dataclass
+from math import atan2, cos, radians, sin, sqrt
 
 import networkx as nx
 
 from travel_map import utils
 from travel_map.visited_edges import VisitedEdges
-from dataclasses import dataclass
-
-import networkx as nx
-
-from travel_map import utils
-from travel_map.visited_edges import VisitedEdges
-
-from math import radians, sin, cos, sqrt, atan2
 
 
 def haversine(lat1, lon1, lat2, lon2):
@@ -50,6 +42,13 @@ class AStarRoute:
         prefer_new: bool = False,
         tolerance: float = 0.30,
     ) -> list[list[int]]:
+        def to_route(current, came_from) -> list[int]:
+            path = [current]
+            while current in came_from:
+                current = came_from[current]
+                path.append(current)
+            return list(reversed(path))
+
         min_length = distance * (1 - tolerance)
         max_length = distance * (1 + tolerance)
 
@@ -58,39 +57,20 @@ class AStarRoute:
         g_score = {start_node: 0.0}
 
         while open_set:
-            a, current = heapq.heappop(open_set)
-            print(a)
+            _, current = heapq.heappop(open_set)
 
-            # printx(g_score)
+            # if current == end_node:
+            #     return [to_route(current, came_from)]
 
             if current == end_node and g_score[current] >= min_length:
-                path = [current]
-                while current in came_from:
-                    current = came_from[current]
-                    path.append(current)
-                return [list(reversed(path))]
+                return [to_route(current, came_from)]
 
             for neighbor in self.graph.neighbors(current):
-                # TODO
-                # Pomijaj krawędź prowadzącą z powrotem (opcjonalnie)
-
-                # TODO co jesli sie skonczą
-                # if prefer_new and (
-                #     (current, neighbor) in self.v_edges
-                #     or (neighbor, current) in self.v_edges
-                # ):
-                #     continue
-
                 tmp_g_score = g_score[current] + utils.get_distance_between(
                     self.graph, current, neighbor
                 )
 
                 if tmp_g_score > max_length:
-                    path = [current]
-                    while current in came_from:
-                        current = came_from[current]
-                        path.append(current)
-                    return [list(reversed(path))]
                     continue
 
                 if neighbor not in g_score or tmp_g_score < g_score[neighbor]:
