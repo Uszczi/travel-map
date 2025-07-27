@@ -5,6 +5,7 @@ from math import atan2, cos, radians, sin, sqrt
 import networkx as nx
 
 from travel_map import utils
+from travel_map.generator.base import RouteGenerator
 from travel_map.visited_edges import VisitedEdges
 
 
@@ -30,7 +31,7 @@ def heuristic(graph, a, b):
 
 
 @dataclass
-class AStarRoute:
+class AStarRoute(RouteGenerator):
     graph: nx.MultiDiGraph
     v_edges: VisitedEdges
 
@@ -39,22 +40,21 @@ class AStarRoute:
         start_node: int,
         end_node: int,
         distance: int,
-        prefer_new: bool = False,
         tolerance: float = 0.30,
+        prefer_new: bool = False,
+        depth_limit: int = 0,
     ) -> list[list[int]]:
+        min_length, max_length = self.calculate_min_max_length(tolerance, distance)
+        open_set = [(0.0, start_node)]
+        came_from = {}
+        g_score = {start_node: 0.0}
+
         def to_route(current, came_from) -> list[int]:
             path = [current]
             while current in came_from:
                 current = came_from[current]
                 path.append(current)
             return list(reversed(path))
-
-        min_length = distance * (1 - tolerance)
-        max_length = distance * (1 + tolerance)
-
-        open_set = [(0.0, start_node)]
-        came_from = {}
-        g_score = {start_node: 0.0}
 
         while open_set:
             _, current = heapq.heappop(open_set)

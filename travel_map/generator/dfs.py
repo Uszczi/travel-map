@@ -3,11 +3,12 @@ from dataclasses import dataclass
 import networkx as nx
 
 from travel_map import utils
+from travel_map.generator.base import RouteGenerator
 from travel_map.visited_edges import VisitedEdges
 
 
 @dataclass
-class DfsRoute:
+class DfsRoute(RouteGenerator):
     graph: nx.MultiDiGraph
     v_edges: VisitedEdges
 
@@ -21,8 +22,7 @@ class DfsRoute:
         prefer_new: bool = False,
     ) -> list[list[int]]:
         result_paths = []
-        min_length = distance * (1 - tolerance)
-        max_length = distance * (1 + tolerance)
+        min_length, max_length = self.calculate_min_max_length(tolerance, distance)
 
         def dfs(current_node, path, current_length):
             if len(result_paths) >= 1:

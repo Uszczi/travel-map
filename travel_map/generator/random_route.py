@@ -4,11 +4,12 @@ from dataclasses import dataclass
 import networkx as nx
 
 from travel_map import utils
+from travel_map.generator.base import RouteGenerator
 from travel_map.visited_edges import VisitedEdges
 
 
 @dataclass
-class RandomRoute:
+class RandomRoute(RouteGenerator):
     graph: nx.MultiDiGraph
     v_edges: VisitedEdges
 
@@ -17,15 +18,18 @@ class RandomRoute:
         start_node: int,
         end_node: int | None,
         distance: int,
+        tolerance: float = 0.15,
         prefer_new: bool = False,
+        depth_limit: int = 10_000_000,
     ) -> list[list[int]]:
         route = [start_node]
         current_distance = 0
         iterations = 0
         current_node = start_node
         previous_node = None
+        min_length, max_length = self.calculate_min_max_length(tolerance, distance)
 
-        while iterations < 100_000_000:
+        while iterations < depth_limit:
             iterations += 1
 
             neighbors = [
@@ -58,17 +62,17 @@ class RandomRoute:
             current_node = next_node
 
             if end_node:
-                if current_distance > distance * 1.4:
+                if current_distance > max_length:
                     route = [start_node]
                     current_distance = 0
                     current_node = start_node
                     previous_node = None
                     continue
 
-                if distance * 0.8 < current_distance and end_node == current_node:
+                if current_distance > min_length and end_node == current_node:
                     return [route]
             else:
-                if current_distance > distance:
+                if current_distance > min_length:
                     return [route]
 
         raise Exception("Couldn't generate random route.")
