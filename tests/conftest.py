@@ -1,3 +1,6 @@
+import os
+from pathlib import Path
+
 import folium
 import osmnx as ox
 import pytest
@@ -44,3 +47,11 @@ def fm():
 @pytest.fixture()
 def v_edges():
     return VisitedEdges[tuple[int, int]]()
+
+
+def get_image_path(generator_class, time) -> Path:
+    path = (
+        Path(__file__).parent.parent / "tmp" / time / generator_class.__class__.__name__
+    )
+    os.makedirs(path, exist_ok=True)
+    return path
