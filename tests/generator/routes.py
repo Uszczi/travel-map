@@ -17,11 +17,12 @@ from travel_map.utils import (
     route_to_zip_x_y,
 )
 
-DEBUG = False
-
-hti = Html2Image()
+SAVE_TO_PNG = True
+OPEN_IN_BROWSER = False
 
 start_time = None
+
+hti = Html2Image()
 
 
 def print_coverage(graph, v_edges):
@@ -78,13 +79,16 @@ class Routes:
         html_path = f"{path}.html"
         png_path = f"{path}.png"
 
-        m.save(html_path)
-        hti.screenshot(
-            html_file=html_path,
-            save_as=f"{name}.png",
-        )
-        shutil.move(f"{name}.png", png_path)
-        # m.show_in_browser()
+        if SAVE_TO_PNG:
+            m.save(html_path)
+            hti.screenshot(
+                html_file=html_path,
+                save_as=f"{name}.png",
+            )
+            shutil.move(f"{name}.png", png_path)
+
+        if OPEN_IN_BROWSER:
+            m.show_in_browser()
 
     def test_start(
         self,
