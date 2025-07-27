@@ -253,6 +253,18 @@ wheels = [
 ]
 
 [[package]]
+name = "imgkit"
+version = "1.2.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "six" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/96/66/49089f7ca929e854f4f110259de392ec8bbed5ac3f2f9e1ff493f6623b15/imgkit-1.2.3.tar.gz", hash = "sha256:c9ade93d0281277c898b983c959f11f0cc1cb4a5fed144560dfa4d273fb50cd8", size = 11690, upload-time = "2023-02-23T08:01:58.396Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/bf/b0/e0c8aaafb20377eccb9aedbb9e00c21aeaac9cdc13d31d1c7532e1241bab/imgkit-1.2.3-py3-none-any.whl", hash = "sha256:cba8e3f67da6e0a5c87345a8b41605337851f9b9b75719500fa6810ecff84791", size = 10634, upload-time = "2023-02-23T08:01:57.223Z" },
+]
+
+[[package]]
 name = "iniconfig"
 version = "2.1.0"
 source = { registry = "https://pypi.org/simple" }
@@ -954,6 +966,7 @@ dependencies = [
 dev = [
     { name = "debugpy" },
     { name = "folium" },
+    { name = "imgkit" },
     { name = "pyqt5" },
     { name = "pytest" },
     { name = "ty" },
@@ -977,6 +990,7 @@ requires-dist = [
 dev = [
     { name = "debugpy", specifier = ">=1.8.14" },
     { name = "folium", specifier = ">=0.20.0" },
+    { name = "imgkit", specifier = ">=1.2.3" },
     { name = "pyqt5", specifier = ">=5.15.11" },
     { name = "pytest", specifier = ">=8.4.0" },
     { name = "ty", specifier = ">=0.0.1a9" },
