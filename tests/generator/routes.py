@@ -1,10 +1,10 @@
 from datetime import datetime
+from playwright.sync_api import sync_playwright
 from typing import Any
 
 import folium as fl
 import pytest
-from html2image import Html2Image
-from html2image.html2image import shutil
+
 
 from tests.conftest import (
     DEFAULT_Y_X,
@@ -21,8 +21,6 @@ SAVE_TO_PNG = True
 OPEN_IN_BROWSER = False
 
 start_time = None
-
-hti = Html2Image()
 
 
 def print_coverage(graph, v_edges):
@@ -58,34 +56,37 @@ class Routes:
         default_start: bool = True,
         default_end: bool = False,
     ):
-        # if not DEBUG:
-        #     return
-
         for route in routes:
             x_y = route_to_zip_x_y(graph, route, reversed=True)
             fl.PolyLine(x_y).add_to(m)
 
         if default_start:
-            fl.Marker(DEFAULT_Y_X, icon=fl.Icon(color="green")).add_to(m)
+            fl.Marker(
+                DEFAULT_Y_X,
+                icon=fl.Icon(color="green"),
+            ).add_to(m)
         if default_end:
             fl.Marker(
                 (PIOTRKOWSKA_START_Y, PIOTRKOWSKA_START_X),
-                icon=fl.Icon(color="green"),
+                icon=fl.Icon(color="red"),
             ).add_to(m)
 
-        name = request.node.originalname
-        path = get_image_path(self, start_time) / name
-        path = str(path)
-        html_path = f"{path}.html"
-        png_path = f"{path}.png"
-
         if SAVE_TO_PNG:
+            name = request.node.originalname
+            path = get_image_path(self, start_time) / name
+            path = str(path)
+            html_path = f"{path}.html"
+            png_path = f"{path}.png"
             m.save(html_path)
-            hti.screenshot(
-                html_file=html_path,
-                save_as=f"{name}.png",
-            )
-            shutil.move(f"{name}.png", png_path)
+
+            with sync_playwright() as p:
+                browser = p.chromium.launch()
+                page = browser.new_page()
+                page.goto(f"file://{html_path}")
+                # TODO
+                page.wait_for_timeout(1000)
+                page.screenshot(path=png_path, full_page=True)
+                browser.close()
 
         if OPEN_IN_BROWSER:
             m.show_in_browser()
@@ -208,15 +209,22 @@ class Routes:
     ):
         routes = []
 
-        for _ in range(self.NUMBER_OF_ROUTES):
-            [route] = generator.generate(
-                start_node=start_node,
-                end_node=end_node,
-                distance=self.DISTANCE,
-                prefer_new=True,
-            )
-            v_edges.mark_edges_visited(route)
-            routes.append(route)
+        for _ in range(3):
+            try:
+                for _ in range(self.NUMBER_OF_ROUTES):
+                    [route] = generator.generate(
+                        start_node=start_node,
+                        end_node=end_node,
+                        distance=self.DISTANCE,
+                        prefer_new=True,
+                    )
+                    v_edges.mark_edges_visited(route)
+                    routes.append(route)
+            except Exception:
+                routes = []
+                v_edges.clear()
+            else:
+                break
 
         print_coverage(graph, v_edges)
         self.show(fm, graph, routes, request, default_end=True)

@@ -32,6 +32,7 @@ htmlcov/
 .tox/
 .nox/
 .pytest_cache/
+skip-covered/
 
 # Ignoruj pliki i katalogi związane z budowaniem paczek
 build/
