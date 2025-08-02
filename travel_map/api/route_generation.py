@@ -59,13 +59,12 @@ def route(
         end_node = None
 
     with utils.time_measure("Generating route took: "):
-        routes = generator_class(G, visited_edges).generate(
+        route = generator_class(G, visited_edges).generate(
             start_node=start_node,
             end_node=end_node,
             distance=distance,
             prefer_new=prefer_new,
         )
-        route = routes[0]
 
     x, y = utils.route_to_x_y(G, route)
     route_distance = utils.get_route_distance(G, route)

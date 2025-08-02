@@ -44,7 +44,7 @@ class AStarRoute(RouteGenerator):
         tolerance: float = 0.30,
         prefer_new: bool = False,
         depth_limit: int = 0,
-    ) -> list[list[int]]:
+    ) -> list[int]:
         min_length, max_length = self.calculate_min_max_length(tolerance, distance)
         open_set = [(0.0, start_node)]
         came_from = {}
@@ -78,12 +78,16 @@ class AStarRoute(RouteGenerator):
                 end_node = random.choice(list(second_neighbors))
 
             if current == end_node:
-                return [to_route(current, came_from)]
+                return to_route(current, came_from)
 
             if current == end_node and g_score[current] >= min_length:
-                return [to_route(current, came_from)]
+                return to_route(current, came_from)
+
+            if g_score[current] > min_length:
+                return to_route(current, came_from)
 
             neighbors = [n for n in self.graph.neighbors(current) if n != previous_node]
+
             if prefer_new:
                 n_neighbors = [
                     n

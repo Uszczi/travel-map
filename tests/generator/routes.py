@@ -51,6 +51,9 @@ class Routes:
         start_node: int | None = None,
         end_node: int | None = None,
     ):
+        # if not isinstance(routes[0], int):
+        #     routes = [routes]
+
         for route in routes:
             x_y = route_to_zip_x_y(graph, route, reversed=True)
             fl.PolyLine(x_y).add_to(m)
@@ -94,12 +97,11 @@ class Routes:
         generator,
         request,
     ):
-        [route] = generator.generate(
+        route = generator.generate(
             start_node=start_node,
             end_node=None,
             distance=self.DISTANCE,
         )
-        assert route
 
         self.show(fm, graph, [route], request, start_node=start_node)
 
@@ -112,7 +114,7 @@ class Routes:
         generator,
         request,
     ):
-        [route] = generator.generate(
+        route = generator.generate(
             start_node=start_node,
             end_node=end_node,
             distance=self.DISTANCE,
@@ -133,7 +135,7 @@ class Routes:
         routes = []
 
         for _ in range(self.NUMBER_OF_ROUTES):
-            [route] = generator.generate(
+            route = generator.generate(
                 start_node=start_node,
                 end_node=None,
                 distance=self.DISTANCE,
@@ -157,7 +159,7 @@ class Routes:
         routes = []
 
         for _ in range(self.NUMBER_OF_ROUTES):
-            [route] = generator.generate(
+            route = generator.generate(
                 start_node=start_node,
                 end_node=end_node,
                 distance=self.DISTANCE,
@@ -180,7 +182,7 @@ class Routes:
         routes = []
 
         for _ in range(self.NUMBER_OF_ROUTES):
-            [route] = generator.generate(
+            route = generator.generate(
                 start_node=start_node,
                 end_node=None,
                 distance=self.DISTANCE,
@@ -205,7 +207,7 @@ class Routes:
         routes = []
 
         for _ in range(self.NUMBER_OF_ROUTES):
-            [route] = generator.generate(
+            route = generator.generate(
                 start_node=start_node,
                 end_node=end_node,
                 distance=self.DISTANCE,

@@ -25,6 +25,9 @@ benchmarks:
 docker_run:
 	docker compose up --detach
 
+docker_test:
+	docker compose run --rm app pytest
+
 docker_fg_run:
 	docker compose up
 
@@ -50,6 +53,8 @@ d-check: docker_check
 d-run: docker_run
 
 d-fg-run: docker_fg_run
+
+d-test: docker_test
 
 lock_dependencies:
 	docker compose run --rm --no-deps app uv lock

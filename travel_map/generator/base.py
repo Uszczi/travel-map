@@ -20,7 +20,7 @@ class RouteGenerator(ABC):
         tolerance: float = 0.15,
         prefer_new: bool = False,
         depth_limit: int = 100,
-    ) -> list[list[int]]: ...
+    ) -> list[int]: ...
 
     def calculate_min_max_length(self, tolerance, distance):
         min_length = distance * (1 - tolerance)

@@ -25,7 +25,7 @@ class TestAStarRoutes(Routes):
         end_node = ox.nearest_nodes(graph, X=19.194585084915165, Y=51.61247380201653)
 
         for _ in range(3):
-            [route] = generator.generate(
+            route = generator.generate(
                 start_node=start_node,
                 end_node=end_node,
                 distance=self.DISTANCE,

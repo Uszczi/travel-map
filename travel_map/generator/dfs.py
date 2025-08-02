@@ -21,19 +21,20 @@ class DfsRoute(RouteGenerator):
         tolerance: float = 0.15,
         depth_limit: int = 100,
         prefer_new: bool = False,
-    ) -> list[list[int]]:
-        result_paths = []
+    ) -> list[int]:
         min_length, max_length = self.calculate_min_max_length(tolerance, distance)
+        result = None
 
         def dfs(current_node, path, current_length):
-            if len(result_paths) >= 1:
+            nonlocal result
+            if result:  # type: ignore[unresolved-reference]
                 return
 
             if min_length <= current_length <= max_length:
                 if end_node and current_node != end_node:
                     return
                 else:
-                    result_paths.append(path)
+                    result = path
                     return
 
             if len(path) > depth_limit or current_length > max_length:
@@ -62,4 +63,8 @@ class DfsRoute(RouteGenerator):
                     dfs(neighbor, path + [neighbor], new_length)
 
         dfs(start_node, [start_node], 0)
-        return result_paths
+
+        if not result:
+            raise Exception("Couldn't generate DFS route.")
+
+        return result

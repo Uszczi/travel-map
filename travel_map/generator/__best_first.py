@@ -1,7 +1,7 @@
 import heapq
 import math
 from dataclasses import dataclass, field
-from typing import List, Set, Tuple
+from typing import Set, Tuple
 
 import networkx as nx
 
@@ -20,8 +20,7 @@ class BestFirstRoute:
         depth_limit: int = 100,
         allow_first_n: int = 10,
         not_allow_last_n: int = 5,
-    ) -> List[List[int]]:
-        result_paths = []
+    ) -> list[int]:
         min_length = target_length * (1 - tolerance)
         max_length = target_length * (1 + tolerance)
 
@@ -44,14 +43,14 @@ class BestFirstRoute:
             heap, (abs(0 + heuristic(start_node) - target_length), 0.0, [], start_node)
         )
 
-        while heap and len(result_paths) < 10:
+        while heap:
             priority, current_length, edges, current_node = heapq.heappop(heap)
 
             # Sprawdź warunki zakończenia
             if current_node == end_node:
                 if min_length <= current_length <= max_length:
                     path_nodes = [start_node] + [v for u, v, _ in edges]
-                    result_paths.append(path_nodes)
+                    return path_nodes
                     self.used_edges.update(edges)
                 continue
 
@@ -100,4 +99,5 @@ class BestFirstRoute:
                         heap, (new_priority, new_length, new_edges, neighbor)
                     )
 
-        return result_paths
+        # return result_paths
+        raise Exception("Couldn't generate BestFirst route.")

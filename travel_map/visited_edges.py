@@ -67,6 +67,7 @@ class VisitedEdges(Generic[K]):
 visited_edges = VisitedEdges[tuple[int, int]]()
 
 
+# Why is it here?
 def strava_route_to_nodes(
     graph: nx.MultiDiGraph, strava_route: StravaRoute
 ) -> list[int]:
