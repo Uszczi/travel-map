@@ -1,15 +1,11 @@
 from datetime import datetime
-from playwright.sync_api import sync_playwright
 from typing import Any
 
 import folium as fl
 import pytest
-
+from playwright.sync_api import sync_playwright
 
 from tests.conftest import (
-    DEFAULT_Y_X,
-    PIOTRKOWSKA_START_X,
-    PIOTRKOWSKA_START_Y,
     get_image_path,
 )
 from travel_map.utils import (
@@ -52,22 +48,21 @@ class Routes:
         graph,
         routes: list[list[int]],
         request,
-        # TODO refactor this to just points
-        default_start: bool = True,
-        default_end: bool = False,
+        start_node: int | None = None,
+        end_node: int | None = None,
     ):
         for route in routes:
             x_y = route_to_zip_x_y(graph, route, reversed=True)
             fl.PolyLine(x_y).add_to(m)
 
-        if default_start:
+        if start_node:
             fl.Marker(
-                DEFAULT_Y_X,
+                (graph.nodes[start_node]["y"], graph.nodes[start_node]["x"]),
                 icon=fl.Icon(color="green"),
             ).add_to(m)
-        if default_end:
+        if end_node:
             fl.Marker(
-                (PIOTRKOWSKA_START_Y, PIOTRKOWSKA_START_X),
+                (graph.nodes[end_node]["y"], graph.nodes[end_node]["x"]),
                 icon=fl.Icon(color="red"),
             ).add_to(m)
 
@@ -106,7 +101,7 @@ class Routes:
         )
         assert route
 
-        self.show(fm, graph, [route], request)
+        self.show(fm, graph, [route], request, start_node=start_node)
 
     def test_start_end(
         self,
@@ -124,7 +119,7 @@ class Routes:
         )
         assert route
 
-        self.show(fm, graph, [route], request, default_end=True)
+        self.show(fm, graph, [route], request, start_node=start_node, end_node=end_node)
 
     def test_start_coverage(
         self,
@@ -147,7 +142,7 @@ class Routes:
             routes.append(route)
 
         print_coverage(graph, v_edges)
-        self.show(fm, graph, routes, request, default_end=True)
+        self.show(fm, graph, routes, request, start_node=start_node)
 
     def test_start_end_coverage(
         self,
@@ -171,7 +166,7 @@ class Routes:
             routes.append(route)
 
         print_coverage(graph, v_edges)
-        self.show(fm, graph, routes, request, default_end=True)
+        self.show(fm, graph, routes, request, start_node=start_node, end_node=end_node)
 
     def test_start_prefer_new_coverage(
         self,
@@ -195,7 +190,7 @@ class Routes:
             routes.append(route)
 
         print_coverage(graph, v_edges)
-        self.show(fm, graph, routes, request, default_end=True)
+        self.show(fm, graph, routes, request, start_node=start_node)
 
     def test_start_end_prefer_new_coverage(
         self,
@@ -209,22 +204,15 @@ class Routes:
     ):
         routes = []
 
-        for _ in range(3):
-            try:
-                for _ in range(self.NUMBER_OF_ROUTES):
-                    [route] = generator.generate(
-                        start_node=start_node,
-                        end_node=end_node,
-                        distance=self.DISTANCE,
-                        prefer_new=True,
-                    )
-                    v_edges.mark_edges_visited(route)
-                    routes.append(route)
-            except Exception:
-                routes = []
-                v_edges.clear()
-            else:
-                break
+        for _ in range(self.NUMBER_OF_ROUTES):
+            [route] = generator.generate(
+                start_node=start_node,
+                end_node=end_node,
+                distance=self.DISTANCE,
+                prefer_new=True,
+            )
+            v_edges.mark_edges_visited(route)
+            routes.append(route)
 
         print_coverage(graph, v_edges)
-        self.show(fm, graph, routes, request, default_end=True)
+        self.show(fm, graph, routes, request, start_node=start_node, end_node=end_node)

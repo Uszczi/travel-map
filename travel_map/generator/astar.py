@@ -1,4 +1,5 @@
 import heapq
+import random
 from dataclasses import dataclass
 from math import atan2, cos, radians, sin, sqrt
 
@@ -49,6 +50,11 @@ class AStarRoute(RouteGenerator):
         came_from = {}
         g_score = {start_node: 0.0}
 
+        if end_node:
+            change_end_node = False
+        else:
+            change_end_node = True
+
         def to_route(current, came_from) -> list[int]:
             path = [current]
             while current in came_from:
@@ -59,6 +65,17 @@ class AStarRoute(RouteGenerator):
         while open_set:
             _, current = heapq.heappop(open_set)
             previous_node = came_from.get(current)
+
+            if change_end_node:
+                neighbors = [n for n in self.graph.neighbors(current)]
+                second_neighbors = set()
+                for n in neighbors:
+                    second_neighbors.update(self.graph.neighbors(n))
+
+                second_neighbors.discard(current)
+                second_neighbors.difference_update(neighbors)
+
+                end_node = random.choice(list(second_neighbors))
 
             if current == end_node:
                 return [to_route(current, came_from)]
@@ -74,6 +91,7 @@ class AStarRoute(RouteGenerator):
                     if (n, current) not in self.v_edges
                     and (current, n) not in self.v_edges
                 ]
+
                 if n_neighbors:
                     neighbors = n_neighbors
 

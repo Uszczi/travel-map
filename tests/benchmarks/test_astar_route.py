@@ -2,7 +2,7 @@ from tests.benchmarks.benchmark import Benchamarks
 from travel_map.generator.astar import AStarRoute
 
 
-class TestRandomRoute(Benchamarks):
+class TestAStarRoute(Benchamarks):
     generator_class = AStarRoute
 
     def test_start(self, graph, start_node, times): ...
