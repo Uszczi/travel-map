@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import random
 
 import networkx as nx
 
@@ -39,10 +40,10 @@ class DfsRoute(RouteGenerator):
                 return
 
             previous_node = path[-2] if len(path) >= 2 else None
-            # TODO add losowanie
             neighbors = [
                 n for n in self.graph.neighbors(current_node) if n != previous_node
             ]
+            random.shuffle(neighbors)
 
             if prefer_new:
                 neighbors.sort(
