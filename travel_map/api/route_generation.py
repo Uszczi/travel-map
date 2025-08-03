@@ -13,9 +13,13 @@ from travel_map.generator.astar import AStarRoute
 from travel_map.generator.dfs import DfsRoute
 from travel_map.generator.random_route import RandomRoute
 from travel_map.models import Route
+from travel_map.services.elevation import ElevationService
 from travel_map.visited_edges import visited_edges
 
 router = APIRouter()
+
+# TODO inject this
+elevation_service = ElevationService()
 
 
 @router.get("/")
@@ -70,8 +74,20 @@ def route(
     route_distance = utils.get_route_distance(G, route)
     segments = visited_edges.get_visited_segments(G, route)
     visited_edges.mark_edges_visited(route)
+    elevation = elevation_service.get(utils.zip_x_y(x, y))
+    elevation = elevation_service.covert_to_list(elevation)
+    total_gain, total_lose = elevation_service.calculate_total_gain_lose(elevation)
 
-    return Route(rec=CITY_BBOX, x=x, y=y, distance=route_distance, segments=segments)
+    return Route(
+        rec=CITY_BBOX,
+        x=x,
+        y=y,
+        distance=route_distance,
+        segments=segments,
+        elevation=elevation,
+        total_gain=total_gain,
+        total_lose=total_lose,
+    )
 
 
 @router.get("/visited-routes")

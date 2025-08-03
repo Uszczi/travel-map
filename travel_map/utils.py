@@ -14,6 +14,20 @@ def time_measure(msg: str):
     logger.info(msg + f"{elapsed_time:.4f} sec.")
 
 
+def time_measure_decorator(msg: str):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            start_time = time.time()
+            result = func(*args, **kwargs)
+            elapsed_time = time.time() - start_time
+            logger.info(msg + f"{elapsed_time:.4f} sec.")
+            return result
+
+        return wrapper
+
+    return decorator
+
+
 def route_to_x_y(
     graph: MultiDiGraph,
     route: list[int],
@@ -43,9 +57,16 @@ def route_to_zip_x_y(
     graph: MultiDiGraph,
     route: list[int],
     reversed: bool = False,
-) -> list[tuple[int, int]]:
+) -> list[tuple[float, float]]:
     x, y = route_to_x_y(graph, route, reversed)
 
+    return list(zip(x, y))
+
+
+def zip_x_y(
+    x: list[float],
+    y: list[float],
+) -> list[tuple[float, float]]:
     return list(zip(x, y))
 
 

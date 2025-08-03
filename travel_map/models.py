@@ -12,6 +12,9 @@ class Route(BaseModel):
     y: list[float]
     distance: float
     segments: list[Segment]
+    elevation: list[int]
+    total_gain: int
+    total_lose: int
 
 
 class StravaRoute(BaseModel):
