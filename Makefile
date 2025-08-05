@@ -4,57 +4,54 @@
 build:
 	docker compose build
 
-install:
-	uv sync
-
 run:
-	uv run uvicorn travel_map.app:app --reload
-
-lint:
-	uv run ruff check --fix .
-	uv run ruff check --fix --select I .
-	uv run black .
-	uv run ty check
-
-check:
-	TODO
-
-benchmarks:
-	uv run pytest -s tests/benchmarks
-
-docker_run:
 	docker compose up --detach
 
-docker_test:
-	docker compose run --rm app pytest
-
-docker_fg_run:
+fg_run:
 	docker compose up
 
-docker_lint:
+test:
+	docker compose run --rm app pytest
+
+
+lint:
 	docker compose run --rm --no-deps app sh -c "\
 		ruff check --fix . && \
 		ruff check --fix --select I . && \
 		black . && \
 		ty check"
 
-docker_check:
+check:
 	TODO
 
-docker_benchamark:
-	docker compose run --rm --no-deps app pytest -v -s tests/benchmarks
+### Local section
+local_install:
+	uv sync
 
-d-benchmark: docker_benchamark
+local_run:
+	uv run uvicorn travel_map.app:app --reload
 
-d-lint: docker_lint
+local_lint:
+	uv run ruff check --fix .
+	uv run ruff check --fix --select I .
+	uv run black .
+	uv run ty check
 
-d-check: docker_check
+local_check:
+	TODO
 
-d-run: docker_run
+local_test:
+	uv run pytest
 
-d-fg-run: docker_fg_run
+l-install: local_install
 
-d-test: docker_test
+l-lint: local_lint
+
+l-check: local_check
+
+l-run: local_run
+
+l-test: local_test
 
 lock_dependencies:
 	docker compose run --rm --no-deps app uv lock
