@@ -8,3 +8,5 @@ tmp/
 .ruff_cache/
 
 **/__pycache__/
+
+travel_map.egg-info/

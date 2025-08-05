@@ -24,6 +24,9 @@ lint:
 check:
 	TODO
 
+script-save-strava-routes:
+	docker compose run --rm app uv run python ./scripts/save_strava_routes.py
+
 ### Local section
 local_install:
 	uv sync

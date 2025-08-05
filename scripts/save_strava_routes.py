@@ -1,14 +1,17 @@
 import requests
+from loguru import logger
 from pymongo import MongoClient
 
 from travel_map.models import StravaRoute
 
-client = MongoClient("mongodb://localhost:27017/")
+client = MongoClient("mongodb://mongodb:27017/")
 db = client["strava_db"]
 collection = db["routes"]
 
 
 def fetch_activities(access_token):
+    logger.info("Starting fetch_activities.")
+
     url = "https://www.strava.com/api/v3/athlete/activities"
     headers = {"Authorization": f"Bearer {access_token}"}
     params = {"per_page": 30, "page": 1}
@@ -20,9 +23,11 @@ def fetch_activities(access_token):
         response = requests.get(url, headers=headers, params=params)
 
         if response.status_code != 200:
-            print(f"Błąd: {response.status_code}")
-            print(response.json())
+            logger.error(f"Błąd: {response.status_code}")
+            logger.info(response.json())
             break
+
+        logger.info(f"Got activities for {page=}")
 
         data = response.json()
         if not data:
@@ -35,7 +40,7 @@ def fetch_activities(access_token):
 
 def save_route(activity, access_token):
     if activity["type"] not in ("Walk", "Ride", "Run"):
-        print(activity["type"], "skipping")
+        logger.info(f"Skipping activity: {activity["type"]}")
         return
 
     url = (
@@ -44,6 +49,7 @@ def save_route(activity, access_token):
     headers = {"Authorization": f"Bearer { access_token }"}
     response = requests.get(url, headers=headers)
     route_json = response.json()
+    points = None
     for r in route_json:
         try:
             if r["type"] == "latlng":
@@ -54,6 +60,10 @@ def save_route(activity, access_token):
             print(route_json)
             raise e
 
+    if not points:
+        logger.error(f"Missing points.")
+        return
+
     try:
         route_data = StravaRoute(
             id=activity["id"],
@@ -61,14 +71,16 @@ def save_route(activity, access_token):
             type=activity["type"],
             name=activity["name"],
         )
-        collection.insert_one(route_data.dict())
-        print(f"Zapisano trasę {route_data.name} do MongoDB.")
+        collection.insert_one(route_data.model_dump())
+        logger.info(f"Zapisano trasę {route_data.name} do MongoDB.")
     except KeyError as e:
-        print(f"Błąd podczas przetwarzania aktywności: {e}")
+        logger.error(f"Błąd podczas przetwarzania aktywności: {e}")
 
 
 def main():
     access_token = ""
+    if not access_token:
+        raise Exception("Access token is required.")
 
     saved = list(collection.find({}, {"id": 1, "_id": 0}))
     saved = [s["id"] for s in saved]
@@ -76,10 +88,13 @@ def main():
     activities = fetch_activities(access_token)
     for activity in activities:
         if activity["id"] in saved:
-            print("Activity already saved.")
+            logger.info("Activity already saved.")
             continue
+
+        logger.info(f"Saving activities {activity['id']}")
         save_route(activity, access_token)
 
 
 if __name__ == "__main__":
+    logger.info("Starting main")
     main()
