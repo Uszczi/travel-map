@@ -22,4 +22,4 @@ jobs:
 
     - name: Copy files to VPS
       run: |
-        rsync -avz --delete ./ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/myapp/
+        rsync -e "ssh -p 20183" -avz --delete ./ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/myapp/
