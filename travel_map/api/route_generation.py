@@ -22,11 +22,6 @@ router = APIRouter()
 elevation_service = ElevationService()
 
 
-@router.get("/")
-def read_root():
-    return {"Hello": "World"}
-
-
 @router.get("/clear")
 def clear():
     graphs.clear()
