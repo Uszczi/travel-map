@@ -24,3 +24,4 @@ jobs:
     - name: Copy files to VPS
       run: |
         rsync -e "ssh -p ${{ secrets.VPS_PORT }}" -avz --delete ./ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/root/pp/travel-map/
+        cp /root/pp/.env.travel-map /root/pp/travel-map
