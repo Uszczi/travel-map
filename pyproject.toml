@@ -22,6 +22,19 @@ include = ["travel_map*"]
 
 [dependency-groups]
 dev = [
+    "black>=25.1.0",
+    "debugpy>=1.8.14",
+    "folium>=0.20.0",
+    "html2image>=2.0.7",
+    "imgkit>=1.2.3",
+    "matplotlib>=3.10.3",
+    "playwright>=1.54.0",
+    "pyqt5>=5.15.11",
+    "pytest-coverage>=0.0",
+    "pytest>=8.4.0",
+    "ruff>=0.11.13",
+    "scikit-learn>=1.7.0",
+    "ty>=0.0.1a9",
 ]
 
 [tool.pytest.ini_options]
