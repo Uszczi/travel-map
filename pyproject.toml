@@ -33,11 +33,13 @@ dev = [
     "playwright>=1.54.0",
     "pyqt5>=5.15.11",
     "pytest>=8.4.0",
+    "pytest-coverage>=0.0",
     "ty>=0.0.1a9",
 ]
 
 [tool.pytest.ini_options]
 addopts = [
     "-v",
-    "-s"
+    "-s",
+    "--cov=travel_map"
 ]
