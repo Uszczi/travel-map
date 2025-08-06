@@ -39,7 +39,3 @@ build/
 dist/
 *.egg-info/
 .eggs/
-
-# Ignoruj pliki konfiguracyjne lokalne
-.env
-*.env
