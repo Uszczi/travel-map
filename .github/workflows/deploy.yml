@@ -1,5 +1,8 @@
 name: Deploy to VPS
 
+deploy:
+    environment: mikrus
+
 on:
   push:
     branches:
