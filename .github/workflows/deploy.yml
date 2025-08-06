@@ -22,7 +22,6 @@ jobs:
         ssh-keyscan -p ${{ secrets.VPS_PORT }} ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
 
     - name: Copy files to VPS
+      working-directory: /root/p/travel-map
       run: |
-        cd /root/p/travel-map
         git pull
-        # rsync -e "ssh -p ${{ secrets.VPS_PORT }}" -avz --delete ./ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/root/pp/travel-map/
