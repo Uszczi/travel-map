@@ -9,6 +9,7 @@ services:
     command: "uv run --no-sync uvicorn travel_map.app:app --host 0.0.0.0 --port 8000"
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    env_file: .env
 
   mongodb:
     image: mongo
