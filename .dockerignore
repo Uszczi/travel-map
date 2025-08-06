@@ -1,5 +1,6 @@
 # Ignoruj pliki i katalogi związane z wersjonowaniem
-.git
+# TODO
+# .git
 .gitignore
 
 # Ignoruj pliki tymczasowe edytorów
