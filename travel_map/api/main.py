@@ -24,14 +24,14 @@ def get_version():
 @router.get("/version")
 def version():
     return {
-        "version": get_version()[:8],
+        "version": get_version()[:7],
     }
 
 
 @router.get("/info")
 def info():
     return {
-        "version": get_version()[:8],
+        "version": get_version()[:7],
         "start_time": start_time,
         "uptime_seconds": (datetime.datetime.utcnow() - start_time).total_seconds(),
     }
