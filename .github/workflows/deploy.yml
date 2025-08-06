@@ -1,8 +1,5 @@
 name: Deploy to VPS
 
-deploy:
-    environment: mikrus
-
 on:
   push:
     branches:
@@ -11,6 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: mikrus
 
     steps:
     - name: Checkout code
