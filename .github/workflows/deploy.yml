@@ -11,6 +11,9 @@ jobs:
     environment: mikrus
 
     steps:
+    - name: Set repo name as env
+      run: echo "REPO_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
+
     - name: Checkout code
       uses: actions/checkout@v4
 
@@ -23,9 +26,9 @@ jobs:
 
     - name: Copy files to VPS
       run: |
-        rsync -e "ssh -p ${{ secrets.VPS_PORT }}" -avz --delete ./ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/root/pp/travel-map/
+        rsync -e "ssh -p ${{ secrets.VPS_PORT }}" -avz --delete ./ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/root/pp/${{ env.REPO_NAME }}/
 
     - name: Restart service on VPS
       run: |
-        ssh -p ${{ secrets.VPS_PORT }} ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} 'cd /root/pp/travel-map && ./deployment/deploy.sh'
+        ssh -p ${{ secrets.VPS_PORT }} ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} 'cd /root/pp/${{ env.REPO_NAME }} && ./deployment/deploy.sh'
 
