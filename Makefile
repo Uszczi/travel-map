@@ -22,7 +22,11 @@ lint:
 		ty check"
 
 check:
-	TODO
+	docker compose run --rm --no-deps app sh -c "\
+		ruff check  . && \
+		ruff check --select I . && \
+		black --check .  && \
+		ty check"
 
 script-save-strava-routes:
 	docker compose run --rm app uv run python ./scripts/save_strava_routes.py
@@ -41,7 +45,10 @@ local_lint:
 	uv run ty check
 
 local_check:
-	TODO
+	uv run ruff check .
+	uv run ruff check --select I .
+	uv run black --check .
+	uv run ty check
 
 local_test:
 	uv run pytest
