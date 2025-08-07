@@ -9,6 +9,7 @@ dependencies = [
     "pydantic-settings>=2.9.1",
     "pymongo>=4.13.1",
     "uvicorn>=0.34.3",
+    "scikit-learn>=1.7.0",
 ]
 
 [tool.ruff]
@@ -33,7 +34,6 @@ dev = [
     "pytest-coverage>=0.0",
     "pytest>=8.4.0",
     "ruff>=0.11.13",
-    "scikit-learn>=1.7.0",
     "ty>=0.0.1a9",
 ]
 
