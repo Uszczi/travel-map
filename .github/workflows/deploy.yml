@@ -26,9 +26,9 @@ jobs:
 
     - name: Copy files to VPS
       run: |
-        rsync -e "ssh -p ${{ secrets.VPS_PORT }}" -avz --delete ./ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/root/pp/${{ env.REPO_NAME }}/
+        rsync -e "ssh -p ${{ secrets.VPS_PORT }}" -avz --delete ./ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/${{ secrets.VPS_USER }}/pp/${{ env.REPO_NAME }}/
 
     - name: Restart service on VPS
       run: |
-        ssh -p ${{ secrets.VPS_PORT }} ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} 'cd /root/pp/${{ env.REPO_NAME }} && ./deployment/deploy.sh'
+        ssh -p ${{ secrets.VPS_PORT }} ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} 'cd /${{ secrets.VPS_USER }}/pp/${{ env.REPO_NAME }} && ./deployment/deploy.sh'
 

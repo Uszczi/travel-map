@@ -1,6 +1,7 @@
 #!/bin/bash
 
-cp /root/pp/.env.travel-map ./.env
+DIRNAME=$(basename "$PWD")
+cp /root/pp/.env.$DIRNAME ./.env
 
 docker compose -f ./deployment/docker-compose.yml build
 docker compose -f ./deployment/docker-compose.yml up --detach
