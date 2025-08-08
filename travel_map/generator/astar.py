@@ -55,60 +55,51 @@ class AStarRoute(RouteGenerator):
         else:
             change_end_node = True
 
-        def to_route(current, came_from) -> list[int]:
-            path = [current]
-            while current in came_from:
-                current = came_from[current]
-                path.append(current)
+        def to_route(current_node, came_from) -> list[int]:
+            path = [current_node]
+            while current_node in came_from:
+                current_node = came_from[current_node]
+                path.append(current_node)
             return list(reversed(path))
 
         while open_set:
-            _, current = heapq.heappop(open_set)
-            previous_node = came_from.get(current)
+            _, current_node = heapq.heappop(open_set)
+            previous_node = came_from.get(current_node)
 
             if change_end_node:
-                neighbors = [n for n in self.graph.neighbors(current)]
+                neighbors = [n for n in self.graph.neighbors(current_node)]
                 second_neighbors = set()
                 for n in neighbors:
                     second_neighbors.update(self.graph.neighbors(n))
 
-                second_neighbors.discard(current)
+                second_neighbors.discard(current_node)
                 second_neighbors.difference_update(neighbors)
 
                 end_node = random.choice(list(second_neighbors))
 
-            if current == end_node:
-                return to_route(current, came_from)
+            if current_node == end_node:
+                return to_route(current_node, came_from)
 
-            if current == end_node and g_score[current] >= min_length:
-                return to_route(current, came_from)
+            if current_node == end_node and g_score[current_node] >= min_length:
+                return to_route(current_node, came_from)
 
-            if g_score[current] > min_length:
-                return to_route(current, came_from)
+            if g_score[current_node] > min_length:
+                return to_route(current_node, came_from)
 
-            neighbors = [n for n in self.graph.neighbors(current) if n != previous_node]
-
-            if prefer_new:
-                n_neighbors = [
-                    n
-                    for n in neighbors
-                    if (n, current) not in self.v_edges
-                    and (current, n) not in self.v_edges
-                ]
-
-                if n_neighbors:
-                    neighbors = n_neighbors
+            neighbors = self.get_neighbours_and_sort(
+                current_node, prefer_new, [previous_node] if previous_node else None
+            )
 
             for neighbor in neighbors:
-                tmp_g_score = g_score[current] + utils.get_distance_between(
-                    self.graph, current, neighbor
+                tmp_g_score = g_score[current_node] + utils.get_distance_between(
+                    self.graph, current_node, neighbor
                 )
 
                 if tmp_g_score > max_length:
                     continue
 
                 if neighbor not in g_score or tmp_g_score < g_score[neighbor]:
-                    came_from[neighbor] = current
+                    came_from[neighbor] = current_node
                     g_score[neighbor] = tmp_g_score
                     f_score = tmp_g_score + heuristic(self.graph, neighbor, end_node)
                     heapq.heappush(open_set, (f_score, neighbor))

@@ -1,4 +1,3 @@
-import random
 from dataclasses import dataclass
 
 import networkx as nx
@@ -41,17 +40,9 @@ class DfsRoute(RouteGenerator):
                 return
 
             previous_node = path[-2] if len(path) >= 2 else None
-            neighbors = [
-                n for n in self.graph.neighbors(current_node) if n != previous_node
-            ]
-            random.shuffle(neighbors)
-
-            if prefer_new:
-                neighbors.sort(
-                    key=lambda node: (current_node, node) not in self.v_edges
-                    and (node, current_node) not in self.v_edges,
-                    reverse=True,
-                )
+            neighbors = self.get_neighbours_and_sort(
+                current_node, prefer_new, [previous_node] if previous_node else None
+            )
 
             for neighbor in neighbors:
                 c_distance = utils.get_distance_between(

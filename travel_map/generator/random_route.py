@@ -1,4 +1,3 @@
-import random
 from dataclasses import dataclass
 
 import networkx as nx
@@ -31,26 +30,13 @@ class RandomRoute(RouteGenerator):
 
         while iterations < depth_limit:
             iterations += 1
-
-            neighbors = [
-                n for n in self.graph.neighbors(current_node) if n != previous_node
-            ]
+            neighbors = self.get_neighbours_and_sort(
+                current_node, prefer_new, [previous_node] if prefer_new else None
+            )
             if not neighbors:
                 next_node = previous_node
             else:
-                if prefer_new:
-                    n_neighbors = [
-                        n
-                        for n in neighbors
-                        if (current_node, n) not in self.v_edges
-                        and (n, current_node) not in self.v_edges
-                    ]
-                    if n_neighbors:
-                        next_node = random.choice(n_neighbors)
-                    else:
-                        next_node = random.choice(neighbors)
-                else:
-                    next_node = random.choice(neighbors)
+                next_node = neighbors[0]
 
             next_node = int(next_node)
             current_distance += utils.get_distance_between(

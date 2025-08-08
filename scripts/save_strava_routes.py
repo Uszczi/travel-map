@@ -61,7 +61,7 @@ def save_route(activity, access_token):
             raise e
 
     if not points:
-        logger.error(f"Missing points.")
+        logger.error("Missing points.")
         return
 
     try:

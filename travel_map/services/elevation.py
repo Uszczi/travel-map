@@ -1,6 +1,6 @@
 import requests
 
-from travel_map.utils import time_measure, time_measure_decorator
+from travel_map.utils import time_measure_decorator
 
 
 class ElevationService:

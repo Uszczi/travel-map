@@ -1,9 +1,10 @@
-from fastapi import APIRouter
-import subprocess
 import datetime
+import subprocess
+
+from fastapi import APIRouter
 
 router = APIRouter()
-start_time = datetime.datetime.utcnow()
+start_time = datetime.datetime.now(datetime.timezone.utc)
 
 
 @router.get("/")
@@ -33,5 +34,7 @@ def info():
     return {
         "version": get_version()[:7],
         "start_time": start_time,
-        "uptime_seconds": (datetime.datetime.utcnow() - start_time).total_seconds(),
+        "uptime_seconds": (
+            datetime.datetime.now(datetime.timezone.utc) - start_time
+        ).total_seconds(),
     }

@@ -1,5 +1,6 @@
 cache/
 .coverage/
+.coverage
 .ipynb_checkpoints
 tmp/
 .venv/

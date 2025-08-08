@@ -1,4 +1,5 @@
 import os
+import random
 from pathlib import Path
 
 import folium
@@ -55,3 +56,11 @@ def get_image_path(generator_class, time) -> Path:
     )
     os.makedirs(path, exist_ok=True)
     return path
+
+
+@pytest.fixture
+def temporary_seed():
+    state = random.getstate()
+    random.seed(1)
+    yield
+    random.setstate(state)
