@@ -31,7 +31,7 @@ class RandomRoute(RouteGenerator):
         while iterations < depth_limit:
             iterations += 1
             neighbors = self.get_neighbours_and_sort(
-                current_node, prefer_new, [previous_node] if prefer_new else None
+                current_node, prefer_new, [previous_node] if previous_node else None
             )
             if not neighbors:
                 next_node = previous_node
