@@ -10,6 +10,7 @@ dependencies = [
     "pymongo>=4.13.1",
     "uvicorn>=0.34.3",
     "scikit-learn>=1.7.0",
+    "gpxpy>=1.6.2",
 ]
 
 [tool.ruff]
