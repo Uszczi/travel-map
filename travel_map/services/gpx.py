@@ -20,7 +20,7 @@ class GPXService:
             lat, lon = p[0], p[1]
             ele = p[2] if len(p) > 2 else None
             gpx_segment.points.append(
-                gpxpy.gpx.GPXTrackPoint(lat, lon, elevation=ele, time=time)
+                gpxpy.gpx.GPXTrackPoint(lat, lon, elevation=ele, time=None)
             )
 
         return gpx
