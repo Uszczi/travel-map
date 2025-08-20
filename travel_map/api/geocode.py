@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
 from fastapi_cache import FastAPICache
 from fastapi_cache.decorator import cache
 
+from travel_map.limiter import NOMINATIM_LIMITER
 from travel_map.serializers.geocode import GeocodeItem, GeocodeResponse
 from travel_map.services.nominatim import (
     BadRequest,
@@ -69,7 +70,8 @@ async def geocode(
 
     if q:
         try:
-            items = await nominatim.search(q=q, limit=5)
+            async with NOMINATIM_LIMITER.slot():
+                items = await nominatim.search(q=q, limit=5)
         except BadRequest:
             raise HTTPException(status_code=400, detail="Query cannot be empty.")
         except FetchFailed:
@@ -88,7 +90,8 @@ async def geocode(
         )
 
     try:
-        reverse = await nominatim.reverse(lat=lat, lng=lng)
+        async with NOMINATIM_LIMITER.slot():
+            reverse = await nominatim.reverse(lat=lat, lng=lng)
     except NotFound as e:
         raise HTTPException(status_code=404, detail=str(e))
     except FetchFailed:
