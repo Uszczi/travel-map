@@ -33,17 +33,3 @@ class GeocodeItem(BaseModel):
 
 class GeocodeResponse(BaseModel):
     items: List[GeocodeItem]
-
-
-class ReverseResponse(BaseModel):
-    place_id: int
-    display_name: str
-    lat: float
-    lng: float
-    type: str
-    boundingbox: BoundingBox
-
-    @field_validator("boundingbox", mode="before")
-    @classmethod
-    def _bbox_from_list(cls, v):
-        return BoundingBox.from_nominatim(v)

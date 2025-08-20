@@ -1,6 +1,6 @@
 import httpx
 
-from travel_map.serializers.geocode import GeocodeItem, ReverseResponse
+from travel_map.serializers.geocode import GeocodeItem
 from travel_map.settings import settings
 
 
@@ -72,7 +72,7 @@ class NominatimService:
         ]
         return items
 
-    async def reverse(self, lat: float, lng: float) -> ReverseResponse:
+    async def reverse(self, lat: float, lng: float) -> GeocodeItem:
         params = {
             "format": "jsonv2",
             "lat": str(lat),
@@ -101,9 +101,9 @@ class NominatimService:
             )
             raise NotFound(msg)
 
-        return ReverseResponse(
-            place_id=raw["place_id"],
-            display_name=raw["display_name"],
+        return GeocodeItem(
+            id=raw["place_id"],
+            label=raw["display_name"],
             lat=raw["lat"],
             lng=raw["lon"],
             type=raw["type"],

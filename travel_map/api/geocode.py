@@ -2,10 +2,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
-from travel_map.serializers.geocode import (
-    GeocodeResponse,
-    ReverseResponse,
-)
+from travel_map.serializers.geocode import GeocodeResponse, GeocodeItem
 from travel_map.services.nominatim import (
     BadRequest,
     FetchFailed,
@@ -32,7 +29,7 @@ async def geocode(
         None, alias="lng", description="Longitude (reverse)"
     ),
     nominatim: NominatimService = Depends(get_nominatim_service),
-) -> GeocodeResponse | ReverseResponse:
+) -> GeocodeResponse | GeocodeItem:
     if q and (lat_param or lng_param):
         raise HTTPException(
             status_code=400,
