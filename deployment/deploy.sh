@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 DIRNAME=$(basename "$PWD")
 cp /root/pp/.env.$DIRNAME ./.env
 
