@@ -12,6 +12,7 @@ dependencies = [
     "scikit-learn>=1.7.0",
     "gpxpy>=1.6.2",
     "pytest-xdist>=3.8.0",
+    "httpx>=0.28.1",
 ]
 
 [tool.ruff]
