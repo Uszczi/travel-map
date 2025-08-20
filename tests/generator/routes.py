@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Any
 
 import folium as fl
+import networkx as nx
 import pytest
 from playwright.sync_api import sync_playwright
 
@@ -13,7 +14,7 @@ from travel_map.utils import (
     route_to_zip_x_y,
 )
 
-SAVE_TO_PNG = True
+SAVE_TO_PNG = False
 OPEN_IN_BROWSER = False
 
 start_time = None
@@ -29,7 +30,7 @@ def print_coverage(graph, v_edges):
 class Routes:
     generator_class: Any
 
-    NUMBER_OF_ROUTES: int = 12
+    NUMBER_OF_ROUTES: int = 10
     DISTANCE: int = 6_000
 
     @pytest.fixture(autouse=True)
@@ -45,7 +46,7 @@ class Routes:
     def show(
         self,
         m: fl.Map,
-        graph,
+        graph: nx.MultiDiGraph,
         routes: list[list[int]],
         request,
         start_node: int | None = None,
