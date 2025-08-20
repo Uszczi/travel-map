@@ -12,3 +12,5 @@ tmp/
 **/__pycache__/
 
 travel_map.egg-info/
+htmlcov/
+.pytest_cache/
