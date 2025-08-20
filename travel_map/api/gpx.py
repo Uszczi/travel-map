@@ -1,6 +1,7 @@
+import io
+
 from fastapi import APIRouter, Body
 from fastapi.responses import StreamingResponse
-import io
 
 from travel_map.services.gpx import GPXService
 
