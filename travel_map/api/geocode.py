@@ -1,8 +1,10 @@
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
+from fastapi_cache import FastAPICache
+from fastapi_cache.decorator import cache
 
-from travel_map.serializers.geocode import GeocodeResponse, GeocodeItem
+from travel_map.serializers.geocode import GeocodeItem, GeocodeResponse
 from travel_map.services.nominatim import (
     BadRequest,
     FetchFailed,
@@ -19,7 +21,31 @@ def get_nominatim_service() -> NominatimService:
     return NominatimService()
 
 
+CACHE_TIME = 60 * 60 * 24 * 7
+
+
+def request_key_builder(
+    func,
+    namespace: str,
+    request: Request,
+    response: Response | None = None,
+    *args,
+    **kwargs,
+):
+    prefix = FastAPICache.get_prefix()
+    return ":".join(
+        [
+            prefix,
+            namespace or "geocode",
+            request.method.lower(),
+            request.url.path,
+            repr(sorted(request.query_params.items())),
+        ]
+    )
+
+
 @router.get("/geocode")
+@cache(CACHE_TIME, key_builder=request_key_builder)
 async def geocode(
     q: Optional[str] = Query(None, description="Search query (search)"),
     lat_param: Optional[str] = Query(

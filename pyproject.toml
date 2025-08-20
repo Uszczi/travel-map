@@ -13,6 +13,8 @@ dependencies = [
     "gpxpy>=1.6.2",
     "pytest-xdist>=3.8.0",
     "httpx>=0.28.1",
+    "redis>=6.4.0",
+    "fastapi-cache2>=0.2.2",
 ]
 
 [tool.ruff]
