@@ -7,7 +7,7 @@ WORKDIR /app
 COPY pyproject.toml .
 
 RUN uv sync
-RUN uv run playwright install && uv run playwright install-deps
+# RUN uv run playwright install && uv run playwright install-deps
 
 COPY . .
 RUN uv pip install -e .
