@@ -49,3 +49,6 @@ addopts = [
     "-s",
     "--cov=travel_map"
 ]
+
+[tool.uv]
+package = true

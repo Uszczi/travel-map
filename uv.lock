@@ -1306,7 +1306,7 @@ wheels = [
 [[package]]
 name = "travel-map"
 version = "0.0.1"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "aiolimiter" },
     { name = "fastapi" },
