@@ -3,6 +3,7 @@ from fastapi import APIRouter
 from loguru import logger
 from pydantic import BaseModel
 
+import osmnx as ox
 from travel_map.db import strava_db
 from travel_map.models import StravaRoute
 from travel_map.utils import ROOT_PATH, get_graph_distance
@@ -23,22 +24,30 @@ def get_strava_routes() -> list[StravaRoute]:
     return result
 
 
+class MarkAsVisitedResponse(BaseModel):
+    graph_distance: int
+    visited_routes_distance: int
+    visited_percent: float
+
+
 @router.get("/mark-as-visited")
-def mark_as_visited() -> str:
+def mark_as_visited() -> MarkAsVisitedResponse:
     G = common.get_or_create_graph()
 
     collection = strava_db["routes"]
     routes = collection.find()
     result = [StravaRoute(**route) for route in routes]  # type: ignore[missing-argument]
     for strava_route in result:
-        logger.info(f"{strava_route.id}")
-        route = strava_route_to_nodes(G, strava_route)
-        visited_edges.mark_edges_visited(route)
+        visited_edges.mark_edges_visited(strava_route.nodes)
 
     graph_distance = get_graph_distance(G)
     visited_routes_distance = visited_edges.get_visited_distance(G)
 
-    return f"{visited_routes_distance / graph_distance * 100:.2f}"
+    return MarkAsVisitedResponse(
+        graph_distance=int(graph_distance),
+        visited_routes_distance=int(visited_routes_distance),
+        visited_percent=float(f"{visited_routes_distance / graph_distance * 100:.2f}"),
+    )
 
 
 class InitDataResponse(BaseModel):
@@ -49,6 +58,7 @@ class InitDataResponse(BaseModel):
 
 @router.get("/init-data")
 def load_init_data() -> InitDataResponse:
+    G = common.get_or_create_graph()
     collection = strava_db["routes"]
 
     saved_ids = {doc["id"] for doc in collection.find({}, {"id": 1, "_id": 0})}
@@ -59,6 +69,7 @@ def load_init_data() -> InitDataResponse:
 
     for path in sorted(INIT_DATA_PATH.glob("*.gpx")):
         file_id = int(path.stem)
+        logger.info(f"Processing {file_id}.")
 
         if file_id in saved_ids:
             already_saved.append(file_id)
@@ -88,23 +99,25 @@ def load_init_data() -> InitDataResponse:
             else:
                 raise ValueError("No tracks or routes found in GPX")
 
-            xy: list[tuple[float, float]] = []
+            x: list[float] = []
+            y: list[float] = []
             prev = None
             for lon, lat in points:
                 pair = (lon, lat)
                 if pair != prev:
-                    xy.append(pair)
+                    x.append(lon)
+                    y.append(lat)
                     prev = pair
 
-            if not xy:
+            if not x or not y:
                 raise ValueError("No coordinate points extracted from GPX")
 
-            doc = StravaRoute(
-                id=file_id,
-                xy=xy,  # (x=lon, y=lat)
-                type="gpx",
-                name=name,
-            )
+            nodes = []
+            for _x, _y in zip(x, y):
+                nodes.append(ox.nearest_nodes(G, _x, _y))
+            nodes = list(dict.fromkeys(nodes))
+
+            doc = StravaRoute(id=file_id, x=x, y=y, type="gpx", name=name, nodes=nodes)
             collection.insert_one(doc.model_dump())
             inserted.append(file_id)
 

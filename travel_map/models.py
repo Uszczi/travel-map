@@ -36,6 +36,10 @@ class Route(BaseModel):
 
 class StravaRoute(BaseModel):
     id: int
-    xy: list[tuple[float, float]]
+    x: list[float]
+    y: list[float]
     type: str
     name: str
+
+    ### Check if for every graph node id is the same
+    nodes: list[int]
