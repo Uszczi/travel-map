@@ -71,5 +71,5 @@ visited_edges = VisitedEdges[tuple[int, int]]()
 def strava_route_to_nodes(
     graph: nx.MultiDiGraph, strava_route: StravaRoute
 ) -> list[int]:
-    nodes = [ox.nearest_nodes(graph, x, y) for y, x in strava_route.xy]
+    nodes = [ox.nearest_nodes(graph, x, y) for x, y in strava_route.xy]
     return nodes

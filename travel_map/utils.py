@@ -1,8 +1,11 @@
 import time
 from contextlib import contextmanager
+from pathlib import Path
 
 from loguru import logger
 from networkx import MultiDiGraph
+
+ROOT_PATH = Path(__file__).parent.parent
 
 
 @contextmanager
