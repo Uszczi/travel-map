@@ -1,13 +1,13 @@
 import gpxpy
+import osmnx as ox
 from fastapi import APIRouter
 from loguru import logger
 from pydantic import BaseModel
 
-import osmnx as ox
 from travel_map.db import strava_db
 from travel_map.models import StravaRoute
 from travel_map.utils import ROOT_PATH, get_graph_distance
-from travel_map.visited_edges import strava_route_to_nodes, visited_edges
+from travel_map.visited_edges import visited_edges
 
 from . import common
 

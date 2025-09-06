@@ -2,8 +2,6 @@ import requests
 from loguru import logger
 from pymongo import MongoClient
 
-from travel_map.models import StravaRoute
-
 client = MongoClient("mongodb://mongodb:27017/")
 db = client["strava_db"]
 collection = db["routes"]
@@ -64,17 +62,18 @@ def save_route(activity, access_token):
         logger.error("Missing points.")
         return
 
-    try:
-        route_data = StravaRoute(
-            id=activity["id"],
-            xy=points,
-            type=activity["type"],
-            name=activity["name"],
-        )
-        collection.insert_one(route_data.model_dump())
-        logger.info(f"Zapisano trasę {route_data.name} do MongoDB.")
-    except KeyError as e:
-        logger.error(f"Błąd podczas przetwarzania aktywności: {e}")
+    # TODO fix
+    # try:
+    #     route_data = StravaRoute(
+    #         id=activity["id"],
+    #         xy=points,
+    #         type=activity["type"],
+    #         name=activity["name"],
+    #     )
+    #     collection.insert_one(route_data.model_dump())
+    #     logger.info(f"Zapisano trasę {route_data.name} do MongoDB.")
+    # except KeyError as e:
+    #     logger.error(f"Błąd podczas przetwarzania aktywności: {e}")
 
 
 def main():

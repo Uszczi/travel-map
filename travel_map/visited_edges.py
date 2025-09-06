@@ -1,9 +1,8 @@
 from typing import Generic, Iterator, TypeVar
 
 import networkx as nx
-import osmnx as ox
 
-from travel_map.models import Segment, StravaRoute
+from travel_map.models import Segment
 from travel_map.utils import get_distance_between
 
 K = TypeVar("K")
@@ -65,11 +64,3 @@ class VisitedEdges(Generic[K]):
 
 # For more users it has to be refactored
 visited_edges = VisitedEdges[tuple[int, int]]()
-
-
-# Why is it here?
-def strava_route_to_nodes(
-    graph: nx.MultiDiGraph, strava_route: StravaRoute
-) -> list[int]:
-    nodes = [ox.nearest_nodes(graph, x, y) for x, y in strava_route.xy]
-    return nodes
