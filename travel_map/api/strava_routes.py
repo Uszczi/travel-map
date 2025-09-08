@@ -60,6 +60,7 @@ class InitDataResponse(BaseModel):
 def load_init_data() -> InitDataResponse:
     G = common.get_or_create_graph()
     collection = strava_db["routes"]
+    collection.delete_many({})
 
     saved_ids = {doc["id"] for doc in collection.find({}, {"id": 1, "_id": 0})}
 
@@ -112,12 +113,31 @@ def load_init_data() -> InitDataResponse:
             if not x or not y:
                 raise ValueError("No coordinate points extracted from GPX")
 
-            nodes = []
-            for _x, _y in zip(x, y):
-                nodes.append(ox.nearest_nodes(G, _x, _y))
+            nodes = ox.nearest_nodes(G, x, y)
             nodes = list(dict.fromkeys(nodes))
 
-            doc = StravaRoute(id=file_id, x=x, y=y, type="gpx", name=name, nodes=nodes)
+            filtered_nodes = []
+            _nodes = nodes[:]
+            current_node = _nodes.pop(0)
+            next_node = _nodes.pop(0)
+            while _nodes:
+                if G.get_edge_data(current_node, next_node):
+                    filtered_nodes.append(current_node)
+                    filtered_nodes.append(next_node)
+                    current_node = next_node
+                    if _nodes:
+                        next_node = _nodes.pop(0)
+                else:
+                    # TODO
+                    # Move tail few time (50?) until it finds edge otherwise move head
+                    current_node = next_node
+                    if _nodes:
+                        next_node = _nodes.pop(0)
+                    continue
+
+            doc = StravaRoute(
+                id=file_id, x=x, y=y, type="gpx", name=name, nodes=filtered_nodes
+            )
             collection.insert_one(doc.model_dump())
             inserted.append(file_id)
 

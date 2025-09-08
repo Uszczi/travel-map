@@ -86,24 +86,36 @@ def route(
 
 
 @router.get("/visited-routes")
-def get_visited_routes(
-    start_x: float = DEFAULT_START_X,
-    start_y: float = DEFAULT_START_Y,
-) -> list[list[tuple[float, float]]]:
-    G = get_or_create_graph(start_x, start_y)
+def get_visited_edges() -> list[list[tuple[float, float]]]:
+    G = get_or_create_graph()
     result = []
 
     for u, v in visited_edges:
-        data = min(G.get_edge_data(u, v).values(), key=lambda d: d["length"])
-        if "geometry" in data:
-            xs, ys = data["geometry"].xy
-            result.append([[y, x] for (x, y) in zip(xs, ys)])
-        else:
-            result.append(
-                [
-                    [G.nodes[u]["y"], G.nodes[u]["x"]],
-                    [G.nodes[v]["y"], G.nodes[v]["x"]],
-                ]
-            )
+        # TODO remove this try, init-data logic for parsing route needs update
+        try:
+            data = min(G.get_edge_data(u, v).values(), key=lambda d: d["length"])
+            if "geometry" in data:
+                xs, ys = data["geometry"].xy
+                result.append([[y, x] for (x, y) in zip(xs, ys)])
+            else:
+                result.append(
+                    [
+                        [G.nodes[u]["y"], G.nodes[u]["x"]],
+                        [G.nodes[v]["y"], G.nodes[v]["x"]],
+                    ]
+                )
+        except Exception:
+            ...
+    return result
+
+
+@router.get("/visited-edges-as-points")
+def get_visited_edges_as_points() -> list[tuple[float, float]]:
+    G = get_or_create_graph()
+    result = []
+
+    for u, v in visited_edges:
+        result.append((G.nodes[u]["y"], G.nodes[u]["x"]))
+        result.append((G.nodes[v]["y"], G.nodes[v]["x"]))
 
     return result
