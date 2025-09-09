@@ -19,7 +19,12 @@ class DummyGenerator(RouteGenerator):
 @pytest.fixture()
 def mark_edges_visited(v_edges):
     v_edges.add((0, 1))
+    v_edges.add((0, 1))
+    v_edges.add((0, 1))
+
     v_edges.add((0, 3))
+    v_edges.add((0, 3))
+
     v_edges.add((6, 0))
 
 
@@ -45,5 +50,21 @@ def generator(graph, v_edges):
 @pytest.mark.usefixtures("temporary_seed", "mark_edges_visited")
 def test_sort(generator, node, neighbors, prefer_new, expected):
     result = generator.sort(neighbors, node, prefer_new)
+
+    assert result == expected, result
+
+
+@pytest.mark.parametrize(
+    "node, neighbors, expected",
+    (
+        (0, [], []),
+        (0, [1, 2, 3, 4, 5, 6], [4, 5, 2, 6, 3, 1]),
+        (0, [6, 5, 4, 3, 2, 1], [4, 2, 5, 6, 3, 1]),
+        (0, [1, 5, 6, 3, 4, 2], [2, 4, 5, 6, 3, 1]),
+    ),
+)
+@pytest.mark.usefixtures("temporary_seed", "mark_edges_visited")
+def test_sort_by_occurrance(generator, node, neighbors, expected):
+    result = generator.sort_by_occurrance(neighbors, node)
 
     assert result == expected, result
