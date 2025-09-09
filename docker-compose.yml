@@ -7,6 +7,7 @@ services:
       - "8000:8000"
     volumes:
       - .:/app
+      - playwright-cache:/ms-playwright
     entrypoint: "uv run"
     command: "uvicorn travel_map.app:app --host 0.0.0.0 --port 8000 --reload"
     extra_hosts:
@@ -29,4 +30,4 @@ services:
 
 volumes:
   redis-data:
-
+  playwright-cache:

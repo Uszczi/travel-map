@@ -55,7 +55,25 @@ class RouteGenerator(ABC):
         )
         return n
 
+    def sort_by_occurrance(self, neighbors: list[int], current_node: int) -> list[int]:
+        n = neighbors.copy()
+        random.shuffle(n)
+
+        def _sort(node: int):
+            if (current_node, node) in self.v_edges:
+                v = self.v_edges[current_node, node]
+            elif (node, current_node) in self.v_edges:
+                v = self.v_edges[node, current_node]
+            else:
+                v = 0
+
+            return v
+
+        n.sort(key=_sort)
+        return n
+
     def get_neighbours_and_sort(self, current_node, prefer_new, exclude):
         neighbors = self.get_neighbours(current_node, exclude)
-        neighbors = self.sort(neighbors, current_node, prefer_new)
+        neighbors = self.sort_by_occurrance(neighbors, current_node)
+        # neighbors = self.sort(neighbors, current_node, prefer_new)
         return neighbors

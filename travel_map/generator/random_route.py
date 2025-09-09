@@ -17,9 +17,9 @@ class RandomRoute(RouteGenerator):
         start_node: int,
         end_node: int | None,
         distance: int,
-        tolerance: float = 0.15,
+        tolerance: float = 0.20,
         prefer_new: bool = False,
-        depth_limit: int = 10_000_000,
+        depth_limit: int = 1_000_000,
     ) -> list[int]:
         route = [start_node]
         current_distance = 0
@@ -61,4 +61,4 @@ class RandomRoute(RouteGenerator):
                 if current_distance > min_length:
                     return route
 
-        raise Exception("Couldn't generate random route.")
+        return []
