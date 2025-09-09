@@ -43,6 +43,7 @@ class AStarRoute(RouteGenerator):
         distance: int,
         tolerance: float = 0.30,
         prefer_new: bool = False,
+        prefer_new_v2: bool = False,
         depth_limit: int = 0,
     ) -> list[int]:
         min_length, max_length = self.calculate_min_max_length(tolerance, distance)

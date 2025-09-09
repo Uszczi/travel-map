@@ -19,6 +19,7 @@ class RandomRoute(RouteGenerator):
         distance: int,
         tolerance: float = 0.20,
         prefer_new: bool = False,
+        prefer_new_v2: bool = False,
         depth_limit: int = 1_000_000,
     ) -> list[int]:
         route = [start_node]

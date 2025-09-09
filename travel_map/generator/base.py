@@ -20,8 +20,10 @@ class RouteGenerator(ABC):
         distance: int,
         tolerance: float = 0.15,
         prefer_new: bool = False,
+        prefer_new_v2: bool = False,
         depth_limit: int = 100,
-    ) -> list[int]: ...
+    ) -> list[int]:
+        ...
 
     def calculate_min_max_length(self, tolerance, distance) -> tuple[float, float]:
         min_length = distance * (1 - tolerance)
@@ -72,8 +74,10 @@ class RouteGenerator(ABC):
         n.sort(key=_sort)
         return n
 
-    def get_neighbours_and_sort(self, current_node, prefer_new, exclude):
+    def get_neighbours_and_sort(self, current_node, prefer_new, exclude, v2):
         neighbors = self.get_neighbours(current_node, exclude)
-        neighbors = self.sort_by_occurrance(neighbors, current_node)
-        # neighbors = self.sort(neighbors, current_node, prefer_new)
+        if v2:
+            neighbors = self.sort_by_occurrance(neighbors, current_node)
+        else:
+            neighbors = self.sort(neighbors, current_node, prefer_new)
         return neighbors

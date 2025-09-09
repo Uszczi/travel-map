@@ -19,6 +19,7 @@ class DfsRoute(RouteGenerator):
         distance: int,
         tolerance: float = 0.15,
         prefer_new: bool = False,
+        prefer_new_v2: bool = False,
         depth_limit: int = 100,
     ) -> list[int]:
         min_length, max_length = self.calculate_min_max_length(tolerance, distance)
@@ -41,7 +42,10 @@ class DfsRoute(RouteGenerator):
 
             previous_node = path[-2] if len(path) >= 2 else None
             neighbors = self.get_neighbours_and_sort(
-                current_node, prefer_new, [previous_node] if previous_node else None
+                current_node,
+                prefer_new,
+                [previous_node] if previous_node else None,
+                v2=prefer_new_v2,
             )
 
             for neighbor in neighbors:

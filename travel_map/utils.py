@@ -40,7 +40,12 @@ def route_to_x_y(
     y = []
     for u, v in zip(route[:-1], route[1:]):
         # if there are parallel edges, select the shortest in length
-        data = min(graph.get_edge_data(u, v).values(), key=lambda d: d["length"])
+        # TODO remove try
+        try:
+            data = min(graph.get_edge_data(u, v).values(), key=lambda d: d["length"])
+        except Exception:
+            continue
+
         if "geometry" in data:
             # if geometry attribute exists, add all its coords to list
             xs, ys = data["geometry"].xy

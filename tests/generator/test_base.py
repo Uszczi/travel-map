@@ -11,6 +11,7 @@ class DummyGenerator(RouteGenerator):
         distance: int,
         tolerance: float = 0.15,
         prefer_new: bool = False,
+        prefer_new_v2: bool = False,
         depth_limit: int = 100,
     ) -> list[int]:
         return []
