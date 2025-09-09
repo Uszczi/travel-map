@@ -35,6 +35,7 @@ def print_coverage(graph, v_edges):
 
 class Routes:
     generator_class: Any
+    use_end_node: bool = True
 
     NUMBER_OF_ROUTES: int = 10
     DISTANCE: int = 6_000
@@ -174,7 +175,7 @@ class Routes:
         for _ in range(self.NUMBER_OF_ROUTES):
             route = generator.generate(
                 start_node=start_node,
-                end_node=end_node,
+                end_node=end_node if self.use_end_node else None,
                 distance=self.DISTANCE,
                 prefer_new=True,
             )
@@ -204,7 +205,7 @@ class Routes:
         for _ in range(self.NUMBER_OF_ROUTES):
             route = generator.generate(
                 start_node=start_node,
-                end_node=end_node,
+                end_node=end_node if self.use_end_node else None,
                 distance=self.DISTANCE,
                 prefer_new=True,
                 prefer_new_v2=True,

@@ -88,7 +88,10 @@ class AStarRoute(RouteGenerator):
                 return to_route(current_node, came_from)
 
             neighbors = self.get_neighbours_and_sort(
-                current_node, prefer_new, [previous_node] if previous_node else None
+                current_node,
+                prefer_new,
+                [previous_node] if previous_node else None,
+                v2=prefer_new_v2,
             )
 
             for neighbor in neighbors:
