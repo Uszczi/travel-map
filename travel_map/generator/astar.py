@@ -94,6 +94,9 @@ class AStarRoute(RouteGenerator):
                 v2=prefer_new_v2,
             )
 
+            if prefer_new_v2:
+                neighbors = neighbors[:2]
+
             for neighbor in neighbors:
                 tmp_g_score = g_score[current_node] + utils.get_distance_between(
                     self.graph, current_node, neighbor
