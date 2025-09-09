@@ -13,7 +13,6 @@ fg_run:
 test:
 	docker compose run --rm app pytest
 
-
 lint:
 	docker compose run --rm --no-deps app sh -c "\
 		ruff check --fix . && \
@@ -27,6 +26,9 @@ check:
 		ruff check --select I . && \
 		black --check .  && \
 		ty check"
+
+clean:
+	rm -rf tmp .pytest_cache .ruff_cache
 
 script-save-strava-routes:
 	docker compose run --rm app uv run python ./scripts/save_strava_routes.py
