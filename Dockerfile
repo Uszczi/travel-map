@@ -15,7 +15,7 @@ RUN uv run playwright install --with-deps chromium
 ARG UID=1000
 ARG GID=1000
 RUN groupadd -g $GID app && useradd -m -u $UID -g $GID app
-RUN mkdir -p /ms-playwright && chown -R $UID:$GID /ms-playwright /app
+RUN chown -R app:app /app
 USER app
 
 COPY . .
