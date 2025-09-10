@@ -23,6 +23,8 @@ class DfsRoute(RouteGenerator):
         depth_limit: int = 100,
         ignored_edges: list[tuple[int, int]] | None = None,
     ) -> list[int]:
+        ignored_edges = ignored_edges or []
+
         min_length, max_length = self.calculate_min_max_length(tolerance, distance)
         result = None
 
@@ -47,6 +49,7 @@ class DfsRoute(RouteGenerator):
                 prefer_new,
                 [previous_node] if previous_node else None,
                 v2=prefer_new_v2,
+                ignored_edges=ignored_edges,
             )
 
             for neighbor in neighbors:

@@ -23,11 +23,13 @@ SAVE_TO_PNG = False
 SAVE_TO_HTML = True or SAVE_TO_PNG
 OPEN_IN_BROWSER = False
 
+
 P = (1177493762, 1177493777)  # "Środek Piotrkowskiej"
 L = (1177493766, 1177493886)  # "Odnoga na początku Lubelskiej"
 W = (2131056242, 2131056249)  # "Wysoka"
-IGNORED_EDGES = (P, L, W)
-
+WCZ = (1177493568, 1177493621)  # Wczasowa
+J = (1177493669, 1177493724)  # Jagiełły
+J2 = (1177493724, 1177493775)  # Jagiełły 2
 
 start_time = None
 
@@ -45,6 +47,7 @@ class Routes:
 
     NUMBER_OF_ROUTES: int = 10
     DISTANCE: int = 6_000
+    IGNORED_EDGES = (P, L, W, WCZ, J, J2)
 
     @pytest.fixture(autouse=True)
     def init(self) -> None:
@@ -65,9 +68,14 @@ class Routes:
         start_node: int | None = None,
         end_node: int | None = None,
         paths: list[list[int]] | None = None,
+        ignored_edges: list[tuple[int, int]] | None = None,
     ):
         # if not isinstance(routes[0], int):
         #     routes = [routes]
+
+        for edge in ignored_edges or []:
+            x_y = route_to_zip_x_y(graph, [edge[0], edge[1]], reversed=True)
+            fl.PolyLine(x_y, color="red").add_to(m)
 
         for path in paths or []:
             x_y = route_to_zip_x_y(graph, path, reversed=True)
@@ -175,9 +183,6 @@ class Routes:
         generator,
         request,
     ):
-        paths = self.load_init_data(graph, v_edges)
-        print_coverage(graph, v_edges)
-
         routes = []
         for _ in range(self.NUMBER_OF_ROUTES):
             route = generator.generate(
@@ -185,7 +190,7 @@ class Routes:
                 end_node=end_node if self.use_end_node else None,
                 distance=self.DISTANCE,
                 prefer_new=True,
-                ignored_edges=IGNORED_EDGES,
+                ignored_edges=self.IGNORED_EDGES,
             )
             if route:
                 v_edges.mark_edges_visited(route)
@@ -194,4 +199,6 @@ class Routes:
                 print("Generating route failed.")
 
         print_coverage(graph, v_edges)
-        self.show(fm, graph, routes, request, start_node, end_node, paths)
+        self.show(
+            fm, graph, routes, request, start_node, end_node, [], self.IGNORED_EDGES
+        )

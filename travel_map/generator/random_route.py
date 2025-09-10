@@ -23,6 +23,8 @@ class RandomRoute(RouteGenerator):
         depth_limit: int = 1_000_000,
         ignored_edges: list[tuple[int, int]] | None = None,
     ) -> list[int]:
+        ignored_edges = ignored_edges or []
+
         route = [start_node]
         current_distance = 0
         iterations = 0
@@ -37,7 +39,9 @@ class RandomRoute(RouteGenerator):
                 prefer_new,
                 [previous_node] if previous_node else None,
                 v2=prefer_new_v2,
+                ignored_edges=ignored_edges,
             )
+
             if not neighbors:
                 next_node = previous_node
             else:

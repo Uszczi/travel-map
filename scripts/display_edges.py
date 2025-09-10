@@ -9,11 +9,17 @@ from travel_map.api.common import get_or_create_graph
 P = (1177493762, 1177493777)  # "Środek Piotrkowskiej"
 L = (1177493766, 1177493886)  # "Odnoga na początku Lubelskiej"
 W = (2131056242, 2131056249)  # "Wysoka"
+WCZ = (1177493568, 1177493621)  # Wczasowa
+J = (1177493669, 1177493724)  # Jagiełły
+J2 = (1177493724, 1177493775)  # Jagiełły 2
 
 SELECTED = [
     ("Piotrkowska", P),
     ("Lubelska", L),
     ("Wysoka", W),
+    ("WCZ", WCZ),
+    ("J", J),
+    ("J2", J2),
 ]
 
 G = get_or_create_graph()
@@ -54,20 +60,12 @@ fig, ax = ox.plot_graph(
     # bgcolor="white",
 )
 
-color_for = {
-    "Piotrkowska": "tab:red",
-    "Lubelska": "tab:red",
-    "Wysoka": "tab:red",
-}
-
 highlight_handles = []
 for name, (u, v) in SELECTED:
     edges = edges_between_with_geom(G, u, v)
 
     for uu, vv, k, geom, data in edges:
         xs, ys = geom.xy
-        (h,) = ax.plot(
-            xs, ys, linewidth=3.0, alpha=0.95, color=color_for[name], label=name
-        )
+        (h,) = ax.plot(xs, ys, linewidth=3.0, alpha=0.95, color="red", label=name)
 
 plt.show()

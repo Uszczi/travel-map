@@ -47,6 +47,8 @@ class AStarRoute(RouteGenerator):
         depth_limit: int = 0,
         ignored_edges: list[tuple[int, int]] | None = None,
     ) -> list[int]:
+        ignored_edges = ignored_edges or []
+
         min_length, max_length = self.calculate_min_max_length(tolerance, distance)
         open_set = [(0.0, start_node)]
         came_from = {}
@@ -93,6 +95,7 @@ class AStarRoute(RouteGenerator):
                 prefer_new,
                 [previous_node] if previous_node else None,
                 v2=prefer_new_v2,
+                ignored_edges=ignored_edges,
             )
 
             if prefer_new_v2:

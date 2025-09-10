@@ -74,10 +74,21 @@ class RouteGenerator(ABC):
         n.sort(key=_sort)
         return n
 
-    def get_neighbours_and_sort(self, current_node, prefer_new, exclude, v2):
+    def get_neighbours_and_sort(
+        self, current_node, prefer_new, exclude, v2, ignored_edges
+    ):
         neighbors = self.get_neighbours(current_node, exclude)
         if v2:
             neighbors = self.sort_by_occurrance(neighbors, current_node)
         else:
             neighbors = self.sort(neighbors, current_node, prefer_new)
+
+        neighbors = list(
+            filter(
+                lambda node: (node, current_node) not in ignored_edges
+                and (current_node, node) not in ignored_edges,
+                neighbors,
+            )
+        )
+
         return neighbors
