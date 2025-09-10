@@ -20,7 +20,7 @@ from travel_map.utils import (
 
 INIT_DATA_PATH = ROOT_PATH / "init_data"
 
-SAVE_TO_PNG = True
+SAVE_TO_PNG = False
 OPEN_IN_BROWSER = False
 
 start_time = None
