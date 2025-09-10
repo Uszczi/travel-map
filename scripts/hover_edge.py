@@ -1,6 +1,6 @@
-import osmnx as ox
 import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
+
 from travel_map.api.common import get_or_create_graph
 
 
@@ -116,7 +116,6 @@ def plot_graph_with_hover(G, figsize=(10, 10), pickradius=5):
 
     fig.canvas.mpl_connect("motion_notify_event", on_move)
     return fig, ax
-
 
 
 G = get_or_create_graph()

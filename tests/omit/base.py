@@ -20,7 +20,14 @@ from travel_map.utils import (
 INIT_DATA_PATH = ROOT_PATH / "init_data"
 
 SAVE_TO_PNG = False
+SAVE_TO_HTML = True or SAVE_TO_PNG
 OPEN_IN_BROWSER = False
+
+P = (1177493762, 1177493777)  # "Środek Piotrkowskiej"
+L = (1177493766, 1177493886)  # "Odnoga na początku Lubelskiej"
+W = (2131056242, 2131056249)  # "Wysoka"
+IGNORED_EDGES = (P, L, W)
+
 
 start_time = None
 
@@ -81,22 +88,23 @@ class Routes:
                 icon=fl.Icon(color="red"),
             ).add_to(m)
 
-        if SAVE_TO_PNG:
+        if SAVE_TO_HTML:
             name = request.node.originalname
             path = get_image_path(self, start_time) / name
             path = str(path)
             html_path = f"{path}.html"
-            png_path = f"{path}.png"
             m.save(html_path)
 
-            with sync_playwright() as p:
-                browser = p.chromium.launch()
-                page = browser.new_page()
-                page.goto(f"file://{html_path}")
-                # TODO
-                page.wait_for_timeout(1000)
-                page.screenshot(path=png_path, full_page=True)
-                browser.close()
+            if SAVE_TO_PNG:
+                png_path = f"{path}.png"
+                with sync_playwright() as p:
+                    browser = p.chromium.launch()
+                    page = browser.new_page()
+                    page.goto(f"file://{html_path}")
+                    # TODO
+                    page.wait_for_timeout(1000)
+                    page.screenshot(path=png_path, full_page=True)
+                    browser.close()
 
         if OPEN_IN_BROWSER:
             m.show_in_browser()
@@ -157,7 +165,7 @@ class Routes:
 
         return paths
 
-    def test_basic(
+    def test_omit(
         self,
         graph,
         fm,
@@ -177,37 +185,7 @@ class Routes:
                 end_node=end_node if self.use_end_node else None,
                 distance=self.DISTANCE,
                 prefer_new=True,
-            )
-            if route:
-                v_edges.mark_edges_visited(route)
-                routes.append(route)
-            else:
-                print("Generating route failed.")
-
-        print_coverage(graph, v_edges)
-        self.show(fm, graph, routes, request, start_node, end_node, paths)
-
-    def test_prefer_new_v2(
-        self,
-        graph,
-        fm,
-        start_node,
-        end_node,
-        v_edges,
-        generator,
-        request,
-    ):
-        paths = self.load_init_data(graph, v_edges)
-        print_coverage(graph, v_edges)
-
-        routes = []
-        for _ in range(self.NUMBER_OF_ROUTES):
-            route = generator.generate(
-                start_node=start_node,
-                end_node=end_node if self.use_end_node else None,
-                distance=self.DISTANCE,
-                prefer_new=True,
-                prefer_new_v2=True,
+                ignored_edges=IGNORED_EDGES,
             )
             if route:
                 v_edges.mark_edges_visited(route)

@@ -21,6 +21,7 @@ class RandomRoute(RouteGenerator):
         prefer_new: bool = False,
         prefer_new_v2: bool = False,
         depth_limit: int = 1_000_000,
+        ignored_edges: list[tuple[int, int]] | None = None,
     ) -> list[int]:
         route = [start_node]
         current_distance = 0
