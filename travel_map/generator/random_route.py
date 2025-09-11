@@ -12,9 +12,8 @@ class RandomRoute(RouteGenerator):
     graph: nx.MultiDiGraph
     v_edges: VisitedEdges
 
-    # proste limity dla pojedynczego segmentu
-    SEG_MAX_STEPS: int = 10_000  # maks. kroków losowych na segment
-    SEG_RESTARTS: int = 1000  # ile restartów segmentu, zanim uznamy porażkę
+    SEG_MAX_STEPS: int = 300
+    SEG_RESTARTS: int = 1000_0000_00
 
     def _random_segment(
         self,
@@ -44,34 +43,24 @@ class RandomRoute(RouteGenerator):
                 )
 
                 if not neighbors:
-                    # ślepy zaułek – spróbuj wrócić 1 krok, jeśli się da
                     if prev is None:
-                        break  # restart segmentu
+                        break
                     next_node = prev
                 else:
-                    # unikaj natychmiastowego zawracania, jeśli są inne opcje
-                    cand = [n for n in neighbors if n != prev] or neighbors
-                    next_node = random.choice(cand)
+                    next_node = neighbors[0]
 
                 next_node = int(next_node)
                 step_len = utils.get_distance_between(self.graph, current, next_node)
                 if step_len <= 0:
-                    # bezsensowny krok – spróbuj innego sąsiada w tej iteracji
-                    # (jeśli nie ma innych, restart segmentu)
-                    # tu: po prostu restartujemy segment
                     break
 
                 if used + step_len > max_remaining:
-                    # przekroczylibyśmy budżet segmentu – restart
                     break
 
-                # wykonaj krok
                 path.append(next_node)
                 used += step_len
                 prev, current = current, next_node
 
-            # jeśli pętla skończyła się bez dotarcia do t, robimy restart
-            # po wyczerpaniu restartów – zwracamy porażkę
         raise Exception(
             f"Nie udało się znaleźć segmentu {s} -> {t} w budżecie {max_remaining:.1f} m."
         )
@@ -90,7 +79,7 @@ class RandomRoute(RouteGenerator):
         tolerance: float = 0.20,
         prefer_new: bool = False,
         prefer_new_v2: bool = False,
-        depth_limit: int = 1_000_000,  # nieużywane tutaj bezpośrednio
+        depth_limit: int = 1_000_000,
         ignored_edges: list[tuple[int, int]] | None = None,
         middle_nodes: list[int] | None = None,
     ) -> list[int]:
@@ -128,11 +117,5 @@ class RandomRoute(RouteGenerator):
                 route.extend(seg)
 
             used_total += self._path_length(seg)
-
-        # if used_total < min_length:
-        #     raise Exception(
-        #         f"Trasa segmentowa {used_total:.1f} m krótsza niż min_length {min_length:.1f} m. "
-        #         f"Zwiększ distance/tolerance lub dodaj więcej punktów pośrednich."
-        #     )
 
         return route
