@@ -1,5 +1,6 @@
-from .routes import Routes
 from travel_map.generator.random_route import RandomRoute
+
+from .routes import Routes
 
 
 class TestRandomRoutes(Routes):
