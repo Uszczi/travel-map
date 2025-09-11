@@ -23,8 +23,8 @@ class Benchamarks:
     # TODO it can be some kind of protocol
     generator_class: Any
 
-    NUMBER_OF_ROUTES = 12
-    DISTANCE = 5_000
+    NUMBER_OF_ROUTES = 10
+    DISTANCE = 6_000
 
     @pytest.fixture()
     def times(self):

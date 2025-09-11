@@ -22,7 +22,6 @@ class DfsRoute(RouteGenerator):
         self,
         s: int,
         t: int,
-        min_length: float,
         max_remaining: float,
         prefer_new: bool,
         prefer_new_v2: bool,
@@ -95,7 +94,7 @@ class DfsRoute(RouteGenerator):
         min_length, max_length = self.calculate_min_max_length(tolerance, distance)
 
         targets: list[int] = middle_nodes[:]
-        len_targets = len(targets)
+        len_targets = len(targets) + 1
         if end_node is not None:
             targets.append(end_node)
 
@@ -115,7 +114,6 @@ class DfsRoute(RouteGenerator):
                 min_length=min_length,
                 used=used,
                 len_targets=len_targets,
-                min_length=min_length,
                 max_remaining=max_remaining,
                 prefer_new=prefer_new,
                 prefer_new_v2=prefer_new_v2,

@@ -40,7 +40,8 @@ class RandomRoute(RouteGenerator):
                 if current == t:
                     if min_length:
                         if used > min_length:
-                    else
+                            return path
+                    else:
                         return path
 
                 neighbors = self.get_neighbours_and_sort(
@@ -101,6 +102,7 @@ class RandomRoute(RouteGenerator):
         min_length, max_length = self.calculate_min_max_length(tolerance, distance)
 
         targets: list[int] = middle_nodes[:]
+        len_targets = len(targets) + 1
         if end_node is not None:
             targets.append(end_node)
 
@@ -118,6 +120,7 @@ class RandomRoute(RouteGenerator):
                 s=route[-1],
                 t=t,
                 min_length=min_length,
+                len_targets=len_targets,
                 max_remaining=max_remaining,
                 prefer_new=prefer_new,
                 prefer_new_v2=prefer_new_v2,
