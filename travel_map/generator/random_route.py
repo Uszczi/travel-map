@@ -19,12 +19,17 @@ class RandomRoute(RouteGenerator):
         self,
         s: int,
         t: int,
+        min_length: float,
+        len_targets: int,
         max_remaining: float,
         prefer_new: bool,
         prefer_new_v2: bool,
         ignored_edges: list[tuple[int, int]],
         ignored_nodes: list[int],
     ) -> list[int]:
+        if len_targets > 1:
+            min_length = 0
+
         for _restart in range(self.SEG_RESTARTS + 1):
             path = [s]
             used = 0.0
@@ -33,7 +38,10 @@ class RandomRoute(RouteGenerator):
 
             for _step in range(self.SEG_MAX_STEPS):
                 if current == t:
-                    return path
+                    if min_length:
+                        if used > min_length:
+                    else
+                        return path
 
                 neighbors = self.get_neighbours_and_sort(
                     current,
@@ -109,6 +117,7 @@ class RandomRoute(RouteGenerator):
             seg = self._random_segment(
                 s=route[-1],
                 t=t,
+                min_length=min_length,
                 max_remaining=max_remaining,
                 prefer_new=prefer_new,
                 prefer_new_v2=prefer_new_v2,
