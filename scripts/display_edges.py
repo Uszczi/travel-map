@@ -1,9 +1,7 @@
-# pip install osmnx matplotlib
 import matplotlib.pyplot as plt
 import osmnx as ox
 from shapely.geometry import LineString
 
-# Twój graf
 from travel_map.api.common import get_or_create_graph
 
 P = (1177493762, 1177493777)  # "Środek Piotrkowskiej"

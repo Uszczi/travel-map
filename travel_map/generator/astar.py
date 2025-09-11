@@ -14,7 +14,6 @@ def haversine(lat1, lon1, lat2, lon2):
     R = 6371000  # promień Ziemi w metrach
     dlat = radians(lat2 - lat1)
     dlon = radians(lon2 - lon1)
-
     a = (
         sin(dlat / 2) ** 2
         + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2) ** 2
@@ -23,11 +22,12 @@ def haversine(lat1, lon1, lat2, lon2):
     return R * c
 
 
-def heuristic(graph, a, b):
-    lat1 = graph.nodes[a]["x"]
-    lon1 = graph.nodes[a]["y"]
-    lat2 = graph.nodes[b]["x"]
-    lon2 = graph.nodes[b]["y"]
+def heuristic(graph: nx.MultiDiGraph, a: int, b: int) -> float:
+    # Uwaga: w OSMnx x=lon, y=lat. Haversine(lat, lon, ...)
+    lon1 = graph.nodes[a]["x"]
+    lat1 = graph.nodes[a]["y"]
+    lon2 = graph.nodes[b]["x"]
+    lat2 = graph.nodes[b]["y"]
     return haversine(lat1, lon1, lat2, lon2)
 
 
@@ -35,6 +35,66 @@ def heuristic(graph, a, b):
 class AStarRoute(RouteGenerator):
     graph: nx.MultiDiGraph
     v_edges: VisitedEdges
+
+    def _reconstruct_path(self, came_from: dict[int, int], current: int) -> list[int]:
+        path = [current]
+        while current in came_from:
+            current = came_from[current]
+            path.append(current)
+        path.reverse()
+        return path
+
+    def _segment_distance(self, path: list[int]) -> float:
+        dist = 0.0
+        for u, v in zip(path, path[1:]):
+            dist += utils.get_distance_between(self.graph, u, v)
+        return dist
+
+    def _astar_segment(
+        self,
+        s: int,
+        t: int,
+        max_remaining: float,
+        prefer_new: bool,
+        prefer_new_v2: bool,
+        ignored_edges: list[tuple[int, int]],
+    ) -> list[int]:
+        open_set: list[tuple[float, int]] = []
+        heapq.heappush(open_set, (heuristic(self.graph, s, t), s))
+
+        came_from: dict[int, int] = {}
+        g_score: dict[int, float] = {s: 0.0}
+
+        while open_set:
+            _, u = heapq.heappop(open_set)
+
+            if u == t:
+                return self._reconstruct_path(came_from, u)
+
+            prev = came_from.get(u)
+
+            neighbors = self.get_neighbours_and_sort(
+                u,
+                prefer_new,
+                [prev] if prev is not None else None,
+                v2=prefer_new_v2,
+                ignored_edges=ignored_edges,
+            )
+            if prefer_new_v2:
+                neighbors = neighbors[:2]
+
+            for v in neighbors:
+                tentative_g = g_score[u] + utils.get_distance_between(self.graph, u, v)
+                if tentative_g > max_remaining:
+                    continue
+
+                if tentative_g < g_score.get(v, float("inf")):
+                    came_from[v] = u
+                    g_score[v] = tentative_g
+                    f = tentative_g + heuristic(self.graph, v, t)
+                    heapq.heappush(open_set, (f, v))
+
+        raise Exception(f"Brak ścieżki dla odcinka {s} -> {t} (limit długości?).")
 
     def generate(
         self,
@@ -46,73 +106,41 @@ class AStarRoute(RouteGenerator):
         prefer_new_v2: bool = False,
         depth_limit: int = 0,
         ignored_edges: list[tuple[int, int]] | None = None,
+        middle_nodes: list[int] | None = None,
     ) -> list[int]:
         ignored_edges = ignored_edges or []
+        middle_nodes = (middle_nodes or [])[:]
 
         min_length, max_length = self.calculate_min_max_length(tolerance, distance)
-        open_set = [(0.0, start_node)]
-        came_from = {}
-        g_score = {start_node: 0.0}
 
-        if end_node:
-            change_end_node = False
-        else:
-            change_end_node = True
+        targets: list[int] = middle_nodes[:]
+        if end_node is not None:
+            targets.append(end_node)
 
-        def to_route(current_node, came_from) -> list[int]:
-            path = [current_node]
-            while current_node in came_from:
-                current_node = came_from[current_node]
-                path.append(current_node)
-            return list(reversed(path))
+        route: list[int] = [start_node]
+        used = 0.0
 
-        while open_set:
-            _, current_node = heapq.heappop(open_set)
-            previous_node = came_from.get(current_node)
+        for t in targets:
+            max_remaining = max_length - used
+            if max_remaining <= 0:
+                raise Exception(
+                    "Przekroczony maksymalny dozwolony dystans (max_length)."
+                )
 
-            if change_end_node:
-                neighbors = [n for n in self.graph.neighbors(current_node)]
-                second_neighbors = set()
-                for n in neighbors:
-                    second_neighbors.update(self.graph.neighbors(n))
-
-                second_neighbors.discard(current_node)
-                second_neighbors.difference_update(neighbors)
-
-                end_node = random.choice(list(second_neighbors))
-
-            if current_node == end_node:
-                return to_route(current_node, came_from)
-
-            if current_node == end_node and g_score[current_node] >= min_length:
-                return to_route(current_node, came_from)
-
-            if g_score[current_node] > min_length:
-                return to_route(current_node, came_from)
-
-            neighbors = self.get_neighbours_and_sort(
-                current_node,
-                prefer_new,
-                [previous_node] if previous_node else None,
-                v2=prefer_new_v2,
+            seg = self._astar_segment(
+                route[-1],
+                t,
+                max_remaining,
+                prefer_new=prefer_new,
+                prefer_new_v2=prefer_new_v2,
                 ignored_edges=ignored_edges,
             )
 
-            if prefer_new_v2:
-                neighbors = neighbors[:2]
+            if route[-1] == seg[0]:
+                route.extend(seg[1:])
+            else:
+                route.extend(seg)
 
-            for neighbor in neighbors:
-                tmp_g_score = g_score[current_node] + utils.get_distance_between(
-                    self.graph, current_node, neighbor
-                )
+            used += self._segment_distance(seg)
 
-                if tmp_g_score > max_length:
-                    continue
-
-                if neighbor not in g_score or tmp_g_score < g_score[neighbor]:
-                    came_from[neighbor] = current_node
-                    g_score[neighbor] = tmp_g_score
-                    f_score = tmp_g_score + heuristic(self.graph, neighbor, end_node)
-                    heapq.heappush(open_set, (f_score, neighbor))
-
-        raise Exception("Nie udało się znaleźć ścieżki A*.")
+        return route
