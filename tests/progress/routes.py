@@ -100,7 +100,10 @@ class Routes:
         generator,
         request,
     ):
+        graph_distance = get_graph_distance(graph)
+
         routes = []
+        diff = []
 
         for _ in range(self.NUMBER_OF_ROUTES):
             route = generator.generate(
@@ -111,6 +114,17 @@ class Routes:
             )
             v_edges.mark_edges_visited(route)
             routes.append(route)
+            print(len(route))
 
+            visited_routes_distance = v_edges.get_visited_distance(graph)
+            diff.append(
+                (visited_routes_distance - (diff[0] if len(diff) > 0 else 0))
+                / graph_distance
+            )
+
+        print()
+        diff = [int(d * 100) for d in diff]
+        print(diff)
+        print()
         print_coverage(graph, v_edges)
         self.show(fm, graph, routes, request, start_node=start_node, end_node=end_node)
