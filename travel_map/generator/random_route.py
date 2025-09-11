@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-import random
+
 import networkx as nx
 
 from travel_map import utils
