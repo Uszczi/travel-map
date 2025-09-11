@@ -25,7 +25,8 @@ class RouteGenerator(ABC):
         ignored_edges: list[tuple[int, int]] | None = None,
         ignored_nodes: list[int] | None = None,
         middle_nodes: list[int] | None = None,
-    ) -> list[int]: ...
+    ) -> list[int]:
+        ...
 
     def calculate_min_max_length(self, tolerance, distance) -> tuple[float, float]:
         min_length = distance * (1 - tolerance)
@@ -77,13 +78,15 @@ class RouteGenerator(ABC):
         return n
 
     def get_neighbours_and_sort(
-        self, current_node, prefer_new, exclude, v2, ignored_edges
+        self,
+        current_node,
+        prefer_new,
+        exclude,
+        v2,
+        ignored_edges,
+        ignored_nodes: list[int],
     ):
         neighbors = self.get_neighbours(current_node, exclude)
-        if v2:
-            neighbors = self.sort_by_occurrance(neighbors, current_node)
-        else:
-            neighbors = self.sort(neighbors, current_node, prefer_new)
 
         neighbors = list(
             filter(
@@ -92,5 +95,16 @@ class RouteGenerator(ABC):
                 neighbors,
             )
         )
+        neighbors = list(
+            filter(
+                lambda node: node not in ignored_nodes,
+                neighbors,
+            ),
+        )
+
+        if v2:
+            neighbors = self.sort_by_occurrance(neighbors, current_node)
+        else:
+            neighbors = self.sort(neighbors, current_node, prefer_new)
 
         return neighbors

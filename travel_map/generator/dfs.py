@@ -26,6 +26,7 @@ class DfsRoute(RouteGenerator):
         prefer_new: bool,
         prefer_new_v2: bool,
         ignored_edges: list[tuple[int, int]],
+        ignored_nodes: list[int],
         depth_limit: int,
         used: float,
         min_length: float,
@@ -54,6 +55,7 @@ class DfsRoute(RouteGenerator):
                 [previous] if previous is not None else None,
                 v2=prefer_new_v2,
                 ignored_edges=ignored_edges,
+                ignored_nodes=ignored_nodes,
             )
             if prefer_new_v2:
                 neighbors = neighbors[:2]
@@ -113,6 +115,7 @@ class DfsRoute(RouteGenerator):
                 prefer_new=prefer_new,
                 prefer_new_v2=prefer_new_v2,
                 ignored_edges=ignored_edges,
+                ignored_nodes=ignored_nodes,
                 depth_limit=depth_limit,
             )
 

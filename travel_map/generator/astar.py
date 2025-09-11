@@ -57,6 +57,7 @@ class AStarRoute(RouteGenerator):
         prefer_new: bool,
         prefer_new_v2: bool,
         ignored_edges: list[tuple[int, int]],
+        ignored_nodes: list[int],
     ) -> list[int]:
         open_set: list[tuple[float, int]] = []
         heapq.heappush(open_set, (heuristic(self.graph, s, t), s))
@@ -78,6 +79,7 @@ class AStarRoute(RouteGenerator):
                 [prev] if prev is not None else None,
                 v2=prefer_new_v2,
                 ignored_edges=ignored_edges,
+                ignored_nodes=ignored_nodes,
             )
             if prefer_new_v2:
                 neighbors = neighbors[:2]
@@ -135,6 +137,7 @@ class AStarRoute(RouteGenerator):
                 prefer_new=prefer_new,
                 prefer_new_v2=prefer_new_v2,
                 ignored_edges=ignored_edges,
+                ignored_nodes=ignored_nodes,
             )
 
             if route[-1] == seg[0]:

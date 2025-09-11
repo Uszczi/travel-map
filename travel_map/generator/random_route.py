@@ -23,6 +23,7 @@ class RandomRoute(RouteGenerator):
         prefer_new: bool,
         prefer_new_v2: bool,
         ignored_edges: list[tuple[int, int]],
+        ignored_nodes: list[int],
     ) -> list[int]:
         for _restart in range(self.SEG_RESTARTS + 1):
             path = [s]
@@ -40,6 +41,7 @@ class RandomRoute(RouteGenerator):
                     [prev] if prev is not None else None,
                     v2=prefer_new_v2,
                     ignored_edges=ignored_edges,
+                    ignored_nodes=ignored_nodes,
                 )
 
                 if not neighbors:
@@ -111,6 +113,7 @@ class RandomRoute(RouteGenerator):
                 prefer_new=prefer_new,
                 prefer_new_v2=prefer_new_v2,
                 ignored_edges=ignored_edges,
+                ignored_nodes=ignored_nodes,
             )
 
             if route[-1] == seg[0]:
