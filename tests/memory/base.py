@@ -193,11 +193,8 @@ def print_coverage(graph, v_edges):
     print(f"{visited_routes_distance / graph_distance * 100:.2f}")
 
 
-import time
-import threading
-import tracemalloc
 from dataclasses import dataclass, field
-from typing import Optional, List
+from typing import Optional
 
 try:
     import psutil
@@ -285,12 +282,9 @@ def _print_table(result: MemProfileResult, max_rows: int = 20) -> None:
 
 # rss_plotter.py
 import os
-import time
-import threading
 from typing import List, Tuple, Optional
 
 import psutil
-import matplotlib.pyplot as plt
 
 
 class RssPlotter:

@@ -1,6 +1,5 @@
-import osmnx as ox
 
-from .routes import Routes, print_coverage
+from .routes import Routes
 from travel_map.generator.astar import AStarRoute
 
 
