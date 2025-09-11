@@ -106,10 +106,12 @@ class AStarRoute(RouteGenerator):
         prefer_new_v2: bool = False,
         depth_limit: int = 0,
         ignored_edges: list[tuple[int, int]] | None = None,
+        ignored_nodes: list[int] | None = None,
         middle_nodes: list[int] | None = None,
     ) -> list[int]:
         ignored_edges = ignored_edges or []
-        middle_nodes = (middle_nodes or [])[:]
+        ignored_nodes = ignored_nodes or []
+        middle_nodes = middle_nodes or []
 
         min_length, max_length = self.calculate_min_max_length(tolerance, distance)
 

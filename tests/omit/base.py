@@ -31,6 +31,9 @@ WCZ = (1177493568, 1177493621)  # Wczasowa
 J = (1177493669, 1177493724)  # Jagiełły
 J2 = (1177493724, 1177493775)  # Jagiełły 2
 
+KOSCIOL = 1177493848
+PIASKOWA = 1177493695
+
 start_time = None
 
 
@@ -48,6 +51,7 @@ class Routes:
     NUMBER_OF_ROUTES: int = 10
     DISTANCE: int = 6_000
     IGNORED_EDGES = (P, L, W, WCZ, J, J2)
+    IGNORED_NODES = (KOSCIOL, PIASKOWA)
 
     @pytest.fixture(autouse=True)
     def init(self) -> None:
@@ -69,6 +73,7 @@ class Routes:
         end_node: int | None = None,
         paths: list[list[int]] | None = None,
         ignored_edges: list[tuple[int, int]] | None = None,
+        ignored_nodes: list[int] | None = None,
     ):
         # if not isinstance(routes[0], int):
         #     routes = [routes]
@@ -76,6 +81,12 @@ class Routes:
         for edge in ignored_edges or []:
             x_y = route_to_zip_x_y(graph, [edge[0], edge[1]], reversed=True)
             fl.PolyLine(x_y, color="red").add_to(m)
+
+        for node in ignored_nodes or []:
+            fl.Marker(
+                (graph.nodes[node]["y"], graph.nodes[node]["x"]),
+                icon=fl.Icon(color="red"),
+            ).add_to(m)
 
         for path in paths or []:
             x_y = route_to_zip_x_y(graph, path, reversed=True)
@@ -93,7 +104,7 @@ class Routes:
         if end_node:
             fl.Marker(
                 (graph.nodes[end_node]["y"], graph.nodes[end_node]["x"]),
-                icon=fl.Icon(color="red"),
+                icon=fl.Icon(color="blue"),
             ).add_to(m)
 
         if SAVE_TO_HTML:
@@ -191,6 +202,7 @@ class Routes:
                 distance=self.DISTANCE,
                 prefer_new=True,
                 ignored_edges=self.IGNORED_EDGES,
+                ignored_nodes=self.IGNORED_NODES,
             )
             if route:
                 v_edges.mark_edges_visited(route)
@@ -200,5 +212,13 @@ class Routes:
 
         print_coverage(graph, v_edges)
         self.show(
-            fm, graph, routes, request, start_node, end_node, [], self.IGNORED_EDGES
+            fm,
+            graph,
+            routes,
+            request,
+            start_node,
+            end_node,
+            [],
+            self.IGNORED_EDGES,
+            self.IGNORED_NODES,
         )

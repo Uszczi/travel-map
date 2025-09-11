@@ -11,6 +11,10 @@ WCZ = (1177493568, 1177493621)  # Wczasowa
 J = (1177493669, 1177493724)  # Jagiełły
 J2 = (1177493724, 1177493775)  # Jagiełły 2
 
+
+KOSCIOL = 1177493848
+PIASKOWA = 1177493695
+
 SELECTED = [
     ("Piotrkowska", P),
     ("Lubelska", L),
@@ -65,5 +69,10 @@ for name, (u, v) in SELECTED:
     for uu, vv, k, geom, data in edges:
         xs, ys = geom.xy
         (h,) = ax.plot(xs, ys, linewidth=3.0, alpha=0.95, color="red", label=name)
+
+for node in (KOSCIOL, PIASKOWA):
+    x, y = G.nodes[node]["x"], G.nodes[node]["y"]
+    (h,) = ax.plot(x, y, color="red", marker="o", linestyle="None", markersize=6)
+
 
 plt.show()
