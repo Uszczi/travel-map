@@ -46,26 +46,9 @@ import matplotlib.pyplot as plt
 
 
 class CPUUsagePlotter(AbstractContextManager):
-    """
-    Kontekst-menedżer próbkujący użycie CPU i rysujący wykres po wyjściu z kontekstu.
-
-    Parametry:
-        interval:      odstęp między próbkami w sekundach (np. 0.1 = 10 Hz)
-        include_system: czy próbkować zużycie CPU całego systemu
-        include_process: czy próbkować zużycie CPU bieżącego procesu
-        normalize_process_to_100: jeśli True, dzieli wynik procesu przez liczbę logicznych CPU,
-                                  aby uzyskać skalę 0–100% (zamiast 0–100*n_cpu)
-        title:         tytuł wykresu (opcjonalnie)
-        save_path:     ścieżka do zapisu PNG; jeśli None, zrobi plt.show()
-
-    Uwaga:
-        - Pierwsza próbka psutil.cpu_percent() służy jako „rozgrzewka” i może być 0.
-        - __exit__ zadziała także przy wyjątku: wykres i tak zostanie wygenerowany.
-    """
-
     def __init__(
         self,
-        interval: float = 0.0000001,
+        interval: float = 0.0000005,  # sensowna wartość domyślna (50 ms)
         include_system: bool = True,
         include_process: bool = True,
         normalize_process_to_100: bool = True,
@@ -74,34 +57,36 @@ class CPUUsagePlotter(AbstractContextManager):
         fig=None,
         ax=None,
         legend=None,
+        min_samples: int = 2,  # gwarancja min. liczby próbek
+        min_interval: float = 0.0000005,  # dolne ograniczenie interwału (~5 ms)
+        wait_for_first_sample_ms: int = 50,  # ile czekać na 1. próbkę z wątku
     ):
         if not include_system and not include_process:
-            raise ValueError(
-                "Musisz włączyć include_system lub include_process (albo oba)."
-            )
+            raise ValueError("Musisz włączyć include_system lub include_process.")
 
-        self.interval = float(interval)
+        # --- ustawienia ---
+        self.interval = max(float(interval), float(min_interval))
         self.include_system = include_system
         self.include_process = include_process
         self.normalize_process_to_100 = normalize_process_to_100
         self.title = title
         self.save_path = save_path
-
         self.legend = legend
+        self.min_samples = int(min_samples)
+        self.wait_for_first_sample_ms = int(wait_for_first_sample_ms)
 
-        # Dane z próbkowania
+        # --- stan ---
         self._t0: Optional[float] = None
         self.times: List[float] = []
         self.system_cpu: List[float] = []
         self.process_cpu: List[float] = []
 
-        # Wątek próbkowania
         self._stop = threading.Event()
         self._thread: Optional[threading.Thread] = None
 
-        # Proces bieżący
         self._proc = psutil.Process()
         self._cpu_count = psutil.cpu_count(logical=True) or 1
+
         if not fig:
             self.fig, self.ax = plt.subplots()
         else:
@@ -114,71 +99,91 @@ class CPUUsagePlotter(AbstractContextManager):
         self.system_cpu.clear()
         self.process_cpu.clear()
 
-        # "Rozgrzewka" liczników psutil
+        # „rozgrzewka” liczników
         if self.include_system:
             psutil.cpu_percent(interval=None)
         if self.include_process:
-            # Dla procesu – także rozgrzewka
             self._proc.cpu_percent(interval=None)
 
+        # natychmiastowa próbka „przed” (gwarantuje >= 1 punkt)
+        self._sample_once()
+
+        # start wątku
         self._stop.clear()
         self._thread = threading.Thread(
             target=self._sampler, name="CPUUsageSampler", daemon=True
         )
         self._thread.start()
+
+        # chwilka na pierwszą próbkę z wątku (race-guard)
+        t_end = time.perf_counter() + self.wait_for_first_sample_ms / 1000.0
+        while time.perf_counter() < t_end and len(self.times) < 2:
+            time.sleep(self.interval * 0.5)
+
         return self
 
     def __exit__(self, exc_type, exc, tb):
-        # Zatrzymaj próbkowanie
+        # próbka „po” (odcina pracę wewnątrz kontekstu)
+        self._sample_once()
+
+        # jeśli nadal mamy zbyt mało punktów, dozbieraj jeszcze chwilkę
+        while len(self.times) < self.min_samples:
+            time.sleep(self.interval)
+            self._sample_once()
+
+        # zakończ wątek
         self._stop.set()
         if self._thread is not None:
             self._thread.join(timeout=max(1.0, 3 * self.interval))
 
-        # Narysuj wykres
         self._plot()
-        # Nie tłumimy wyjątków — pozwalamy im się przebić dalej
         return False
+
+    def _now_t(self) -> float:
+        return time.perf_counter() - (self._t0 or time.perf_counter())
+
+    def _sample_once(self):
+        t = self._now_t()
+        self.times.append(t)
+        if self.include_system:
+            self.system_cpu.append(psutil.cpu_percent(interval=None))
+        if self.include_process:
+            p = self._proc.cpu_percent(interval=None)  # <-- kluczowa poprawka!
+            if self.normalize_process_to_100 and self._cpu_count > 0:
+                p = p / self._cpu_count
+            self.process_cpu.append(p)
 
     def _sampler(self):
         next_tick = time.perf_counter()
         while not self._stop.is_set():
             now = time.perf_counter()
             if now >= next_tick:
-                t = now - (self._t0 or now)
-                self.times.append(t)
-
-                if self.include_system:
-                    self.system_cpu.append(psutil.cpu_percent(interval=None))
-                if self.include_process:
-                    p = psutil.cpu_percent(interval=None)
-                    # if self.normalize_process_to_100:
-                    #     p = p / self._cpu_count
-                    self.process_cpu.append(p)
-
-                # wyznacz kolejny termin próbki
+                self._sample_once()
                 next_tick += self.interval
-            # śpij najkrócej jak trzeba, żeby ograniczyć jitter
+            # króciutki sen – bez prób 100 kHz, których i tak scheduler nie dowiezie
             time.sleep(max(0.0, next_tick - time.perf_counter()) * 0.9)
 
     def _plot(self):
-        # Dopasuj długości (gdy włączono/wyłączono któreś z pomiarów)
-        # if self.include_system:
-        #     plt.plot(
-        #         self.times[: len(self.system_cpu)],
-        #         self.system_cpu,
-        #         label="CPU systemu [%]",
-        #     )
-        if self.include_process:
+        x = self.times
+        # rysuj z markerem – pojedynczy punkt też będzie widoczny
+        if self.include_process and self.process_cpu:
             self.ax.plot(
-                self.times[: len(self.process_cpu)],
+                x[: len(self.process_cpu)],
                 self.process_cpu,
-                label=self.legend,
+                label=self.legend or "CPU procesu [%]",
+                marker="o",
+            )
+        if self.include_system and self.system_cpu:
+            self.ax.plot(
+                x[: len(self.system_cpu)],
+                self.system_cpu,
+                label="CPU systemu [%]",
+                marker="o",
             )
 
         self.fig.supxlabel("Czas [s]")
         self.fig.supylabel("Zużycie CPU [%]")
         self.fig.legend()
-        # self.fig.tight_layout()
 
         if self.save_path:
             plt.savefig(self.save_path, dpi=150)

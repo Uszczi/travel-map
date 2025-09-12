@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Any
 
+import matplotlib.pyplot as plt
 import folium as fl
 import gpxpy
 import networkx as nx
@@ -313,7 +314,7 @@ class RssPlotter:
         fig,
         ax,
         interval: float = 0.00001,
-        unit: str = "MB",
+        unit: str = "B",
         include_children: bool = False,
         title: Optional[str] = None,
         show: bool = True,
@@ -401,7 +402,7 @@ class RssPlotter:
         delta = end_val - start_val
         if y:
             peak_idx = y.index(peak_val)
-            ax.annotate(
+            self.ax.annotate(
                 f"peak: {peak_val:.2f} {self.unit}",
                 xy=(x[peak_idx], peak_val),
                 xytext=(10, 10),
@@ -576,10 +577,13 @@ class Routes:
         generator,
         request,
     ):
+        fig, ax = plt.subplots()
         routes = []
-        with CPUUsagePlotter(
-            save_path=f"{generator.__class__.__name__}_{request.node.originalname}",
-            legend="Random",
+        with RssPlotter(
+            save=f"{generator.__class__.__name__}_{request.node.originalname}",
+            title="Random",
+            ax=ax,
+            fig=fig,
         ) as f:
             for _ in range(self.NUMBER_OF_ROUTES):
                 route = generator.generate(
@@ -598,11 +602,11 @@ class Routes:
         print_coverage(graph, v_edges)
         v_edges.clear()
 
-        with CPUUsagePlotter(
-            save_path=f"{generator.__class__.__name__}_{request.node.originalname}",
-            ax=f.ax,
-            fig=f.fig,
-            legend="DFS",
+        with RssPlotter(
+            save=f"{generator.__class__.__name__}_{request.node.originalname}",
+            title="Random",
+            ax=ax,
+            fig=fig,
         ) as f:
             for _ in range(self.NUMBER_OF_ROUTES):
                 route = generator.generate(
