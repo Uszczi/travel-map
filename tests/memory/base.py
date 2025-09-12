@@ -283,101 +283,168 @@ def _print_table(result: MemProfileResult, max_rows: int = 20) -> None:
 
 # rss_plotter.py
 import os
-from typing import List, Tuple, Optional
+import threading
+import time
+from typing import List, Tuple, Optional, Literal
 
 import psutil
+import matplotlib.pyplot as plt
+
+
+def _read_smaps_rollup(pid: int) -> dict[str, int]:
+    """Czyta /proc/<pid>/smaps_rollup i zwraca wybrane pola (w bajtach)."""
+    out: dict[str, int] = {}
+    path = f"/proc/{pid}/smaps_rollup"
+    try:
+        with open(path, "r", encoding="utf-8", errors="ignore") as f:
+            for line in f:
+                if ":" not in line:
+                    continue
+                k, v = line.split(":", 1)
+                k = k.strip()
+                v = v.strip().split()[0]  # wartość w kB
+                if k in {"Pss", "Rss", "Private_Clean", "Private_Dirty"}:
+                    out[k] = int(v) * 1024  # kB -> B
+    except FileNotFoundError:
+        pass
+    except Exception:
+        pass
+    return out
 
 
 class RssPlotter:
     """
-    Kontekst menedżer śledzący RSS procesu i (opcjonalnie) jego dzieci
-    w regularnych odstępach czasu, a następnie rysujący wykres.
+    Dokładniejszy profiler pamięci procesu:
+      - precyzyjne próbkowanie (perf_counter + planowanie kolejnych ticków),
+      - metryki: RSS (domyślna), PSS, USS (z psutil lub /proc/*/smaps_rollup),
+      - opcjonalne doliczanie potomków.
 
-    Parametry:
-      interval:        odstęp próbkowania w sekundach (float)
-      unit:            'B' | 'KB' | 'MB' | 'GB'
-      include_children:jeśli True, dolicza RSS procesów potomnych
-      title:           tytuł wykresu (domyślny: 'Zużycie pamięci RSS procesu')
-      show:            czy wyświetlić wykres (plt.show())
-      save:            ścieżka do zapisu wykresu (np. 'rss.png'); None żeby nie zapisywać
-
-    Użycie:
-      with RssPlotter(interval=0.1, unit='MB') as mon:
-          # ... kod do profilowania ...
-      # po wyjściu z bloku wykres jest narysowany/zapisany, a mon.data() zwróci próbki
+    Parametry zgodne z poprzednią wersją + nowy 'metric':
+      metric: 'rss' | 'pss' | 'uss'
     """
 
     _SCALE = {"B": 1, "KB": 1024, "MB": 1024**2, "GB": 1024**3}
 
     def __init__(
         self,
-        fig,
-        ax,
-        interval: float = 0.00001,
-        unit: str = "B",
+        fig=None,
+        ax=None,
+        *,
+        interval: float = 0.01,
+        unit: str = "KB",
         include_children: bool = False,
         title: Optional[str] = None,
         show: bool = True,
         save: Optional[str] = None,
         figsize: Tuple[float, float] = (8, 4),
+        metric: Literal["rss", "pss", "uss"] = "rss",
+        min_interval: float = 0.005,  # twarde minimum, psutil i tak ma pewien narzut
     ):
         unit = unit.upper()
         if unit not in self._SCALE:
             raise ValueError(f"Nieobsługiwana jednostka: {unit}")
-        self.interval = interval
+        if metric not in {"rss", "pss", "uss"}:
+            raise ValueError("metric musi być jednym z: 'rss', 'pss', 'uss'")
+
+        # Utrzymaj API: jeśli fig/ax nie podane, stworzymy je przy __exit__
+        self.fig = fig
+        self.ax = ax
+
+        self.interval = max(float(interval), float(min_interval))
         self.unit = unit
         self.include_children = include_children
-        self.title = title or "Zużycie pamięci RSS procesu"
+        self.title = title or "Zużycie pamięci procesu"
         self.show = show
         self.save = save
         self.figsize = figsize
+        self.metric = metric
 
         self._stop = threading.Event()
         self._thread: Optional[threading.Thread] = None
         self._t: List[float] = []
-        self._rss_bytes: List[int] = []
-        self._start: Optional[float] = None
+        self._bytes: List[int] = []
+        self._t0: Optional[float] = None
         self._proc = psutil.Process(os.getpid())
-        self.fig = fig
-        self.ax = ax
 
     # --- API pomocnicze ---
     def data(self) -> Tuple[List[float], List[float]]:
         scale = self._SCALE[self.unit]
-        return self._t[:], [b / scale for b in self._rss_bytes]
+        return self._t[:], [b / scale for b in self._bytes]
 
     def peak(self) -> float:
         _, y = self.data()
         return max(y) if y else 0.0
 
-    def _rss_now(self) -> int:
-        rss = 0
+    # --- pobieranie metryk pamięci ---
+    def _proc_mem_bytes(self, proc: psutil.Process) -> int:
+        """Zwraca bajty dla wybranej metryki (rss/pss/uss) jednego procesu."""
         try:
-            rss += self._proc.memory_info().rss
-        except psutil.Error:
-            pass
-        if self.include_children:
-            for ch in self._proc.children(recursive=True):
+            if self.metric == "rss":
+                return proc.memory_info().rss
+            # pss / uss: najpierw spróbuj przez psutil (szybciej), potem smaps_rollup
+            if self.metric in {"pss", "uss"}:
+                mfull = None
                 try:
-                    rss += ch.memory_info().rss
-                except psutil.Error:
-                    continue
-        return rss
+                    mfull = proc.memory_full_info()
+                except (psutil.AccessDenied, psutil.NoSuchProcess):
+                    mfull = None
 
+                if mfull is not None:
+                    if self.metric == "pss" and hasattr(mfull, "pss"):
+                        return int(mfull.pss)
+                    if self.metric == "uss" and hasattr(mfull, "uss"):
+                        return int(mfull.uss)
+
+                sm = _read_smaps_rollup(proc.pid)
+                if self.metric == "pss":
+                    return sm.get("Pss", 0)
+                # USS ~= Private_Clean + Private_Dirty
+                if self.metric == "uss":
+                    return sm.get("Private_Clean", 0) + sm.get("Private_Dirty", 0)
+        except (psutil.NoSuchProcess, psutil.ZombieProcess, psutil.AccessDenied):
+            return 0
+        except Exception:
+            return 0
+        return 0
+
+    def _mem_now_bytes(self) -> int:
+        total = self._proc_mem_bytes(self._proc)
+        if self.include_children:
+            try:
+                for ch in self._proc.children(recursive=True):
+                    total += self._proc_mem_bytes(ch)
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                pass
+        return total
+
+    # --- pętla próbkowania z planowaniem next_tick ---
     def _sample_loop(self):
+        next_tick = time.perf_counter()
         while not self._stop.is_set():
-            self._record_sample()
-            self._stop.wait(self.interval)
+            now = time.perf_counter()
+            if now >= next_tick:
+                self._record_sample(now)
+                # jeżeli byliśmy spóźnieni, nadgonimy bez „spirali”
+                skipped = int((now - next_tick) // self.interval)
+                next_tick += (skipped + 1) * self.interval
+            # czekaj dokładnie do następnego ticka (lub krócej, jeśli przerwano)
+            sleep_for = max(0.0, next_tick - time.perf_counter())
+            self._stop.wait(sleep_for)
 
-    def _record_sample(self):
-        t = time.monotonic() - (self._start or 0.0)
+    def _record_sample(self, now: Optional[float] = None):
+        if now is None:
+            now = time.perf_counter()
+        t = now - (self._t0 or now)
         self._t.append(t)
-        self._rss_bytes.append(self._rss_now())
+        self._bytes.append(self._mem_now_bytes())
 
     def __enter__(self):
-        self._start = time.monotonic()
-        self._record_sample()
-        self._thread = threading.Thread(target=self._sample_loop, daemon=True)
+        # ustal t0 i zrób zerową próbkę
+        self._t0 = time.perf_counter()
+        self._record_sample(self._t0)
+        self._thread = threading.Thread(
+            target=self._sample_loop, daemon=True, name="RssPlotterSampler"
+        )
         self._thread.start()
         return self
 
@@ -385,22 +452,38 @@ class RssPlotter:
         self._stop.set()
         if self._thread is not None:
             self._thread.join()
-        self._record_sample()
+        self._record_sample()  # ostatnia próbka
 
         x, y = self.data()
-        if not self.fig:
+        if self.fig is None or self.ax is None:
             self.fig, self.ax = plt.subplots(figsize=self.figsize)
+
+        # Rysunek
         self.ax.plot(x, y)
         self.ax.set_xlabel("czas [s]")
-        self.ax.set_ylabel(f"RSS [{self.unit}]")
+        self.ax.set_ylabel(f"{self.metric.upper()} [{self.unit}]")
         self.ax.set_title(self.title)
         self.ax.grid(True, alpha=0.3)
 
-        peak_val = max(y) if y else 0.0
-        start_val = y[0] if y else 0.0
-        end_val = y[-1] if y else 0.0
-        delta = end_val - start_val
+        # --- WYŁĄCZENIE NOTACJI NAUKOWEJ NA OSIACH ---
+        from matplotlib.ticker import ScalarFormatter
+
+        sf_x = ScalarFormatter(useMathText=False)
+        sf_x.set_scientific(False)
+        sf_x.set_useOffset(False)
+        self.ax.xaxis.set_major_formatter(sf_x)
+
+        sf_y = ScalarFormatter(useMathText=False)
+        sf_y.set_scientific(False)
+        sf_y.set_useOffset(False)
+        self.ax.yaxis.set_major_formatter(sf_y)
+
+        # Dodatkowe zabezpieczenie (obejmuje obie osie)
+        self.ax.ticklabel_format(style="plain", useOffset=False, axis="both")
+        # ---------------------------------------------
+
         if y:
+            peak_val = max(y)
             peak_idx = y.index(peak_val)
             self.ax.annotate(
                 f"peak: {peak_val:.2f} {self.unit}",
@@ -409,6 +492,10 @@ class RssPlotter:
                 textcoords="offset points",
                 arrowprops=dict(arrowstyle="->", lw=1),
             )
+            start_val, end_val = y[0], y[-1]
+            delta = end_val - start_val
+        else:
+            start_val = end_val = delta = 0.0
 
         if self.save:
             self.fig.savefig(self.save, bbox_inches="tight")
@@ -419,18 +506,24 @@ class RssPlotter:
             plt.close(self.fig)
 
         print(
-            f"RSS start: {start_val:.2f} {self.unit}, "
+            f"{self.metric.upper()} start: {start_val:.2f} {self.unit}, "
             f"end: {end_val:.2f} {self.unit}, "
             f"peak: {peak_val:.2f} {self.unit}, "
             f"Δ: {delta:+.2f} {self.unit}"
         )
 
 
+# --- end of replacement ---
+
+
 class Routes:
-    generator_class: Any
+    generator_class_1: Any
+    generator_class_2: Any
+    generator_class_3: Any
+
     use_end_node: bool = True
 
-    NUMBER_OF_ROUTES: int = 10
+    NUMBER_OF_ROUTES: int = 20
     DISTANCE: int = 6_000
     IGNORED_EDGES = (P, L, W, WCZ, J, J2)
     # IGNORED_NODES = (KOSCIOL, PIASKOWA)
@@ -443,8 +536,16 @@ class Routes:
             start_time = datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
 
     @pytest.fixture()
-    def generator(self, graph, v_edges):
-        return self.generator_class(graph, v_edges)
+    def generator1(self, graph, v_edges):
+        return self.generator_class_1(graph, v_edges)
+
+    @pytest.fixture()
+    def generator2(self, graph, v_edges):
+        return self.generator_class_2(graph, v_edges)
+
+    @pytest.fixture()
+    def generator3(self, graph, v_edges):
+        return self.generator_class_3(graph, v_edges)
 
     def show(
         self,
@@ -574,19 +675,28 @@ class Routes:
         start_node,
         end_node,
         v_edges,
-        generator,
+        generator1,
+        generator2,
+        generator3,
         request,
     ):
-        fig, ax = plt.subplots()
-        routes = []
+        # --- 1) jedna figura + 3 osie (po jednej dla każdego generatora) ---
+        fig, axs = plt.subplots(nrows=3, ncols=1, figsize=(10, 9), sharex=True)
+        ax1, ax2, ax3 = axs
+
+        routes: list[list[int]] = []
+
+        # --- 2) generator1 na pierwszej osi ---
         with RssPlotter(
-            save=f"{generator.__class__.__name__}_{request.node.originalname}",
-            title="Random",
-            ax=ax,
             fig=fig,
-        ) as f:
+            ax=ax1,
+            title=f"{generator1.__class__.__name__}",
+            metric="uss",
+            show=False,  # nie otwieraj okna
+            save=None,  # nie zapisuj pojedynczych wykresów
+        ):
             for _ in range(self.NUMBER_OF_ROUTES):
-                route = generator.generate(
+                route = generator1.generate(
                     start_node=start_node,
                     end_node=end_node if self.use_end_node else None,
                     distance=self.DISTANCE,
@@ -602,14 +712,42 @@ class Routes:
         print_coverage(graph, v_edges)
         v_edges.clear()
 
+        # --- 3) generator2 na drugiej osi ---
         with RssPlotter(
-            save=f"{generator.__class__.__name__}_{request.node.originalname}",
-            title="Random",
-            ax=ax,
             fig=fig,
-        ) as f:
+            ax=ax2,
+            title=f"{generator2.__class__.__name__}",
+            metric="uss",
+            show=False,
+            save=None,
+        ):
             for _ in range(self.NUMBER_OF_ROUTES):
-                route = generator.generate(
+                route = generator2.generate(
+                    start_node=start_node,
+                    end_node=end_node if self.use_end_node else None,
+                    distance=self.DISTANCE,
+                    ignored_edges=[],
+                    ignored_nodes=[],
+                )
+                if route:
+                    v_edges.mark_edges_visited(route)
+                    routes.append(route)
+                else:
+                    print("Generating route failed.")
+
+        v_edges.clear()
+
+        # --- 4) generator3 na trzeciej osi ---
+        with RssPlotter(
+            fig=fig,
+            ax=ax3,
+            title=f"{generator3.__class__.__name__}",
+            metric="uss",
+            show=False,
+            save=None,
+        ):
+            for _ in range(self.NUMBER_OF_ROUTES * 5):
+                route = generator3.generate(
                     start_node=start_node,
                     end_node=end_node if self.use_end_node else None,
                     distance=self.DISTANCE,
@@ -623,6 +761,18 @@ class Routes:
                     print("Generating route failed.")
 
         print_coverage(graph, v_edges)
+
+        # --- 5) kosmetyka + wspólny zapis ---
+        fig.suptitle(f"Porównanie zużycia pamięci", y=0.98)
+        fig.supxlabel("czas [s]")
+        fig.supylabel("USS [B]")
+        fig.tight_layout(rect=[0, 0.03, 1, 0.95])
+
+        out_path = f"memory_combined_{request.node.originalname}.png"
+        fig.savefig(out_path, dpi=150)
+        plt.close(fig)
+
+        # Jeśli chcesz też obejrzeć trasy na mapie, odkomentuj niżej:
         # self.show(
         #     fm,
         #     graph,
@@ -630,7 +780,7 @@ class Routes:
         #     request,
         #     start_node,
         #     end_node,
-        #     [],
-        #     self.IGNORED_EDGES,
-        #     self.IGNORED_NODES,
+        #     paths=[],
+        #     ignored_edges=self.IGNORED_EDGES,
+        #     ignored_nodes=self.IGNORED_NODES,
         # )

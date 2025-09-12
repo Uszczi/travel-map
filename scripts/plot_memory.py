@@ -8,7 +8,7 @@ y3 = [294308.00] * 10  # Seria 3
 #  -------------------------------
 
 plt.figure()
-plt.ylim(200000, 400000)
+plt.ylim(290_000, 300_000)
 plt.plot(x, y1, label="Losowy algorytm")
 plt.plot(x, y2, label="A*")
 plt.plot(x, y3, label="Depth First Search")
