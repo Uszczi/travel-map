@@ -30,7 +30,7 @@ def print_coverage(graph, v_edges):
 class Routes:
     generator_class: Any
 
-    NUMBER_OF_ROUTES: int = 10
+    NUMBER_OF_ROUTES: int = 15
     DISTANCE: int = 6_000
 
     @pytest.fixture(autouse=True)
@@ -110,11 +110,9 @@ class Routes:
                 start_node=start_node,
                 end_node=end_node,
                 distance=self.DISTANCE,
-                prefer_new=True,
             )
             v_edges.mark_edges_visited(route)
             routes.append(route)
-            print(len(route))
 
             visited_routes_distance = v_edges.get_visited_distance(graph)
             diff.append(
