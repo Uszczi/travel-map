@@ -40,10 +40,11 @@ class NominatimService:
             raise BadRequest("Empty query.")
 
         params = {
+            "key": settings.NOMINATIM_ACCESS_TOKEN,
             "q": q.strip(),
-            "format": "jsonv2",
+            "accept-language": "pl",  # TODO
+            "format": "json",
             "limit": str(limit),
-            "addressdetails": "1",
         }
 
         try:

@@ -41,5 +41,5 @@ class RedisQPSLimiter:
 
 
 NOMINATIM_LIMITER = RedisQPSLimiter(
-    get_redis(), key="rl:nominatim:qps1", interval_ms=1000
+    get_redis(), key="rl:nominatim:qps1", interval_ms=500
 )

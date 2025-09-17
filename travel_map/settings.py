@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     NOMINATIM_USER_AGENT: str = ""
     NOMINATIM_URL: str = ""
     NOMINATIM_REVERSE_URL: str = ""
+    NOMINATIM_ACCESS_TOKEN: str = ""
 
     REDIS_HOST: str = ""
     REDIS_PORT: int = 0
