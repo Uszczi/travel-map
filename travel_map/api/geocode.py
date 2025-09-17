@@ -55,6 +55,7 @@ async def geocode(
     lng_param: Optional[str] = Query(
         None, alias="lng", description="Longitude (reverse)"
     ),
+    tag: Optional[str] = Query(None, alias="tag", description="Tag of places"),
     nominatim: NominatimService = Depends(get_nominatim_service),
 ) -> GeocodeResponse | GeocodeItem:
     if q and (lat_param or lng_param):
@@ -71,7 +72,7 @@ async def geocode(
     if q:
         try:
             async with NOMINATIM_LIMITER.slot():
-                items = await nominatim.search(q=q, limit=5)
+                items = await nominatim.search(q=q, limit=5, tag=tag)
         except BadRequest:
             raise HTTPException(status_code=400, detail="Query cannot be empty.")
         except FetchFailed:

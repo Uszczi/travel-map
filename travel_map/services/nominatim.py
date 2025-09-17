@@ -35,7 +35,9 @@ class NominatimService:
             "Accept-Language": "pl,en;q=0.8",
         }
 
-    async def search(self, q: str, limit: int = 5) -> list[GeocodeItem]:
+    async def search(
+        self, q: str, limit: int = 5, tag: str | None = None
+    ) -> list[GeocodeItem]:
         if not q or not q.strip():
             raise BadRequest("Empty query.")
 
@@ -45,7 +47,11 @@ class NominatimService:
             "accept-language": "pl",  # TODO
             "format": "json",
             "limit": str(limit),
+            "dedupe": 1,
         }
+
+        if tag:
+            params["tag"] = tag
 
         try:
             async with httpx.AsyncClient(
@@ -75,10 +81,10 @@ class NominatimService:
 
     async def reverse(self, lat: float, lng: float) -> GeocodeItem:
         params = {
-            "format": "jsonv2",
+            "key": settings.NOMINATIM_ACCESS_TOKEN,
+            "format": "json",
             "lat": str(lat),
             "lon": str(lng),
-            "addressdetails": "1",
         }
 
         try:
@@ -107,6 +113,6 @@ class NominatimService:
             label=raw["display_name"],
             lat=raw["lat"],
             lng=raw["lon"],
-            type=raw["type"],
+            type=raw["osm_type"],
             boundingbox=raw["boundingbox"],
         )
