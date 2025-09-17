@@ -43,7 +43,6 @@ from contextlib import AbstractContextManager
 from typing import Optional, List
 
 import psutil
-import matplotlib.pyplot as plt
 
 
 class CPUUsagePlotter(AbstractContextManager):
@@ -283,12 +282,9 @@ def _print_table(result: MemProfileResult, max_rows: int = 20) -> None:
 
 # rss_plotter.py
 import os
-import threading
-import time
 from typing import List, Tuple, Optional, Literal
 
 import psutil
-import matplotlib.pyplot as plt
 
 
 def _read_smaps_rollup(pid: int) -> dict[str, int]:
@@ -763,7 +759,7 @@ class Routes:
         print_coverage(graph, v_edges)
 
         # --- 5) kosmetyka + wspólny zapis ---
-        fig.suptitle(f"Porównanie zużycia pamięci", y=0.98)
+        fig.suptitle("Porównanie zużycia pamięci", y=0.98)
         fig.supxlabel("czas [s]")
         fig.supylabel("USS [B]")
         fig.tight_layout(rect=[0, 0.03, 1, 0.95])

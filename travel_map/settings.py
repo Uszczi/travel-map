@@ -3,6 +3,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     URL_PREFIX: str = ""
+    SENTRY_SDK: str = ""
     MONGO_URL: str = ""
     NOMINATIM_USER_AGENT: str = ""
     NOMINATIM_URL: str = ""

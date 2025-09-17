@@ -6,7 +6,7 @@ from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from redis import asyncio as aioredis
 
-from travel_map.api import include_routers, setup_middlewares
+from travel_map.api import include_routers, setup_middlewares, init_sentry
 from travel_map.settings import settings
 
 
@@ -17,6 +17,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     yield
 
 
+init_sentry()
 app = FastAPI(lifespan=lifespan, root_path=settings.URL_PREFIX)
 setup_middlewares(app)
 include_routers(app)
