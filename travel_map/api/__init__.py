@@ -1,8 +1,8 @@
+import sentry_sdk
 from fastapi import FastAPI
 
 from travel_map.settings import settings
 
-import sentry_sdk
 from .geocode import router as geocode_router
 from .gpx import router as gpx_router
 from .main import router as main_router

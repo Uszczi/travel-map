@@ -6,7 +6,7 @@ from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from redis import asyncio as aioredis
 
-from travel_map.api import include_routers, setup_middlewares, init_sentry
+from travel_map.api import include_routers, init_sentry, setup_middlewares
 from travel_map.settings import settings
 
 
