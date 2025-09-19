@@ -18,6 +18,9 @@ dependencies = [
     "aiolimiter>=1.2.1",
     "psutil>=7.0.0",
     "sentry-sdk[fastapi]>=2.38.0",
+    "sqlmodel>=0.0.25",
+    "alembic>=1.16.5",
+    "asyncpg>=0.30.0",
 ]
 
 [tool.ruff]

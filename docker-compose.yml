@@ -3,6 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    env_file: .env
     ports:
       - "8000:8000"
     volumes:
@@ -27,5 +28,24 @@ services:
       - redis-data:/data
     command: ["redis-server", "--save", "60", "1", "--loglevel", "warning", "--appendonly", "yes"]
 
+  db:
+    image: postgres:17
+    container_name: postgres
+    environment:
+      POSTGRES_DB: app_db
+      POSTGRES_USER: app_user
+      POSTGRES_PASSWORD: supersecret
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 volumes:
   redis-data:
+  pgdata:

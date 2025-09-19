@@ -15,6 +15,9 @@ class Settings(BaseSettings):
     REDIS_PORT: int = 0
     REDIS_URL: str
 
+    DB_CONNECTION_STR: str
+    DB_ASYNC_CONNECTION_STR: str
+
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
 

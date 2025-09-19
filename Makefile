@@ -7,6 +7,9 @@ build:
 run:
 	docker compose up --detach
 
+stop:
+	docker compose stop
+
 fg_run:
 	docker compose up
 
@@ -26,6 +29,18 @@ check:
 		ruff check --select I . && \
 		black --check .  && \
 		ty check"
+
+run_migrations:
+	docker compose run --rm --no-deps app alembic upgrade head
+
+
+create_migrations:
+	@msg='$(filter-out $@,$(MAKECMDGOALS))'; \
+	docker compose run --rm --no-deps app alembic revision --autogenerate -m "$$msg"
+
+clear_db:
+	docker compose rm -f db
+	docker volume rm travel-map_pgdata
 
 clean:
 	rm -rf tmp
@@ -69,17 +84,17 @@ lock_dependencies:
 	docker compose run --rm --no-deps app uv lock
 
 add_dependency:
-	@name=$$(echo $(MAKECMDGOALS) | cut -d' ' -f2); \
+	@name='$(filter-out $@,$(MAKECMDGOALS))'; \
 	docker compose run --rm --no-deps app uv add $$name
 
 add_dev_dependency:
-	@name=$$(echo $(MAKECMDGOALS) | cut -d' ' -f2); \
+	@name='$(filter-out $@,$(MAKECMDGOALS))'; \
 	docker compose run --rm --no-deps app uv add --dev $$name
 
 remove_dependency:
-	@name=$$(echo $(MAKECMDGOALS) | cut -d' ' -f2); \
+	@name='$(filter-out $@,$(MAKECMDGOALS))'; \
 	docker compose run --rm --no-deps app uv remove $$name
 
 remove_dev_dependency:
-	@name=$$(echo $(MAKECMDGOALS) | cut -d' ' -f2); \
+	@name='$(filter-out $@,$(MAKECMDGOALS))'; \
 	docker compose run --rm --no-deps app uv remove --dev $$name
