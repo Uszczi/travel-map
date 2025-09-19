@@ -14,6 +14,7 @@ class ElevationService:
 
     @time_measure_decorator("Getting elevation took: ")
     def get(self, cords: list[tuple[float, float]]) -> dict[tuple[float, float], int]:
+        # TODO Handle empty cords
         with self.session as s:
             response = s.post(
                 "http://host.docker.internal:8080/api/v1/lookup",
