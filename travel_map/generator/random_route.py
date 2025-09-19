@@ -18,7 +18,7 @@ class RandomRoute(RouteGenerator):
     def _random_segment(
         self,
         s: int,
-        t: int,
+        t: int | None,
         min_length: float,
         len_targets: int,
         max_remaining: float,
@@ -37,6 +37,11 @@ class RandomRoute(RouteGenerator):
             prev = None
 
             for _step in range(self.SEG_MAX_STEPS):
+                if t is None:
+                    if min_length:
+                        if used > min_length:
+                            return path
+
                 if current == t:
                     if min_length:
                         if used > min_length:
@@ -101,10 +106,9 @@ class RandomRoute(RouteGenerator):
 
         min_length, max_length = self.calculate_min_max_length(tolerance, distance)
 
-        targets: list[int] = middle_nodes[:]
-        len_targets = len(targets) + 1
-        if end_node is not None:
-            targets.append(end_node)
+        targets: list[int | None] = middle_nodes[:]
+        targets.append(end_node)
+        len_targets = len(targets)
 
         route: list[int] = [start_node]
         used_total = 0.0

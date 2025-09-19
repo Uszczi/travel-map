@@ -21,7 +21,7 @@ class DfsRoute(RouteGenerator):
     def _dfs_segment(
         self,
         s: int,
-        t: int,
+        t: int | None,
         max_remaining: float,
         prefer_new: bool,
         prefer_new_v2: bool,
@@ -46,6 +46,12 @@ class DfsRoute(RouteGenerator):
                 return
             if depth > depth_limit:
                 return
+
+            if t is None:
+                if used + length_so_far > min_length:
+                    result = path
+                    return
+
             if current == t and used + length_so_far > min_length / len_targets:
                 result = path
                 return
@@ -93,10 +99,9 @@ class DfsRoute(RouteGenerator):
 
         min_length, max_length = self.calculate_min_max_length(tolerance, distance)
 
-        targets: list[int] = middle_nodes[:]
-        len_targets = len(targets) + 1
-        if end_node is not None:
-            targets.append(end_node)
+        targets: list[int | None] = middle_nodes[:]
+        targets.append(end_node)
+        len_targets = len(targets)
 
         route: list[int] = [start_node]
         used = 0.0
