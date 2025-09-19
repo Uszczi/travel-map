@@ -1,19 +1,19 @@
 """init migrations
 
-Revision ID: aecf35e77b24
+Revision ID: e7c8d2e1abb7
 Revises:
-Create Date: 2025-09-19 13:21:18.450441
+Create Date: 2025-09-19 16:01:18.526892
 
 """
+
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
 import sqlmodel
-
+from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = "aecf35e77b24"
+revision: str = "e7c8d2e1abb7"
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -41,9 +41,9 @@ def upgrade() -> None:
             server_default=sa.text("gen_random_uuid()"),
             nullable=False,
         ),
-        sa.Column("email", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-        sa.PrimaryKeyConstraint("uuid", name=op.f("pk_usermodel")),
-        sa.UniqueConstraint("uuid", name=op.f("uq_usermodel_uuid")),
+        sa.Column("email", sqlmodel.AutoString(), nullable=False),
+        sa.PrimaryKeyConstraint("uuid"),
+        sa.UniqueConstraint("uuid"),
     )
 
 

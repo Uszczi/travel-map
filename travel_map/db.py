@@ -1,5 +1,6 @@
-from pymongo import MongoClient
+from typing import AsyncIterator
 
+from pymongo import MongoClient
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -15,7 +16,7 @@ async_engine = create_async_engine(
 )
 
 
-async def get_async_session() -> AsyncSession:
+async def get_async_session() -> AsyncIterator[AsyncSession]:
     async_session = sessionmaker(
         bind=async_engine, class_=AsyncSession, expire_on_commit=False
     )

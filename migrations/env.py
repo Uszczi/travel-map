@@ -2,11 +2,14 @@ import asyncio
 import os
 from json import loads
 from logging.config import fileConfig
+from typing import Any
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlmodel import SQLModel
+
+from travel_map.models import UserModel  # noqa: F401
 
 config = context.config
 
@@ -23,18 +26,16 @@ target_metadata.naming_convention = {
     "pk": "pk_%(table_name)s",
 }
 
-from travel_map.models import UserModel  # noqa: 'autogenerate' support
-
 
 exclude_tables = loads(os.getenv("DB_EXCLUDE_TABLES", "{}"))
 
 
 def filter_db_objects(
-    object,  # noqa: indirect usage
+    _object,
     name,
     type_,
-    *args,  # noqa: indirect usage
-    **kwargs,  # noqa: indirect usage
+    *_args,
+    **_kwargs,
 ):
     if type_ == "table":
         return name not in exclude_tables
@@ -72,8 +73,8 @@ def do_run_migrations(connection):
 
 
 async def run_migrations_online():
-    config_section = config.get_section(config.config_ini_section)
-    url = os.getenv("DB_ASYNC_CONNECTION_STR")
+    config_section: dict[str, Any] = config.get_section(config.config_ini_section) or {}
+    url = str(os.getenv("DB_ASYNC_CONNECTION_STR"))
     config_section["sqlalchemy.url"] = url
 
     connectable = AsyncEngine(

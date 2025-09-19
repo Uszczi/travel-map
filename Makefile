@@ -39,7 +39,7 @@ create_migrations:
 	docker compose run --rm --no-deps app alembic revision --autogenerate -m "$$msg"
 
 clear_db:
-	docker compose rm -f db
+	docker compose rm -fs db
 	docker volume rm travel-map_pgdata
 
 clean:
