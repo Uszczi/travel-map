@@ -82,8 +82,52 @@ services:
       - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
     depends_on:
       - prometheus
+      - loki
+      - tempo
+      - alloy
+
+  loki:
+    image: grafana/loki:2.9.4
+    command: -config.file=/etc/loki/config.yml
+    volumes:
+      - ./loki-config.yml:/etc/loki/config.yml:ro
+      - loki-data:/loki
+    ports: ["3100:3100"]
+
+
+  tempo:
+    image: grafana/tempo:2.6.0
+    command: ["-config.file=/etc/tempo/config.yml"]
+    ports:
+      - "3200:3200"   # HTTP (querier/query-frontend API, metrics)
+      - "9095:9095"   # gRPC (query-frontend <-> querier)
+    volumes:
+      - ./tempo-config.yml:/etc/tempo/config.yml:ro
+      - tempo-data:/var/tempo
+
+
+  alloy:
+    image: grafana/alloy:latest
+    command:
+      - run
+      - --server.http.listen-addr=0.0.0.0:12345
+      - /etc/alloy/config.river
+    ports:
+      - "4317:4317" # OTLP gRPC (aplikacje → Alloy)
+      - "4318:4318" # OTLP HTTP (aplikacje → Alloy)
+      - "12345:12345" # Alloy UI (opcjonalnie)
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro # autodiscovery kontenerów
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - ./alloy-config.river:/etc/alloy/config.river:ro
+    depends_on:
+      - loki
+      - tempo
+
 
 volumes:
   redis-data:
   pgdata:
   grafana-storage:
+  loki-data:
+  tempo-data:

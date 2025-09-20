@@ -1,0 +1,42 @@
+server:
+  http_listen_port: 3200
+  grpc_listen_port: 9095          # <- włącz gRPC; NIE 0
+
+
+# Query-frontend nasłuchuje po gRPC w tym samym procesie
+query_frontend:
+  max_outstanding_per_tenant: 100
+
+# Querier łączy się z query-frontend po gRPC
+querier:
+  max_concurrent_queries: 8
+  frontend_worker:
+    frontend_address: 127.0.0.1:9095  # <- adres i port z 'server.grpc_listen_port'
+
+# Odbiorniki OTLP (traces) – HTTP i gRPC
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+        http:
+          endpoint: 0.0.0.0:4318
+
+# Czas trwania bloków w ingesterze
+ingester:
+  max_block_duration: 5m
+
+# Kompaktowanie i retencja
+compactor:
+  compaction:
+    block_retention: 24h
+
+# Storage lokalny (na dysku)
+storage:
+  trace:
+    backend: local
+    local:
+      path: /var/tempo/traces
+    wal:
+      path: /var/tempo/wal
