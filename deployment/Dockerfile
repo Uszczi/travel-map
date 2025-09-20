@@ -7,6 +7,8 @@ WORKDIR /app
 ENV PYTHONUNBUFFERED=1 \
     PROMETHEUS_MULTIPROC_DIR=/tmp/prometheus_multiproc
 
+RUN mkdir -p /tmp/prometheus_multiproc
+
 COPY pyproject.toml .
 
 RUN uv sync --no-dev

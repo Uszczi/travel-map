@@ -18,6 +18,8 @@ RUN groupadd -g $GID app && useradd -m -u $UID -g $GID app
 RUN chown -R app:app /app
 USER app
 
+RUN mkdir -p /tmp/prometheus_multiproc
+
 COPY . .
 RUN uv pip install -e .
 
