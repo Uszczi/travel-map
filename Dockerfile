@@ -11,7 +11,6 @@ WORKDIR /app
 COPY pyproject.toml .
 
 RUN uv sync
-RUN uv run playwright install --with-deps chromium
 
 ARG UID=1000
 ARG GID=1000
