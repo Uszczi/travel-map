@@ -2,7 +2,8 @@ import uuid as uuid_pkg
 from datetime import datetime, timezone
 
 from pydantic import BaseModel, computed_field
-from sqlalchemy import text
+from sqlalchemy import Column, text
+from sqlalchemy.types import DateTime
 from sqlmodel import Field, SQLModel
 
 
@@ -62,17 +63,18 @@ class UUIDModel(SQLModel):
 class TimestampModel(SQLModel):
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),
-        nullable=False,
-        sa_column_kwargs={"server_default": text("current_timestamp(0)")},
+        sa_column=Column(
+            DateTime(timezone=True),
+            server_default=text("CURRENT_TIMESTAMP(0)"),
+        ),
     )
-
     updated_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),
-        nullable=False,
-        sa_column_kwargs={
-            "server_default": text("current_timestamp(0)"),
-            "onupdate": text("current_timestamp(0)"),
-        },
+        sa_column=Column(
+            DateTime(timezone=True),  # <<<<<< timezone=True
+            server_default=text("CURRENT_TIMESTAMP(0)"),
+            server_onupdate=text("CURRENT_TIMESTAMP(0)"),
+        ),
     )
 
 

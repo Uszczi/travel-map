@@ -1,28 +1,25 @@
+import json
 import os
 import sys
-import json
 import time
 import uuid
 from contextvars import ContextVar
-from typing import Optional
+from typing import Optional, cast
 
-from fastapi import FastAPI, Request, Response
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI
 from loguru import logger
 
 # -------------------------------
 # OpenTelemetry (traces)
 # -------------------------------
 from opentelemetry import trace
-from opentelemetry.trace import Span
-from opentelemetry.sdk.resources import Resource
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
-
-from fastapi import FastAPI
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.trace import Span, Status, StatusCode
 
 from travel_map.api import include_routers, init_sentry, setup_middlewares
 from travel_map.extensions.lifespan import lifespan
@@ -39,10 +36,15 @@ OTLP_ENDPOINT = os.getenv(
 )  # Alloy/Tempo OTLP HTTP
 OTLP_HEADERS = os.getenv("OTEL_EXPORTER_OTLP_HEADERS")  # np. "authorization=Bearer abc"
 
-trace_id_var: ContextVar[Optional[str]] = ContextVar("trace_id", default=None)
-span_id_var: ContextVar[Optional[str]] = ContextVar("span_id", default=None)
-correlation_id_var: ContextVar[Optional[str]] = ContextVar(
-    "correlation_id", default=None
+# NOTE: używamy cast, aby zadowolić typowanie przy default=None
+trace_id_var: ContextVar[Optional[str]] = cast(
+    ContextVar[Optional[str]], ContextVar("trace_id", default=None)
+)
+span_id_var: ContextVar[Optional[str]] = cast(
+    ContextVar[Optional[str]], ContextVar("span_id", default=None)
+)
+correlation_id_var: ContextVar[Optional[str]] = cast(
+    ContextVar[Optional[str]], ContextVar("correlation_id", default=None)
 )
 
 
@@ -96,16 +98,15 @@ resource = Resource.create(
 provider = TracerProvider(resource=resource)
 exporter = OTLPSpanExporter(
     endpoint=f"{OTLP_ENDPOINT}/v1/traces",
-    headers=dict(h.split("=", 1) for h in OTLP_HEADERS.split(","))
-    if OTLP_HEADERS
-    else None,
+    headers=(
+        dict(h.split("=", 1) for h in OTLP_HEADERS.split(",")) if OTLP_HEADERS else None
+    ),
 )
 processor = BatchSpanProcessor(exporter)
 provider.add_span_processor(processor)
 trace.set_tracer_provider(provider)
 
 tracer = trace.get_tracer(__name__)
-
 
 init_sentry()
 
@@ -137,7 +138,8 @@ async def logging_tracing_middleware(request, call_next):
         return response
     except Exception as exc:
         span.record_exception(exc)
-        span.set_status(trace.status.Status(trace.status.StatusCode.ERROR, str(exc)))
+        # poprawne API statusu w OTel
+        span.set_status(Status(StatusCode.ERROR, str(exc)))
         # zaloguj błąd z korelacją
         logger.bind(
             trace_id=trace_id_var.get(),
@@ -150,8 +152,8 @@ async def logging_tracing_middleware(request, call_next):
     finally:
         dur_ms = round((time.perf_counter() - start) * 1000, 2)
         # uzupełnij span
-        if "status" in locals():
-            span.set_attribute("http.status_code", status)
+        if "response" in locals():
+            span.set_attribute("http.status_code", response.status_code)
         span.set_attribute("app.duration_ms", dur_ms)
         # access-log (INFO)
         logger.bind(
@@ -160,7 +162,7 @@ async def logging_tracing_middleware(request, call_next):
             correlation_id=corr,
             http_method=request.method,
             http_path=request.url.path,
-            http_status=status if "status" in locals() else None,
+            http_status=(response.status_code if "response" in locals() else None),
             duration_ms=dur_ms,
         ).info("HTTP request handled")
 
