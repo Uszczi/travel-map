@@ -18,6 +18,8 @@ class Settings(BaseSettings):
     DB_CONNECTION_STR: str
     DB_ASYNC_CONNECTION_STR: str
 
+    PROMETHEUS_MULTIPROC_DIR: str
+
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
 
