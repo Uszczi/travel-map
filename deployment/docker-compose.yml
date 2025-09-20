@@ -102,7 +102,7 @@ services:
       - "3200:3200"   # HTTP (querier/query-frontend API, metrics)
       - "9095:9095"   # gRPC (query-frontend <-> querier)
     volumes:
-      - ./tempo-config.yml:/etc/tempo/config.yml:ro
+      - ../tempo-config.yml:/etc/tempo/config.yml:ro
       - tempo-data:/var/tempo
 
 
@@ -119,7 +119,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro # autodiscovery kontenerów
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - ./alloy-config.river:/etc/alloy/config.river:ro
+      - ../alloy-config.river:/etc/alloy/config.river:ro
     depends_on:
       - loki
       - tempo
