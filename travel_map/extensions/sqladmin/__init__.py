@@ -7,6 +7,11 @@ from travel_map.settings import settings
 
 
 def include_sqladmin(app: FastAPI) -> None:
-    admin = Admin(app, engine, base_url=settings.URL_PREFIX + "/backoffice")
+    if settings.URL_PREFIX:
+        base_url = f"/{settings.URL_PREFIX}/backoffice"
+    else:
+        base_url = "/backoffice"
+
+    admin = Admin(app, engine, base_url=base_url)
 
     admin.add_view(UserAdmin)
