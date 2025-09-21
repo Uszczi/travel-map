@@ -1,13 +1,15 @@
-// ======= Odkrywanie kontenerów Docker po gnieździe dockera
+logging {
+  level  = "debug"
+  format = "logfmt"
+}
+
 discovery.docker "compose" {
   host             = "unix:///var/run/docker.sock"
   refresh_interval = "10s"
 }
 
-// ======= Relabel: trzymaj tylko usługę z docker-compose o nazwie "app"
 discovery.relabel "only_app" {
   targets = discovery.docker.compose.targets
-
   rule {
     action        = "keep"
     source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
@@ -15,16 +17,17 @@ discovery.relabel "only_app" {
   }
 }
 
-// ======= Źródło logów z Dockera (kontenery wyfiltrowane powyżej)
 loki.source.docker "app" {
-  host             = "unix:///var/run/docker.sock"
+  host       = "unix:///var/run/docker.sock"
   targets    = discovery.relabel.only_app.output
-  forward_to = [loki.process.app.receiver]
+  forward_to = [loki.process.app_json.receiver, loki.process.app_plain.receiver]
 }
 
-// ======= Przetwarzanie JSON wg Twojego formatu
-loki.process "app" {
+loki.process "app_json" {
+  stage.drop { expression = "^[^{]" }
+
   stage.json {
+    drop_malformed = false
     expressions = {
       timestamp      = "timestamp",
       level          = "level",
@@ -42,19 +45,6 @@ loki.process "app" {
     }
   }
 
-  // Użyj czasu z logu (RFC3339/RFC3339Nano; najlepiej UTC)
-  stage.timestamp {
-    source = "timestamp"
-    format = "RFC3339Nano"
-    // timezone = "UTC" // odkomentuj, jeśli w logu brak strefy
-  }
-
-  // (opcjonalnie) odrzuć bardzo stare linie
-//  stage.drop {
-//    older_than          = "90s"
-//    drop_counter_reason = "line_too_old"
-//  }
-
   stage.labels {
     values = {
       job     = "docker",
@@ -62,6 +52,7 @@ loki.process "app" {
       env     = "env",
       version = "version",
       level   = "level",
+      parsed  = "json",
     }
   }
 
@@ -77,16 +68,25 @@ loki.process "app" {
     }
   }
 
-  stage.output { source = "message" }
+  forward_to = [loki.write.default.receiver]
+}
+
+loki.process "app_plain" {
+  stage.drop { expression = "^\\s*\\{" }
+
+  stage.static_labels {
+    values = {
+      job     = "docker",
+      service = "app",
+      env     = "dev",
+      parsed  = "plain",
+    }
+  }
 
   forward_to = [loki.write.default.receiver]
 }
 
-// ======= Wysyłka do Loki
 loki.write "default" {
   endpoint { url = "http://loki:3100/loki/api/v1/push" }
-
-  external_labels = {
-    cluster = "dev",
-  }
+  external_labels = { cluster = "dev" }
 }

@@ -23,4 +23,4 @@ RUN mkdir -p /tmp/prometheus_multiproc
 COPY . .
 RUN uv pip install -e .
 
-CMD ["uv", "run", "uvicorn", "travel_map.app:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+CMD ["uv", "run", "uvicorn", "travel_map.app:app", "--host", "0.0.0.0", "--port", "8000", "--reload", "--no-access-log"]
