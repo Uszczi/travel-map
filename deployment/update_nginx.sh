@@ -15,6 +15,7 @@ SITES_ENABLED="/etc/nginx/sites-enabled"
 echo "Updating nginx sites-enabled."
 echo "Removing files."
 rm -f "$SITES_ENABLED/default" \
+      "$SITES_ENABLED/api.conf" \
       "$SITES_ENABLED/grafana.conf" \
       "$SITES_ENABLED/prometheus.conf"
 
