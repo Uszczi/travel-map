@@ -2,7 +2,7 @@ import uuid as uuid_pkg
 from datetime import datetime, timezone
 
 from pydantic import BaseModel, computed_field
-from sqlalchemy import Column, text
+from sqlalchemy import Column, UniqueConstraint, text
 from sqlalchemy.types import DateTime
 from sqlmodel import Field, SQLModel
 
@@ -79,4 +79,6 @@ class TimestampModel(SQLModel):
 
 
 class UserModel(UUIDModel, TimestampModel, table=True):
-    email: str
+    __table_args__ = (UniqueConstraint("email", name="uq_user_email"),)
+
+    email: str = Field(primary_key=True)
