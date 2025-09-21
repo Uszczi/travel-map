@@ -2,6 +2,7 @@ import datetime
 import subprocess
 
 from fastapi import APIRouter
+from loguru import logger
 
 router = APIRouter()
 start_time = datetime.datetime.now(datetime.timezone.utc)
@@ -9,6 +10,7 @@ start_time = datetime.datetime.now(datetime.timezone.utc)
 
 @router.get("/")
 def read_root():
+    logger.info("Hello World.")
     return {"Hello": "World"}
 
 
