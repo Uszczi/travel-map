@@ -24,6 +24,7 @@ from opentelemetry.trace import Span, Status, StatusCode
 from travel_map.api import include_routers, init_sentry, setup_middlewares
 from travel_map.extensions.lifespan import lifespan
 from travel_map.extensions.prometheus import include_prometheus
+from travel_map.extensions.sqladmin import include_sqladmin
 from travel_map.settings import settings
 
 # ======= ENV =======
@@ -117,6 +118,8 @@ setup_middlewares(app)
 include_routers(app)
 
 include_prometheus(app)
+
+include_sqladmin(app)
 
 FastAPIInstrumentor.instrument_app(app, tracer_provider=provider)
 RequestsInstrumentor().instrument()
