@@ -111,7 +111,7 @@ tracer = trace.get_tracer(__name__)
 
 init_sentry()
 
-app = FastAPI(lifespan=lifespan, root_path=settings.URL_PREFIX)
+app = FastAPI(lifespan=lifespan)
 
 setup_middlewares(app)
 
