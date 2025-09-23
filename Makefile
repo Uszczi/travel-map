@@ -70,6 +70,10 @@ local_check:
 local_test:
 	uv run pytest
 
+local_vulture:
+	uv run vulture travel_map \
+	  --ignore-decorators "@router.get,@router.post,@router.put,@router.delete,@router.patch,@app.get,@app.post,@app.put,@app.delete,@app.patch"
+
 l-install: local_install
 
 l-lint: local_lint
@@ -79,6 +83,8 @@ l-check: local_check
 l-run: local_run
 
 l-test: local_test
+
+l-vulture: local_vulture
 
 lock_dependencies:
 	docker compose run --rm --no-deps app uv lock
