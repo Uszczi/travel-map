@@ -15,11 +15,11 @@ engine = create_engine(settings.DB_CONNECTION_STR, echo=True)
 async_engine = create_async_engine(
     settings.DB_ASYNC_CONNECTION_STR, echo=True, future=True
 )
+async_session = sessionmaker(
+    bind=async_engine, class_=AsyncSession, expire_on_commit=False
+)
 
 
 async def get_async_session() -> AsyncIterator[AsyncSession]:
-    async_session = sessionmaker(
-        bind=async_engine, class_=AsyncSession, expire_on_commit=False
-    )
     async with async_session() as session:
         yield session

@@ -12,6 +12,11 @@ services:
     command: "uvicorn travel_map.app:app --host 0.0.0.0 --port 8000 --reload --no-access-log"
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    depends_on:
+      - db
+      - redis
+      - mongodb
+      - mailhog
 
   mongodb:
     image: mongo
@@ -96,17 +101,15 @@ services:
       - loki-data:/loki
     ports: ["3100:3100"]
 
-
   tempo:
     image: grafana/tempo:2.6.0
     command: ["-config.file=/etc/tempo/config.yml"]
     ports:
-      - "3200:3200"   # HTTP (querier/query-frontend API, metrics)
-      - "9095:9095"   # gRPC (query-frontend <-> querier)
+      - "3200:3200"
+      - "9095:9095"
     volumes:
       - ./tempo-config.yml:/etc/tempo/config.yml:ro
       - tempo-data:/var/tempo
-
 
   alloy:
     image: grafana/alloy:latest
@@ -115,17 +118,23 @@ services:
       - --server.http.listen-addr=0.0.0.0:12345
       - /etc/alloy/config.river
     ports:
-      - "4317:4317" # OTLP gRPC (aplikacje → Alloy)
-      - "4318:4318" # OTLP HTTP (aplikacje → Alloy)
-      - "12345:12345" # Alloy UI (opcjonalnie)
+      - "4317:4317"
+      - "4318:4318"
+      - "12345:12345"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro # autodiscovery kontenerów
+      - /var/run/docker.sock:/var/run/docker.sock:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - ./alloy-config.river:/etc/alloy/config.river:ro
     depends_on:
       - loki
       - tempo
 
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
 
 volumes:
   redis-data:

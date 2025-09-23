@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Activate your account</title>
+  <meta name="x-apple-disable-message-reformatting">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body style="margin:0;padding:0;background:#f7f7f8;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f7f7f8;">
+    <tr>
+      <td align="center" style="padding:24px;">
+        <table role="presentation" width="560" cellpadding="0" cellspacing="0" border="0" style="width:560px;max-width:100%;background:#ffffff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);">
+          <tr>
+            <td style="padding:24px;font-family:Arial,Helvetica,sans-serif;color:#555555;font-size:14px;line-height:1.5;">
+              <p style="margin:0 0 8px 0;">Hi{% if user_name %} {{ user_name }}{% endif %},</p>
+              <h2 style="margin:0 0 8px 0;color:#111111;font-size:22px;font-weight:700;">Activate your account</h2>
+              <p style="margin:0 0 16px 0;color:#222222;font-size:16px;">
+                To finish signing up for <strong>{{ app_name or "our app" }}</strong>, click the button below:
+              </p>
+              <p style="margin:18px 0;">
+                <a href="{{ activation_url }}" target="_blank" rel="noopener"
+                   style="display:inline-block;background:#0ea5e9;color:#ffffff;text-decoration:none;
+                          font-weight:600;font-size:16px;padding:12px 18px;border-radius:10px;">
+                  Activate Account
+                </a>
+              </p>
+              <p style="margin:0 0 8px 0;">If the button doesn’t work, copy and paste this link into your browser:</p>
+              <p style="margin:0 0 16px 0;word-break:break-all;font-family:Consolas,Monaco,monospace;color:#111111;">
+                {{ activation_url }}
+              </p>
+
+              {% if token_expires_minutes %}
+              <p style="margin:0 0 16px 0;color:#666666;font-size:14px;">
+                This activation link will expire in {{ token_expires_minutes }} minutes.
+              </p>
+              {% endif %}
+
+              <hr style="border:none;border-top:1px solid #eeeeee;margin:16px 0;">
+
+              <p style="margin:0 0 4px 0;color:#666666;font-size:13px;">
+                Didn’t create an account? Please ignore this email or contact us at
+                <a href="mailto:{{ support_email }}" style="color:#0ea5e9;text-decoration:underline;">{{ support_email }}</a>.
+              </p>
+              <p style="margin:8px 0 0 0;color:#777777;font-size:12px;">
+                This is an automated message — please do not reply.
+              </p>
+            </td>
+          </tr>
+        </table>
+        <div style="height:24px;line-height:24px;">&nbsp;</div>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
