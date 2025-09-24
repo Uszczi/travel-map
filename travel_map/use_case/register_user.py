@@ -8,7 +8,12 @@ from travel_map.services.email import EmailService, send_activation_email
 
 class RegisterUserCommand(BaseModel):
     email: EmailStr
+    hashed_password: str
     locale: Locale = Locale.PL
+
+
+class UserAlreadyRegistered(Exception):
+    pass
 
 
 class RegisterUserUseCase:
@@ -20,9 +25,9 @@ class RegisterUserUseCase:
         async with self.uow as uow:
             existing = await uow.users.get_by_email(cmd.email)
             if existing:
-                raise ValueError("Email already used.")
+                raise UserAlreadyRegistered()
 
-            user = UserModel(email=cmd.email, is_active=False)
+            user = UserModel(**cmd.model_dump())
 
             uow.users.add(user)
             await uow.commit()

@@ -2,12 +2,15 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from typing import Protocol
+from uuid import UUID
 
 from travel_map.models import UserModel
 
 
 class UserRepository(Protocol):
     async def get_by_email(self, email: str) -> UserModel | None: ...
+
+    async def get(self, uid: UUID | str) -> UserModel | None: ...
 
     def add(self, user: UserModel) -> UserModel: ...
 

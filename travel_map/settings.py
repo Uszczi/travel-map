@@ -31,6 +31,11 @@ class Settings(BaseSettings):
     MAIL_SSL_TLS: bool = True
     MAIL_VALIDATE_CERTS: bool = True
 
+    JWT_ACCESS_LIFETIME_S: int = 15 * 60  # 15 minutes
+    JWT_REFRESH_LIFETIME_S: int = 30 * 24 * 3600  # 30 days
+    JWT_ACCESS_SECRET: SecretStr
+    JWT_REFRESH_SECRET: SecretStr
+
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
 
