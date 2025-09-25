@@ -48,6 +48,7 @@ def issue_access_token(user: UserModel) -> str:
     return generate_jwt(
         data={
             "sub": str(user.uuid),
+            "aud": "access",
             "typ": "access",
         },
         secret=settings.JWT_ACCESS_SECRET,
@@ -60,6 +61,7 @@ def issue_refresh_token(user: UserModel) -> str:
     return generate_jwt(
         data={
             "sub": str(user.uuid),
+            "aud": "refresh",
             "typ": "refresh",
         },
         secret=settings.JWT_REFRESH_SECRET,
