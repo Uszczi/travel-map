@@ -1,9 +1,12 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import SecretStr
 
+from travel_map.dependencies import get_current_user
+from travel_map.models import UserModel
 from travel_map.password import PasswordHelper
 from travel_map.serializers.input.user import UserDetails, UserRegister
 from travel_map.use_case import (
@@ -32,6 +35,14 @@ JWT_ALGORITHM = "HS256"
 ACCESS_AUD = "access"
 REFRESH_AUD = "refresh"
 
+ACCESS_COOKIE_NAME = "access_token"
+REFRESH_COOKIE_NAME = "refresh_token"
+# W dev na http://localhost ustaw SECURE_COOKIES=False. W produkcji -> True (HTTPS)!
+SECURE_COOKIES = False
+# Jeżeli znasz realny czas życia tokenów, wpisz go tu (sekundy).
+ACCESS_COOKIE_MAX_AGE = 15 * 60  # 15 min
+REFRESH_COOKIE_MAX_AGE = 30 * 24 * 3600  # 30 dni
+
 
 @router.post("/login")
 async def login(
@@ -45,12 +56,29 @@ async def login(
             )
         )
     except InvalidCredentials:
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid username or password.",
-        )
+        raise HTTPException(status_code=400, detail="Invalid username or password.")
 
-    return tokens
+    resp = JSONResponse(content=tokens.model_dump())
+
+    resp.set_cookie(
+        key=ACCESS_COOKIE_NAME,
+        value=tokens.access_token,
+        httponly=True,
+        secure=SECURE_COOKIES,
+        samesite="lax",
+        max_age=ACCESS_COOKIE_MAX_AGE,
+        path="/",
+    )
+    resp.set_cookie(
+        key=REFRESH_COOKIE_NAME,
+        value=tokens.refresh_token,
+        httponly=True,
+        secure=SECURE_COOKIES,
+        samesite="lax",
+        max_age=REFRESH_COOKIE_MAX_AGE,
+        path="/",
+    )
+    return resp
 
 
 @router.post("/refresh")
@@ -77,3 +105,8 @@ async def register(
         )
 
     return user
+
+
+@router.get("/me")
+async def me(user: UserModel = Depends(get_current_user)) -> UserDetails:
+    return user  # type: ignore

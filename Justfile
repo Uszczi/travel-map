@@ -24,7 +24,7 @@ test:
 	{{COMPOSE}} run --rm {{APP_SVC}} pytest
 
 lint:
-	{{COMPOSE}} run --rm --no-deps {{APP_SVC}} sh -lc '\
+	{{COMPOSE}} run --rm --no-deps {{APP_SVC}} sh -c '\
 		ruff check --fix . && \
 		ruff check --fix --select I . && \
 		black . && \
@@ -32,7 +32,7 @@ lint:
 	'
 
 check:
-	{{COMPOSE}} run --rm --no-deps {{APP_SVC}} sh -lc '\
+	{{COMPOSE}} run --rm --no-deps {{APP_SVC}} sh -c '\
 		ruff check . && \
 		ruff check --select I . && \
 		black --check . && \
@@ -40,6 +40,7 @@ check:
 	'
 
 run_migrations:
+	{{COMPOSE}} run --no-deps -d {{DB_SVC}}
 	{{COMPOSE}} run --rm --no-deps {{APP_SVC}} alembic upgrade head
 
 create_migrations +msg:
@@ -105,3 +106,10 @@ l-check:
 l-vulture:
 	uv run vulture travel_map \
 	  --ignore-decorators "@router.get,@router.post,@router.put,@router.delete,@router.patch,@app.get,@app.post,@app.put,@app.delete,@app.patch"
+
+# HTTPIE
+login:
+	http --session=ses0 --form POST {{BASE_URL}}/login username=admin@email.com password=Password12!
+
+me:
+	http --session=ses0 {{BASE_URL}}/me
