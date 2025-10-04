@@ -1,13 +1,9 @@
-from pydantic import BaseModel, EmailStr
 import jwt
+from fastapi import HTTPException
 
-from fastapi import Depends, HTTPException, Request, status
-from travel_map.settings import settings
-from travel_map.domain.locale import Locale
 from travel_map.domain.ports import UnitOfWork
-from travel_map.jwt import decode_jwt, issue_activation_token
-from travel_map.models import UserModel
-from travel_map.services.email import EmailService, send_activation_email
+from travel_map.jwt import decode_jwt
+from travel_map.settings import settings
 
 ACTIVATION_AUD = "activation"
 

@@ -1,11 +1,11 @@
 from pydantic import BaseModel, EmailStr
 
-from travel_map.settings import settings
 from travel_map.domain.locale import Locale
 from travel_map.domain.ports import UnitOfWork
 from travel_map.jwt import issue_activation_token
 from travel_map.models import UserModel
 from travel_map.services.email import EmailService, send_activation_email
+from travel_map.settings import settings
 
 
 class RegisterUserCommand(BaseModel):

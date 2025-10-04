@@ -1,8 +1,5 @@
 from typing import Annotated
 
-import jwt
-from fastapi import APIRouter, HTTPException
-from travel_map.settings import settings
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
@@ -13,13 +10,10 @@ from travel_map.models import UserModel
 from travel_map.password import PasswordHelper
 from travel_map.serializers.input.user import UserDetails, UserRegister
 from travel_map.use_case import (
-    get_verify_user_email_uc,
     get_login_user_uc,
     get_refresh_token_uc,
     get_register_user_uc,
-)
-from travel_map.use_case.activate_user import (
-    VerifyUserEmailUseCase,
+    get_verify_user_email_uc,
 )
 from travel_map.use_case.login_user import (
     InvalidCredentials,
@@ -34,6 +28,9 @@ from travel_map.use_case.register_user import (
     RegisterUserCommand,
     RegisterUserUseCase,
     UserAlreadyRegistered,
+)
+from travel_map.use_case.verify_user_email import (
+    VerifyUserEmailUseCase,
 )
 
 router = APIRouter()
