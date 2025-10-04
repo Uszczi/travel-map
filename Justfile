@@ -40,17 +40,13 @@ check:
 	'
 
 run_migrations:
-	{{COMPOSE}} run --no-deps -d {{DB_SVC}}
+	{{COMPOSE}} up --no-deps -d {{DB_SVC}}
+	sleep 1
 	{{COMPOSE}} run --rm --no-deps {{APP_SVC}} alembic upgrade head
 
-create_migrations +msg:
-	MSG='{{join(msg, " ")}}'
-	if [ -z "$MSG" ]; then
-	echo "Please provide a migration message, e.g.: just create_migrations init" >&2
-	exit 1
-	fi
+create_migrations msg:
 	{{COMPOSE}} run --rm --no-deps {{APP_SVC}} \
-		alembic revision --autogenerate -m "$$MSG"
+	alembic revision --autogenerate -m '{{msg}}'
 
 clear_db:
 	{{COMPOSE}} rm -fs {{DB_SVC}}
@@ -108,6 +104,9 @@ l-vulture:
 	  --ignore-decorators "@router.get,@router.post,@router.put,@router.delete,@router.patch,@app.get,@app.post,@app.put,@app.delete,@app.patch"
 
 # HTTPIE
+register email:
+	http POST {{BASE_URL}}/register email={{email}} password=Password12!
+
 login:
 	http --session=ses0 --form POST {{BASE_URL}}/login username=admin@email.com password=Password12!
 

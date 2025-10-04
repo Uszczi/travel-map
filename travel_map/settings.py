@@ -3,6 +3,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    APP_BASE_URL: str
     ALLOWED_ORIGINS: list[str]
     URL_PREFIX: str
     SENTRY_SDK: str
@@ -33,8 +34,10 @@ class Settings(BaseSettings):
 
     JWT_ACCESS_LIFETIME_S: int = 15 * 60  # 15 minutes
     JWT_REFRESH_LIFETIME_S: int = 30 * 24 * 3600  # 30 days
+    JWT_ACTIVATION_LIFETIME_S: int = 7 * 24 * 3600  # 7 days
     JWT_ACCESS_SECRET: SecretStr
     JWT_REFRESH_SECRET: SecretStr
+    JWT_EMAIL_SECRET: SecretStr
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

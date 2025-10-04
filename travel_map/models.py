@@ -81,3 +81,4 @@ class TimestampModel(SQLModel):
 class UserModel(UUIDModel, TimestampModel, table=True):
     email: str = Field(sa_column=Column(String(255), nullable=False, unique=True))
     hashed_password: str = Field(sa_column=Column(String(255), nullable=False))
+    is_email_verified: bool = False

@@ -1,5 +1,8 @@
 from typing import Annotated
 
+import jwt
+from fastapi import APIRouter, HTTPException
+from travel_map.settings import settings
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
@@ -10,9 +13,13 @@ from travel_map.models import UserModel
 from travel_map.password import PasswordHelper
 from travel_map.serializers.input.user import UserDetails, UserRegister
 from travel_map.use_case import (
+    get_verify_user_email_uc,
     get_login_user_uc,
     get_refresh_token_uc,
     get_register_user_uc,
+)
+from travel_map.use_case.activate_user import (
+    VerifyUserEmailUseCase,
 )
 from travel_map.use_case.login_user import (
     InvalidCredentials,
@@ -31,6 +38,7 @@ from travel_map.use_case.register_user import (
 
 router = APIRouter()
 
+# TODO remove it from there
 JWT_ALGORITHM = "HS256"
 ACCESS_AUD = "access"
 REFRESH_AUD = "refresh"
@@ -105,6 +113,14 @@ async def register(
         )
 
     return user
+
+
+@router.get("/activate")
+async def activate_account(
+    token: str, uc: VerifyUserEmailUseCase = Depends(get_verify_user_email_uc)
+):
+    msg = await uc(token)
+    return msg
 
 
 @router.get("/me")

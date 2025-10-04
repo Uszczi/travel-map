@@ -1,7 +1,9 @@
 from pydantic import BaseModel, EmailStr
 
+from travel_map.settings import settings
 from travel_map.domain.locale import Locale
 from travel_map.domain.ports import UnitOfWork
+from travel_map.jwt import issue_activation_token
 from travel_map.models import UserModel
 from travel_map.services.email import EmailService, send_activation_email
 
@@ -32,9 +34,8 @@ class RegisterUserUseCase:
             uow.users.add(user)
             await uow.commit()
 
-        # TODO
-        token = "GENERATED_TOKEN"
-        activation_url = f"https://yourapp.com/activate?token={token}"
+        token = issue_activation_token(user)
+        activation_url = f"{settings.APP_BASE_URL}/activate?token={token}"
 
         await send_activation_email(
             email_service=self.email_service,

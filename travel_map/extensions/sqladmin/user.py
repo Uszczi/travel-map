@@ -13,6 +13,9 @@ def fmt_dt(dt):
 
 
 class UserAdmin(ModelView, model=UserModel):
+    column_details_exclude_list = [
+        UserModel.hashed_password,
+    ]
     column_list = [
         UserModel.uuid,
         UserModel.email,
