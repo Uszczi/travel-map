@@ -8,12 +8,23 @@ from pydantic import SecretStr
 from travel_map.dependencies import get_current_user
 from travel_map.models import UserModel
 from travel_map.password import PasswordHelper
-from travel_map.serializers.input.user import UserDetails, UserRegister
+from travel_map.serializers.input.user import (
+    UserConfimPasswordReset,
+    UserDetails,
+    UserEmail,
+    UserRegister,
+)
 from travel_map.use_case import (
+    get_confirm_password_reset_uc,
     get_login_user_uc,
     get_refresh_token_uc,
     get_register_user_uc,
+    get_request_password_reset_uc,
     get_verify_user_email_uc,
+)
+from travel_map.use_case.confirm_password_reset import (
+    ConfirmPasswordResetCommand,
+    ConfirmPasswordResetUseCase,
 )
 from travel_map.use_case.login_user import (
     InvalidCredentials,
@@ -28,6 +39,9 @@ from travel_map.use_case.register_user import (
     RegisterUserCommand,
     RegisterUserUseCase,
     UserAlreadyRegistered,
+)
+from travel_map.use_case.request_password_reset import (
+    RequestPasswordResetUseCase,
 )
 from travel_map.use_case.verify_user_email import (
     VerifyUserEmailUseCase,
@@ -114,10 +128,36 @@ async def register(
 
 @router.get("/activate")
 async def activate_account(
-    token: str, uc: VerifyUserEmailUseCase = Depends(get_verify_user_email_uc)
+    token: str,
+    uc: VerifyUserEmailUseCase = Depends(get_verify_user_email_uc),
 ):
     msg = await uc(token)
     return msg
+
+
+@router.post("/password-reset")
+async def request_password_reset(
+    data: UserEmail,
+    uc: RequestPasswordResetUseCase = Depends(get_request_password_reset_uc),
+):
+    await uc(email=data.email)
+    return {"message": "If the email exists, a reset link has been sent."}
+
+
+@router.post("/password-reset/confirm")
+async def confirm_password_reset(
+    data: UserConfimPasswordReset,
+    uc: ConfirmPasswordResetUseCase = Depends(get_confirm_password_reset_uc),
+):
+    await uc(
+        ConfirmPasswordResetCommand(
+            token=data.token,
+            new_password=SecretStr(
+                PasswordHelper().hash(data.password.get_secret_value())
+            ),
+        )
+    )
+    return {"message": "Password changed."}
 
 
 @router.get("/me")

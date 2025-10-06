@@ -42,10 +42,17 @@ def get_email_service() -> EmailService:
 
 class EmailTemplate(StrEnum):
     ACTIVATION = "account_activation.html"
+    PASSWORD_RESET = "password_reset.html"
 
 
-EMAIL_TITLE_PL = {EmailTemplate.ACTIVATION: "Aktywuj swoje konto"}
-EMAIL_TITLE_EN = {EmailTemplate.ACTIVATION: "Activate your account"}
+EMAIL_TITLE_PL = {
+    EmailTemplate.ACTIVATION: "Aktywuj swoje konto",
+    EmailTemplate.PASSWORD_RESET: "Zresetuj swoje hasło",
+}
+EMAIL_TITLE_EN = {
+    EmailTemplate.ACTIVATION: "Activate your account",
+    EmailTemplate.PASSWORD_RESET: "Reset your password",
+}
 
 TITLES = {Locale.PL: EMAIL_TITLE_PL, Locale.EN: EMAIL_TITLE_EN}
 
@@ -54,11 +61,16 @@ def get_email_template(locale: Locale, name: EmailTemplate):
     return f"{locale}/email/{name}"
 
 
+def get_email_plain_template(locale: Locale, name: EmailTemplate) -> str:
+    path = get_email_template(locale, name)
+    path = path.replace(".html", ".txt")
+    return path
+
+
 def get_email_subject(locale: Locale, name: EmailTemplate):
     return TITLES[locale][name]
 
 
-# TODO move it to EmailService or remove TODO
 async def send_activation_email(
     email_service: EmailService,
     recipient_email: str,
@@ -77,4 +89,36 @@ async def send_activation_email(
     await email_service.fm.send_message(
         message,
         template_name=get_email_template(locale, EmailTemplate.ACTIVATION),
+    )
+
+
+async def send_password_reset_email(
+    email_service: EmailService,
+    recipient_email: str,
+    reset_url: str,
+    locale: Locale,
+    *,
+    token_expires_minutes: int | None = None,
+    user_name: str | None = None,
+) -> None:
+    template_body = {
+        "reset_url": reset_url,
+        # TODO fix this
+        "app_name": getattr(settings, "APP_NAME", "our app"),
+        "support_email": getattr(settings, "SUPPORT_EMAIL", "support@example.com"),
+        "token_expires_minutes": 30,
+        "user_name": user_name,
+    }
+
+    message = MessageSchema(
+        subject=get_email_subject(locale, EmailTemplate.PASSWORD_RESET),
+        recipients=[recipient_email],
+        subtype=MessageType.html,
+        template_body=template_body,
+    )
+
+    await email_service.fm.send_message(
+        message,
+        template_name=get_email_template(locale, EmailTemplate.PASSWORD_RESET),
+        plain_template=get_email_plain_template(locale, EmailTemplate.PASSWORD_RESET),
     )

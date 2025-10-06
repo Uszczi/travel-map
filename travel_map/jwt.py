@@ -9,7 +9,11 @@ from travel_map.models import UserModel
 from travel_map.settings import settings
 
 SecretType = Union[str, SecretStr]
+
 JWT_ALGORITHM = "HS256"
+PASSWORD_RESET_AUD = "password_reset"
+ACCESS_AUD = "access"
+REFRESH_AUD = "refresh"
 
 
 def _get_secret_value(secret: SecretType) -> str:
@@ -49,8 +53,8 @@ def issue_access_token(user: UserModel) -> str:
     return generate_jwt(
         data={
             "sub": str(user.uuid),
-            "aud": "access",
-            "typ": "access",
+            "aud": ACCESS_AUD,
+            "typ": ACCESS_AUD,
             "jti": str(uuid4()),
         },
         secret=settings.JWT_ACCESS_SECRET,
@@ -63,8 +67,8 @@ def issue_refresh_token(user: UserModel) -> str:
     return generate_jwt(
         data={
             "sub": str(user.uuid),
-            "aud": "refresh",
-            "typ": "refresh",
+            "aud": REFRESH_AUD,
+            "typ": REFRESH_AUD,
             "jti": str(uuid4()),
         },
         secret=settings.JWT_REFRESH_SECRET,
@@ -85,4 +89,17 @@ def issue_activation_token(user: UserModel) -> str:
         secret=settings.JWT_EMAIL_SECRET,
         lifetime_seconds=settings.JWT_ACTIVATION_LIFETIME_S,
         algorithm=JWT_ALGORITHM,
+    )
+
+
+def issue_password_reset_token(user: UserModel) -> str:
+    return generate_jwt(
+        data={
+            "sub": str(user.uuid),
+            "aud": PASSWORD_RESET_AUD,
+            "typ": PASSWORD_RESET_AUD,
+            "jti": str(uuid4()),
+        },
+        secret=settings.JWT_EMAIL_SECRET,
+        lifetime_seconds=settings.JWT_PASSWORD_RESET_LIFETIME_S,
     )

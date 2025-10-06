@@ -5,8 +5,7 @@ from pydantic import EmailStr, SecretStr, StringConstraints, field_validator
 from sqlmodel import SQLModel
 
 
-class UserRegister(SQLModel):
-    email: EmailStr
+class PasswordSchema(SQLModel):
     password: Annotated[SecretStr, StringConstraints(min_length=8, max_length=72)]
 
     @field_validator("password")
@@ -24,5 +23,18 @@ class UserRegister(SQLModel):
         return vv
 
 
+class UserRegister(PasswordSchema):
+    email: EmailStr
+
+
+class UserEmail(SQLModel):
+    email: EmailStr
+
+
+class UserConfimPasswordReset(PasswordSchema):
+    token: str
+
+
+# TODO remove it from there
 class UserDetails(SQLModel):
     email: EmailStr

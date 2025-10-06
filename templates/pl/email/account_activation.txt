@@ -1,0 +1,14 @@
+Cześć{% if user_name %} {{ user_name }}{% endif %},
+
+Aby dokończyć rejestrację w {{ app_name or "naszej aplikacji" }}, kliknij poniższy link, aby aktywować swoje konto:
+{{ activation_url }}
+
+{% if token_expires_minutes %}
+Pamiętaj: link aktywacyjny wygaśnie za {{ token_expires_minutes }} minut.
+{% endif %}
+
+Jeśli przycisk w wiadomości nie działa, możesz skopiować powyższy link i wkleić go do przeglądarki.
+
+Nie zakładałeś(-aś) konta? Zignoruj tę wiadomość lub skontaktuj się z nami: {{ support_email }}.
+
+Wiadomość wygenerowana automatycznie — prosimy nie odpowiadać bezpośrednio.

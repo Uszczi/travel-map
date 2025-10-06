@@ -112,3 +112,6 @@ login:
 
 me:
 	http --session=ses0 {{BASE_URL}}/me
+
+request-password-reset:
+	http {{BASE_URL}}/password-reset email=admin@email.com

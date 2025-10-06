@@ -1,0 +1,14 @@
+Hi{% if user_name %} {{ user_name }}{% endif %},
+
+To finish signing up for {{ app_name or "our app" }}, please click the link below to activate your account:
+{{ activation_url }}
+
+{% if token_expires_minutes %}
+Please note: this activation link will expire in {{ token_expires_minutes }} minutes.
+{% endif %}
+
+If the button in the email doesn’t work, you can copy and paste the link above into your browser.
+
+If you didn’t create an account, please ignore this email or contact us at {{ support_email }}.
+
+This is an automated message — please do not reply.

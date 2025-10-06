@@ -35,6 +35,7 @@ class Settings(BaseSettings):
     JWT_ACCESS_LIFETIME_S: int = 15 * 60  # 15 minutes
     JWT_REFRESH_LIFETIME_S: int = 30 * 24 * 3600  # 30 days
     JWT_ACTIVATION_LIFETIME_S: int = 7 * 24 * 3600  # 7 days
+    JWT_PASSWORD_RESET_LIFETIME_S: int = 30 * 60  # 30 minutes
     JWT_ACCESS_SECRET: SecretStr
     JWT_REFRESH_SECRET: SecretStr
     JWT_EMAIL_SECRET: SecretStr
