@@ -5,7 +5,6 @@ from sqlmodel import SQLModel
 
 from travel_map.domain.ports import UnitOfWork
 from travel_map.jwt import PASSWORD_RESET_AUD, decode_jwt
-from travel_map.password import PasswordHelper
 from travel_map.settings import settings
 
 
@@ -42,7 +41,6 @@ class ConfirmPasswordResetUseCase:
             if not user:
                 raise HTTPException(status_code=404, detail="User not found.")
 
-            hashed = PasswordHelper().hash(cmd.new_password.get_secret_value())
-            user.hashed_password = hashed
+            user.hashed_password = cmd.new_password.get_secret_value()
 
             await uow.commit()

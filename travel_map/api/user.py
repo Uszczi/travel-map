@@ -5,6 +5,7 @@ from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import SecretStr
 
+from travel_map.cookies import delete_refresh_cookie, set_refresh_cookie
 from travel_map.dependencies import get_current_user
 from travel_map.models import UserModel
 from travel_map.password import PasswordHelper
@@ -78,25 +79,14 @@ async def login(
         raise HTTPException(status_code=400, detail="Invalid username or password.")
 
     resp = JSONResponse(content=tokens.model_dump())
+    set_refresh_cookie(resp, tokens.refresh_token)
+    return resp
 
-    resp.set_cookie(
-        key=ACCESS_COOKIE_NAME,
-        value=tokens.access_token,
-        httponly=True,
-        secure=SECURE_COOKIES,
-        samesite="lax",
-        max_age=ACCESS_COOKIE_MAX_AGE,
-        path="/",
-    )
-    resp.set_cookie(
-        key=REFRESH_COOKIE_NAME,
-        value=tokens.refresh_token,
-        httponly=True,
-        secure=SECURE_COOKIES,
-        samesite="lax",
-        max_age=REFRESH_COOKIE_MAX_AGE,
-        path="/",
-    )
+
+@router.post("/logout")
+async def logout():
+    resp = JSONResponse({"ok": True})
+    delete_refresh_cookie(resp)
     return resp
 
 
@@ -105,7 +95,10 @@ async def refresh(
     data: RefreshTokenCommand, uc: RefreshTokenUseCase = Depends(get_refresh_token_uc)
 ):
     tokens = await uc(data)
-    return tokens
+
+    resp = JSONResponse(content=tokens.model_dump())
+    set_refresh_cookie(resp, tokens.refresh_token)
+    return resp
 
 
 @router.post("/register")
@@ -153,7 +146,7 @@ async def confirm_password_reset(
         ConfirmPasswordResetCommand(
             token=data.token,
             new_password=SecretStr(
-                PasswordHelper().hash(data.password.get_secret_value())
+                PasswordHelper().hash(data.password)  # type: ignore
             ),
         )
     )
