@@ -3,6 +3,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    ENV: str
+
     APP_BASE_URL: str
     ALLOWED_ORIGINS: list[str]
     URL_PREFIX: str

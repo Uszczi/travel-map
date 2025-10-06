@@ -48,6 +48,12 @@ create_migrations msg:
 	{{COMPOSE}} run --rm --no-deps {{APP_SVC}} \
 	alembic revision --autogenerate -m '{{msg}}'
 
+lock_dependencies:
+	{{COMPOSE}} run --rm --no-deps {{APP_SVC}} uv lock
+
+check_settings:
+	{{COMPOSE}} run --rm --no-deps {{APP_SVC}} python -c "from travel_map.settings import settings; print(settings.ENV)"
+
 clear_db:
 	{{COMPOSE}} rm -fs {{DB_SVC}}
 	docker volume rm {{PGDATA_VOLUME}} || true
@@ -57,10 +63,6 @@ clean:
 
 save_strava:
 	{{COMPOSE}} run --rm {{APP_SVC}} uv run python ./scripts/save_strava_routes.py
-
-lock_dependencies:
-	{{COMPOSE}} run --rm --no-deps {{APP_SVC}} uv lock
-
 # Dependency management
 # Examples:
 #   just add fastapi[standard] httpie
