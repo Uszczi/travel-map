@@ -4,7 +4,7 @@ COMPOSE        := "docker compose"
 APP_SVC        := "app"
 DB_SVC         := "db"
 PGDATA_VOLUME  := "travel-map_pgdata"
-APP_MODULE     := "travel_map.app:app"
+APP_MODULE     := "app.app:app"
 BASE_URL       := "http://127.0.0.1:8000"
 
 
@@ -102,7 +102,7 @@ l-check:
 	uv run ty check
 
 l-vulture:
-	uv run vulture travel_map \
+	uv run vulture app \
 	  --ignore-decorators "@router.get,@router.post,@router.put,@router.delete,@router.patch,@app.get,@app.post,@app.put,@app.delete,@app.patch"
 
 # HTTPIE
