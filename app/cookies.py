@@ -1,6 +1,5 @@
 from fastapi.responses import JSONResponse
 
-
 REFRESH_COOKIE_NAME = "refresh_token"
 SECURE_COOKIES = False
 REFRESH_COOKIE_MAX_AGE = 30 * 24 * 3600  # 30 dni

@@ -2,10 +2,10 @@ import pytest
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from tests.factories import acreate_user
 from app.jwt import issue_refresh_token
 from app.models import UserModel
 from app.password import PasswordHelper
+from tests.factories import acreate_user
 
 
 @pytest.mark.asyncio

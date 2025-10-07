@@ -25,8 +25,7 @@ class RouteGenerator(ABC):
         ignored_edges: list[tuple[int, int]] | None = None,
         ignored_nodes: list[int] | None = None,
         middle_nodes: list[int] | None = None,
-    ) -> list[int]:
-        ...
+    ) -> list[int]: ...
 
     def calculate_min_max_length(self, tolerance, distance) -> tuple[float, float]:
         min_length = distance * (1 - tolerance)

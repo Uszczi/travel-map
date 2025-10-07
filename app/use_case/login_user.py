@@ -10,8 +10,7 @@ class LoginUserCommand(BaseModel):
     password: SecretStr
 
 
-class InvalidCredentials(Exception):
-    ...
+class InvalidCredentials(Exception): ...
 
 
 class TokenPair(BaseModel):
