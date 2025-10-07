@@ -6,8 +6,8 @@ from sqlalchemy.orm import sessionmaker
 from sqlmodel import SQLModel
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from travel_map.app import app
-from travel_map.db import async_engine
+from app.app import app
+from app.db import async_engine
 
 
 @pytest_asyncio.fixture

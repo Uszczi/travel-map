@@ -39,10 +39,10 @@ dependencies = [
 line-length = 120
 
 [tool.ruff.lint.isort]
-known-first-party = ["travel_map"]
+known-first-party = ["app"]
 
 [tool.setuptools.packages.find]
-include = ["travel_map*"]
+include = ["app*"]
 
 [dependency-groups]
 dev = [
@@ -67,7 +67,7 @@ dev = [
 addopts = [
     "-v",
     # "-s",
-    "--cov=travel_map"
+    "--cov=app"
 ]
 
 [tool.uv]

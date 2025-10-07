@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import osmnx as ox
 from shapely.geometry import LineString
 
-from travel_map.api.common import get_or_create_graph
+from app.api.common import get_or_create_graph
 
 P = (1177493762, 1177493777)  # "Środek Piotrkowskiej"
 L = (1177493766, 1177493886)  # "Odnoga na początku Lubelskiej"

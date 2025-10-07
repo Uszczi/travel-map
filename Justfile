@@ -52,7 +52,7 @@ lock_dependencies:
 	{{COMPOSE}} run --rm --no-deps {{APP_SVC}} uv lock
 
 check_settings:
-	{{COMPOSE}} run --rm --no-deps {{APP_SVC}} python -c "from travel_map.settings import settings; print(settings.ENV)"
+	{{COMPOSE}} run --rm --no-deps {{APP_SVC}} python -c "from app.settings import settings; print(settings.ENV)"
 
 clear_db:
 	{{COMPOSE}} rm -fs {{DB_SVC}}

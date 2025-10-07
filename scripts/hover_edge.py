@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
 
-from travel_map.api.common import get_or_create_graph
+from app.api.common import get_or_create_graph
 
 
 def infer_mode_from_highway(hw):

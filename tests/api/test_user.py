@@ -3,9 +3,9 @@ from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from tests.factories import acreate_user
-from travel_map.jwt import issue_refresh_token
-from travel_map.models import UserModel
-from travel_map.password import PasswordHelper
+from app.jwt import issue_refresh_token
+from app.models import UserModel
+from app.password import PasswordHelper
 
 
 @pytest.mark.asyncio

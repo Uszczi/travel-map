@@ -8,7 +8,7 @@ from uuid import UUID
 import factory
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from travel_map.models import UserModel
+from app.models import UserModel
 
 
 class UserFactory(factory.Factory):

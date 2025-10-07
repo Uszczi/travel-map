@@ -9,7 +9,7 @@ from sqlalchemy import engine_from_config, pool
 from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlmodel import SQLModel
 
-from travel_map.models import UserModel  # noqa: F401
+from app.models import UserModel  # noqa: F401
 
 config = context.config
 
