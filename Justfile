@@ -112,6 +112,9 @@ register email:
 login:
 	http --session=ses0 --form POST {{BASE_URL}}/login username=admin@email.com password=Password12!
 
+login-set-access:
+	http --session=ses0 --form POST {{BASE_URL}}/login-set-access username=admin@email.com password=Password12!
+
 me:
 	http --session=ses0 {{BASE_URL}}/me
 

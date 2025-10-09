@@ -5,17 +5,18 @@ from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import SecretStr
 
-from app.cookies import delete_refresh_cookie, set_refresh_cookie
+from app.cookies import delete_refresh_cookie, set_access_cookie, set_refresh_cookie
 from app.dependencies import get_current_user
 from app.models import UserModel
 from app.password import PasswordHelper
 from app.serializers.input.user import (
+    RefreshToken,
     UserConfimPasswordReset,
     UserDetails,
     UserEmail,
     UserRegister,
-    RefreshToken,
 )
+from app.settings import settings
 from app.use_case import (
     get_confirm_password_reset_uc,
     get_login_user_uc,
@@ -82,6 +83,28 @@ async def login(
     resp = JSONResponse(content=tokens.model_dump())
     set_refresh_cookie(resp, tokens.refresh_token)
     return resp
+
+
+if settings.ENV == "local":
+
+    @router.post("/login-set-access")
+    async def login(
+        form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+        uc: LoginUserUserCase = Depends(get_login_user_uc),
+    ):
+        try:
+            tokens = await uc(
+                LoginUserCommand(
+                    username=form_data.username, password=SecretStr(form_data.password)
+                )
+            )
+        except InvalidCredentials:
+            raise HTTPException(status_code=400, detail="Invalid username or password.")
+
+        resp = JSONResponse(content=tokens.model_dump())
+        set_refresh_cookie(resp, tokens.refresh_token)
+        set_access_cookie(resp, tokens.access_token)
+        return resp
 
 
 @router.post("/logout")
