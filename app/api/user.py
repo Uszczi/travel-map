@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Cookie, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import SecretStr
@@ -14,6 +14,7 @@ from app.serializers.input.user import (
     UserDetails,
     UserEmail,
     UserRegister,
+    RefreshToken,
 )
 from app.use_case import (
     get_confirm_password_reset_uc,
@@ -92,9 +93,17 @@ async def logout():
 
 @router.post("/refresh")
 async def refresh(
-    data: RefreshTokenCommand, uc: RefreshTokenUseCase = Depends(get_refresh_token_uc)
+    data: RefreshToken,
+    refresh_cookie: Annotated[str | None, Cookie(alias=REFRESH_COOKIE_NAME)] = None,
+    uc: RefreshTokenUseCase = Depends(
+        get_refresh_token_uc,
+    ),
 ):
-    tokens = await uc(data)
+    token = refresh_cookie or (data.refresh_token if data else None)
+    if not token:
+        raise HTTPException(status_code=401, detail="Missing refresh token")
+
+    tokens = await uc(RefreshTokenCommand(refresh_token=token))
 
     resp = JSONResponse(content=tokens.model_dump())
     set_refresh_cookie(resp, tokens.refresh_token)

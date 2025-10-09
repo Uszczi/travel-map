@@ -35,6 +35,10 @@ class UserConfimPasswordReset(PasswordSchema):
     token: str
 
 
+class RefreshToken(SQLModel):
+    refresh_token: str | None = None
+
+
 # TODO remove it from there
 class UserDetails(SQLModel):
     email: EmailStr
