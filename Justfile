@@ -86,6 +86,9 @@ l-install:
 l-run:
 	uv run uvicorn {{APP_MODULE}} --reload
 
+l-debug:
+	uv run debugpy --wait-for-client --listen 0.0.0.0:5678 -m uvicorn {{APP_MODULE}}
+
 l-test:
 	uv run pytest
 
