@@ -15,13 +15,15 @@ def read_root():
 
 
 def get_version():
-    return (
-        subprocess.check_output(
-            ["awk", 'BEGIN { ORS=" " }; { print $1 }', "./.git/FETCH_HEAD"]
-        )
-        .decode()
-        .strip()
-    )
+    # TODO fix me
+    return "TODO fix"
+    # return (
+    #     subprocess.check_output(
+    #         ["awk", 'BEGIN { ORS=" " }; { print $1 }', "./.git/HEAD"]
+    #     )
+    #     .decode()
+    #     .strip()
+    # )
 
 
 @router.get("/version")
