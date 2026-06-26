@@ -1,5 +1,5 @@
 import datetime
-import subprocess
+from pathlib import Path
 
 from fastapi import APIRouter
 from loguru import logger
@@ -15,15 +15,11 @@ def read_root():
 
 
 def get_version():
-    # TODO fix me
-    return "TODO fix"
-    # return (
-    #     subprocess.check_output(
-    #         ["awk", 'BEGIN { ORS=" " }; { print $1 }', "./.git/HEAD"]
-    #     )
-    #     .decode()
-    #     .strip()
-    # )
+    head = Path("./.git/HEAD").read_text().strip()
+    if head.startswith("ref: "):
+        ref_path = f"./.git/{head[5:]}"
+        return Path(ref_path).read_text().strip()
+    return head
 
 
 @router.get("/version")
