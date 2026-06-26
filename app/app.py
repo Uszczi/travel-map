@@ -22,9 +22,6 @@ app = FastAPI(
 setup_middlewares(app)
 
 include_routers(app)
-
 include_prometheus(app)
-
 # include_alloy(app)
-
 include_sqladmin(app)
