@@ -3,6 +3,8 @@ from unittest.mock import patch
 
 import pytest
 import pytest_asyncio
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.inmemory import InMemoryBackend
 from httpx import ASGITransport, AsyncClient
 from pydantic import SecretStr
 from sqlalchemy.orm import sessionmaker
@@ -44,6 +46,12 @@ _app_settings.settings = Settings(
 @pytest.fixture
 def test_settings():
     return _app_settings.settings
+
+
+@pytest.fixture(autouse=True)
+def init_cache():
+    FastAPICache.init(InMemoryBackend(), prefix="test-cache")
+    yield
 
 
 @pytest.fixture(autouse=True)
