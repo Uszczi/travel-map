@@ -50,7 +50,7 @@ from app.use_case.verify_user_email import (
     VerifyUserEmailUseCase,
 )
 
-router = APIRouter()
+router = APIRouter(tags=["Auth"])
 
 # TODO remove it from there
 JWT_ALGORITHM = "HS256"

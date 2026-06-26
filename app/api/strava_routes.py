@@ -11,7 +11,7 @@ from app.visited_edges import visited_edges
 
 from . import common
 
-router = APIRouter(prefix="/strava")
+router = APIRouter(prefix="/strava", tags=["Strava"])
 
 INIT_DATA_PATH = ROOT_PATH / "init_data"
 

@@ -16,7 +16,7 @@ from app.models import Route
 from app.services.elevation import ElevationService
 from app.visited_edges import visited_edges
 
-router = APIRouter()
+router = APIRouter(tags=["Routes"])
 
 # TODO inject this
 elevation_service = ElevationService()

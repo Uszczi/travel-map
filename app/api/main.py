@@ -4,7 +4,7 @@ import subprocess
 from fastapi import APIRouter
 from loguru import logger
 
-router = APIRouter()
+router = APIRouter(tags=["General"])
 start_time = datetime.datetime.now(datetime.timezone.utc)
 
 

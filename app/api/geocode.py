@@ -14,7 +14,7 @@ from app.services.nominatim import (
     UpstreamError,
 )
 
-router = APIRouter()
+router = APIRouter(tags=["Geocoding"])
 
 
 # TODO

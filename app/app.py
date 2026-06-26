@@ -7,7 +7,17 @@ from app.extensions.sqladmin import include_sqladmin
 
 init_sentry()
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(
+    lifespan=lifespan,
+    openapi_tags=[
+        {"name": "General", "description": "Health check, version, and info endpoints"},
+        {"name": "Routes", "description": "Route generation and visited edges"},
+        {"name": "Strava", "description": "Strava route import and management"},
+        {"name": "GPX", "description": "GPX file export"},
+        {"name": "Geocoding", "description": "Forward and reverse geocoding"},
+        {"name": "Auth", "description": "User authentication and account management"},
+    ],
+)
 
 setup_middlewares(app)
 

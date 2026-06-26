@@ -5,7 +5,7 @@ from fastapi.responses import StreamingResponse
 
 from app.services.gpx import GPXService
 
-router = APIRouter()
+router = APIRouter(tags=["GPX"])
 
 
 @router.post("/route-to-gpx")
