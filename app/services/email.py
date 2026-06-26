@@ -2,8 +2,8 @@ from enum import StrEnum
 
 from fastapi_mail import ConnectionConfig, FastMail, MessageSchema, MessageType
 
-from app.domain.locale import Locale
 import app.settings as app_settings
+from app.domain.locale import Locale
 
 
 class EmailService:

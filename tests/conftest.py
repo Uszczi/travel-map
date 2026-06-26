@@ -1,55 +1,55 @@
-import pytest
 from typing import AsyncIterator
+from unittest.mock import patch
 
+import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
+from pydantic import SecretStr
 from sqlalchemy.orm import sessionmaker
 from sqlmodel import SQLModel
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-
-from unittest.mock import patch
-from pydantic import SecretStr
+import app.settings as _app_settings
+from app.app import app
+from app.db import async_engine
 from app.settings import Settings
+
+_app_settings.settings = Settings(
+    ENV="TEST",
+    MONGO_URL="mongodb://test:27017",
+    DB_CONNECTION_STR="sqlite+aiosqlite:///test.db",
+    DB_ASYNC_CONNECTION_STR="sqlite+aiosqlite:///test.db",
+    REDIS_URL="redis://localhost:6379/0",
+    REDIS_HOST="localhost",
+    ALLOWED_ORIGINS=["*"],
+    URL_PREFIX="",
+    SENTRY_SDK="",
+    NOMINATIM_URL="",
+    NOMINATIM_REVERSE_URL="",
+    NOMINATIM_USER_AGENT="test",
+    NOMINATIM_ACCESS_TOKEN="",
+    PROMETHEUS_MULTIPROC_DIR="/tmp/prometheus_multiproc",
+    APP_BASE_URL="http://test",
+    JWT_ACCESS_SECRET=SecretStr("test-access"),
+    JWT_REFRESH_SECRET=SecretStr("test-refresh"),
+    JWT_EMAIL_SECRET=SecretStr("test-email"),
+    MAIL_SERVER="mailhog",
+    MAIL_PORT=1025,
+    MAIL_STARTTLS=False,
+    MAIL_SSL_TLS=False,
+    MAIL_VALIDATE_CERTS=False,
+)
 
 
 @pytest.fixture
 def test_settings():
-    return Settings(
-        ENV="test",
-        MONGO_URL="mongodb://test:27017",
-        DB_CONNECTION_STR="sqlite+aiosqlite:///test.db",
-        DB_ASYNC_CONNECTION_STR="sqlite+aiosqlite:///test.db",
-        REDIS_URL="redis://localhost:6379/0",
-        REDIS_HOST="localhost",
-        ALLOWED_ORIGINS=["*"],
-        URL_PREFIX="",
-        SENTRY_SDK="",
-        NOMINATIM_URL="",
-        NOMINATIM_REVERSE_URL="",
-        NOMINATIM_USER_AGENT="test",
-        NOMINATIM_ACCESS_TOKEN="",
-        PROMETHEUS_MULTIPROC_DIR="/tmp/prometheus_multiproc",
-        APP_BASE_URL="http://test",
-        JWT_ACCESS_SECRET=SecretStr("test-access"),
-        JWT_REFRESH_SECRET=SecretStr("test-refresh"),
-        JWT_EMAIL_SECRET=SecretStr("test-email"),
-        MAIL_SERVER="mailhog",
-        MAIL_PORT=1025,
-        MAIL_STARTTLS=False,
-        MAIL_SSL_TLS=False,
-        MAIL_VALIDATE_CERTS=False,
-    )
+    return _app_settings.settings
 
 
 @pytest.fixture(autouse=True)
 def mock_settings(test_settings):
     with patch("app.settings.settings", test_settings):
         yield
-
-
-from app.app import app
-from app.db import async_engine
 
 
 @pytest_asyncio.fixture
