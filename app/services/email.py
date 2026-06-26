@@ -1,34 +1,32 @@
 from enum import StrEnum
-from functools import lru_cache
 
 from fastapi_mail import ConnectionConfig, FastMail, MessageSchema, MessageType
 
 from app.domain.locale import Locale
-from app.settings import settings
+import app.settings as app_settings
 
 
 class EmailService:
     def __init__(self, fm: FastMail) -> None:
-        # TODO make it private
         self.fm = fm
 
     def send(self):
         pass
 
 
-@lru_cache(maxsize=1)
 def _get_connection_config() -> ConnectionConfig:
+    s = app_settings.settings
     return ConnectionConfig(
-        MAIL_USERNAME=settings.MAIL_USERNAME,
-        MAIL_PASSWORD=settings.MAIL_PASSWORD,
-        MAIL_FROM=settings.MAIL_FROM,
-        MAIL_FROM_NAME=settings.MAIL_FROM_NAME,
-        MAIL_SERVER=settings.MAIL_SERVER,
-        MAIL_PORT=settings.MAIL_PORT,
-        MAIL_STARTTLS=settings.MAIL_STARTTLS,
-        MAIL_SSL_TLS=settings.MAIL_SSL_TLS,
+        MAIL_USERNAME=s.MAIL_USERNAME,
+        MAIL_PASSWORD=s.MAIL_PASSWORD,
+        MAIL_FROM=s.MAIL_FROM,
+        MAIL_FROM_NAME=s.MAIL_FROM_NAME,
+        MAIL_SERVER=s.MAIL_SERVER,
+        MAIL_PORT=s.MAIL_PORT,
+        MAIL_STARTTLS=s.MAIL_STARTTLS,
+        MAIL_SSL_TLS=s.MAIL_SSL_TLS,
         USE_CREDENTIALS=True,
-        VALIDATE_CERTS=settings.MAIL_VALIDATE_CERTS,
+        VALIDATE_CERTS=s.MAIL_VALIDATE_CERTS,
         TEMPLATE_FOLDER="templates/",
     )
 
@@ -104,8 +102,10 @@ async def send_password_reset_email(
     template_body = {
         "reset_url": reset_url,
         # TODO fix this
-        "app_name": getattr(settings, "APP_NAME", "our app"),
-        "support_email": getattr(settings, "SUPPORT_EMAIL", "support@example.com"),
+        "app_name": getattr(app_settings.settings, "APP_NAME", "our app"),
+        "support_email": getattr(
+            app_settings.settings, "SUPPORT_EMAIL", "support@example.com"
+        ),
         "token_expires_minutes": 30,
         "user_name": user_name,
     }
