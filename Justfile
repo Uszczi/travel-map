@@ -14,6 +14,9 @@ build:
 run:
 	{{COMPOSE}} up --detach
 
+bash:
+	{{COMPOSE}} run -it --rm {{APP_SVC}} bash
+
 stop:
 	{{COMPOSE}} stop
 
