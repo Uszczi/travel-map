@@ -57,8 +57,10 @@ dev = [
     "pyqt5>=5.15.11",
     "pytest-asyncio>=1.2.0",
     "pytest-coverage>=0.0",
+    "pytest-freezegun>=0.4.2",
     "pytest>=8.4.0",
     "ruff>=0.11.13",
+    "setuptools>=82.0.1",
     "ty>=0.0.1a9",
     "vulture>=2.14",
 ]
