@@ -14,6 +14,9 @@ class ElevationService:
 
     @time_measure_decorator("Getting elevation took: ")
     def get(self, cords: list[tuple[float, float]]) -> dict[tuple[float, float], int]:
+        # TODO handle not working
+        return {}
+
         # TODO Handle empty cords
         with self.session as s:
             response = s.post(
