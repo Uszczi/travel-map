@@ -46,7 +46,7 @@ def route_to_x_y(
         except Exception:
             continue
 
-        if "geometry" in data:
+        if data.get("geometry"):
             # if geometry attribute exists, add all its coords to list
             xs, ys = data["geometry"].xy
             x.extend(xs)

@@ -28,7 +28,9 @@ class GeocodeItem(BaseModel):
     @field_validator("boundingbox", mode="before")
     @classmethod
     def _bbox_from_list(cls, v):
-        return BoundingBox.from_nominatim(v)
+        if type(v) is list:
+            return BoundingBox.from_nominatim(v)
+        return v
 
 
 class GeocodeResponse(BaseModel):

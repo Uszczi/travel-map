@@ -1,5 +1,5 @@
 import osmnx as ox
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, HTTPException
 
 from app import utils
 from app.api.common import (
@@ -18,8 +18,9 @@ from app.visited_edges import visited_edges
 
 router = APIRouter(tags=["Routes"])
 
-# TODO inject this
-elevation_service = ElevationService()
+
+def get_elevation_service():
+    return ElevationService()
 
 
 @router.get("/clear")
@@ -37,6 +38,7 @@ def route(
     end_y: float | None = None,
     distance: int = 6000,
     prefer_new: bool = False,
+    elevation_service: ElevationService = Depends(get_elevation_service),
 ) -> Route:
     CITY_BBOX = get_city_bbox(start_x, start_y)
     G = get_or_create_graph(start_x, start_y)
@@ -49,7 +51,9 @@ def route(
 
     generator_class = algorithm_map.get(algorithm_type.lower())
     if not generator_class:
-        raise ValueError(f"Unsupported algorithm type: {algorithm_type}")
+        raise HTTPException(
+            status_code=422, detail=f"Unsupported algorithm type: {algorithm_type}"
+        )
 
     start_node = ox.nearest_nodes(G, X=start_x, Y=start_y)
     if end_x and end_y:
