@@ -38,6 +38,7 @@ def route(
     end_y: float | None = None,
     distance: int = 6000,
     prefer_new: bool = False,
+    skip_elevation: bool = True,
     elevation_service: ElevationService = Depends(get_elevation_service),
 ) -> Route:
     CITY_BBOX = get_city_bbox(start_x, start_y)
@@ -73,8 +74,12 @@ def route(
     route_distance = utils.get_route_distance(G, route)
     segments = visited_edges.get_visited_segments(G, route)
     visited_edges.mark_edges_visited(route)
-    elevation = elevation_service.get(utils.zip_x_y(x, y))
-    elevation = elevation_service.covert_to_list(elevation)
+    if skip_elevation:
+        elevation = []
+    else:
+        elevation = elevation_service.get(utils.zip_x_y(x, y))
+        elevation = elevation_service.covert_to_list(elevation)
+
     total_gain, total_lose = elevation_service.calculate_total_gain_lose(elevation)
 
     return Route(

@@ -263,3 +263,72 @@ async def test_route_response_structure(
         assert "distance" in segment
         assert isinstance(segment["new"], bool)
         assert isinstance(segment["distance"], float)
+
+
+@patch("app.api.route_generation.get_or_create_graph")
+@patch("app.api.route_generation.ox.nearest_nodes")
+async def test_route_response_skip_elevation(
+    mock_nearest_nodes,
+    mock_get_graph,
+    client,
+    mock_graph,
+    mock_elevation_service,
+    mock_route_generator,
+):
+    mock_get_graph.return_value = mock_graph
+    mock_nearest_nodes.side_effect = [1, 3]
+
+    res = await client.get("/route/random?skip_elevation=false")
+
+    assert res.status_code == 200
+    data = res.json()
+
+    assert isinstance(data["rec"], list)
+    assert len(data["rec"]) == 4
+    assert isinstance(data["x"], list)
+    assert isinstance(data["y"], list)
+    assert isinstance(data["distance"], float)
+    assert isinstance(data["segments"], list)
+    assert isinstance(data["elevation"], list)
+    assert data["total_gain"] > 0
+    assert data["total_lose"] > 0
+
+    for segment in data["segments"]:
+        assert "new" in segment
+        assert "distance" in segment
+        assert isinstance(segment["new"], bool)
+        assert isinstance(segment["distance"], float)
+
+
+@patch("app.api.route_generation.get_or_create_graph")
+@patch("app.api.route_generation.ox.nearest_nodes")
+async def test_route_response_skip_elevation_true(
+    mock_nearest_nodes,
+    mock_get_graph,
+    client,
+    mock_graph,
+    mock_route_generator,
+):
+    mock_get_graph.return_value = mock_graph
+    mock_nearest_nodes.side_effect = [1, 3]
+
+    res = await client.get("/route/random?skip_elevation=true")
+
+    assert res.status_code == 200
+    data = res.json()
+
+    assert isinstance(data["rec"], list)
+    assert len(data["rec"]) == 4
+    assert isinstance(data["x"], list)
+    assert isinstance(data["y"], list)
+    assert isinstance(data["distance"], float)
+    assert isinstance(data["segments"], list)
+    assert isinstance(data["elevation"], list)
+    assert data["total_gain"] == 0
+    assert data["total_lose"] == 0
+
+    for segment in data["segments"]:
+        assert "new" in segment
+        assert "distance" in segment
+        assert isinstance(segment["new"], bool)
+        assert isinstance(segment["distance"], float)
