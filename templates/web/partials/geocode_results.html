@@ -11,7 +11,11 @@
       class="geocode-item"
       data-lat="{{ item.lat }}"
       data-lng="{{ item.lng }}"
-      onclick="window.TravelMap.flyTo(this)"
+      data-bbox-s="{{ item.boundingbox.south }}"
+      data-bbox-n="{{ item.boundingbox.north }}"
+      data-bbox-w="{{ item.boundingbox.west }}"
+      data-bbox-e="{{ item.boundingbox.east }}"
+      onclick="window.TravelMap.flyToCity(this)"
     >
       {{ item.label }}
     </button>

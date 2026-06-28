@@ -48,7 +48,8 @@ async def test_index_page(client):
     assert 'id="map"' in body
     assert "leaflet" in body.lower()
     assert "htmx.org" in body
-    assert "/htmx/route" in body
+    assert 'id="city-search"' in body
+    assert "/htmx/geocode" in body
 
 
 async def test_static_css_served(client):
@@ -112,14 +113,14 @@ async def test_htmx_geocode_results(client):
     body = res.text
     assert "Warsaw, Poland" in body
     assert 'data-lat="52.23"' in body
-    assert "window.TravelMap.flyTo" in body
+    assert "window.TravelMap.flyToCity" in body
 
 
 async def test_htmx_geocode_empty_query(client):
     res = await client.get("/htmx/geocode?q=")
 
     assert res.status_code == 200
-    assert "window.TravelMap.flyTo" not in res.text
+    assert "window.TravelMap.flyToCity" not in res.text
 
 
 def _async_return(value):

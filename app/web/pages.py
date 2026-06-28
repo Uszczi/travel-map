@@ -26,3 +26,10 @@ def index(request: Request) -> HTMLResponse:
             "default_y": DEFAULT_START_Y,
         },
     )
+
+
+@router.get("/debug", response_class=HTMLResponse)
+def debug(request: Request) -> HTMLResponse:
+    from app.web.templates import templates
+
+    return templates.TemplateResponse(request, "debug.html")

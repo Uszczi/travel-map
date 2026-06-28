@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Theme Colors — Debug{% endblock %}
+
+{% block content %}
+<style>
+  .debug-wrap { max-width: 640px; margin: 40px auto; padding: 0 20px; }
+  .debug-wrap h1 { margin: 0 0 8px; font-size: 1.3rem; }
+  .debug-wrap p { margin: 0 0 24px; color: var(--muted); font-size: 0.85rem; }
+  .swatch-grid { display: grid; gap: 12px; }
+  .swatch-row { display: flex; align-items: center; gap: 14px; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; }
+  .swatch { width: 48px; height: 48px; border-radius: 8px; border: 1px solid var(--border); flex-shrink: 0; }
+  .swatch-meta { display: flex; flex-direction: column; gap: 2px; }
+  .swatch-name { font-weight: 600; font-size: 0.9rem; }
+  .swatch-value { color: var(--muted); font-size: 0.8rem; font-family: monospace; }
+  .section-title { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); margin: 28px 0 10px; }
+  .back-link { display: inline-block; margin-top: 28px; color: var(--accent-2); font-size: 0.85rem; }
+</style>
+
+<div class="debug-wrap">
+  <h1>Theme Colors</h1>
+  <p>CSS custom properties used across the UI.</p>
+
+  <div class="section-title">Tailwind Config Colors</div>
+  <div class="swatch-grid" id="tw-colors"></div>
+
+  <a href="/" class="back-link">&larr; Back to map</a>
+</div>
+
+<script>
+  const TW_COLORS = [
+    "surface",
+    "panel",
+    "panel-2",
+    "border",
+    "muted",
+    "accent",
+    "accent-2",
+    "danger",
+  ];
+
+  const CSS_VAR = {
+    surface: "--bg",
+    panel: "--panel",
+    "panel-2": "--panel-2",
+    border: "--border",
+    muted: "--muted",
+    accent: "--accent",
+    "accent-2": "--accent-2",
+    danger: "--danger",
+  };
+
+  const root = getComputedStyle(document.documentElement);
+  const grid = document.getElementById("tw-colors");
+
+  for (const name of TW_COLORS) {
+    const hex = root.getPropertyValue(CSS_VAR[name]).trim();
+    const row = document.createElement("div");
+    row.className = "swatch-row";
+    row.innerHTML = `
+      <div class="swatch" style="background:${hex}"></div>
+      <div class="swatch-meta">
+        <span class="swatch-name">${name}</span>
+        <span class="swatch-value">${hex}</span>
+      </div>
+    `;
+    grid.appendChild(row);
+  }
+</script>
+{% endblock %}

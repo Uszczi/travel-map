@@ -78,5 +78,24 @@
       map.flyTo([lat, lng], 15);
       setStart({ lat: lat, lng: lng });
     },
+
+    flyToCity: function (btn) {
+      const south = parseFloat(btn.dataset.bboxS);
+      const north = parseFloat(btn.dataset.bboxN);
+      const west = parseFloat(btn.dataset.bboxW);
+      const east = parseFloat(btn.dataset.bboxE);
+      if (isNaN(south + north + west + east)) return;
+
+      const bounds = L.latLngBounds([south, west], [north, east]);
+      map.fitBounds(bounds, { padding: [30, 30] });
+
+      const center = bounds.getCenter();
+      setStart(center);
+
+      document.getElementById("city-search") &&
+        (document.getElementById("city-search").value = btn.textContent.trim());
+      document.getElementById("city-results") &&
+        (document.getElementById("city-results").innerHTML = "");
+    },
   };
 })();
