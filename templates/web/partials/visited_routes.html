@@ -1,4 +1,4 @@
-<p class="muted">{{ count }} visited segment{{ "s" if count != 1 else "" }} loaded.</p>
+<p class="text-muted">{{ count }} visited segment{{ "s" if count != 1 else "" }} loaded.</p>
 
 <script>
   window.TravelMap.drawVisited({{ segments|tojson }});

@@ -1,12 +1,12 @@
-<div class="card">
-  <h3>Generated route</h3>
-  <dl class="stats">
-    <div><dt>Distance</dt><dd>{{ "%.0f"|format(route.distance) }} m</dd></div>
-    <div><dt>New</dt><dd>{{ "%.0f"|format(route.total_new) }} m
+<div class="bg-panel border border-border rounded-[10px] p-4">
+  <h3 class="font-semibold mb-3">Generated route</h3>
+  <dl class="grid grid-cols-2 gap-2 text-sm">
+    <div><dt class="text-muted">Distance</dt><dd>{{ "%.0f"|format(route.distance) }} m</dd></div>
+    <div><dt class="text-muted">New</dt><dd>{{ "%.0f"|format(route.total_new) }} m
       ({{ "%.1f"|format(route.percent_of_new) }}%)</dd></div>
-    <div><dt>Revisited</dt><dd>{{ "%.0f"|format(route.total_old) }} m</dd></div>
+    <div><dt class="text-muted">Revisited</dt><dd>{{ "%.0f"|format(route.total_old) }} m</dd></div>
     {% if route.total_gain or route.total_lose %}
-    <div><dt>Elevation</dt><dd>+{{ route.total_gain }} / -{{ route.total_lose }} m</dd></div>
+    <div><dt class="text-muted">Elevation</dt><dd>+{{ route.total_gain }} / -{{ route.total_lose }} m</dd></div>
     {% endif %}
   </dl>
 </div>

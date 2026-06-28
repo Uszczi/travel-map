@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -11,7 +11,7 @@
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
     crossorigin=""
   />
-  <link rel="stylesheet" href="{{ url_for('static', path='css/app.css') }}" />
+  <style>*{box-sizing:border-box}</style>
 
   <script
     src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
@@ -35,13 +35,14 @@
             accent: "#85CB33",
             "accent-2": "#A5CBC3",
             danger: "#e05a4a",
+            text: "#EFFFC8",
           },
         },
       },
     };
   </script>
 </head>
-<body>
+<body class="m-0 h-full font-sans bg-surface text-text">
   {% block content %}{% endblock %}
 
   <script src="{{ url_for('static', path='js/app.js') }}" defer></script>

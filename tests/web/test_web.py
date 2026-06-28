@@ -52,12 +52,6 @@ async def test_index_page(client):
     assert "/htmx/geocode" in body
 
 
-async def test_static_css_served(client):
-    res = await client.get("/static/css/app.css")
-
-    assert res.status_code == 200
-    assert "text/css" in res.headers["content-type"]
-
 
 @patch("app.api.route_generation.get_or_create_graph")
 @patch("app.api.route_generation.ox.nearest_nodes")
