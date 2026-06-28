@@ -61,6 +61,7 @@ Start via `docker compose up --detach` (PostgreSQL, Redis, MongoDB, Mailhog). Fo
 - Type checking with `ty`
 - `uv package = true` (project is a package)
 - `app` is known-first-party import
+- Tailwind CSS is used (via CDN in templates) — not optional
 
 ## JWT auth
 
