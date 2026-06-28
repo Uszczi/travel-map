@@ -9,6 +9,7 @@ from app.api.common import (
     get_or_create_graph,
     graphs,
 )
+from app.generator.all_streets_random import AllStreetsRoute
 from app.generator.astar import AStarRoute
 from app.generator.dfs import DfsRoute
 from app.generator.random_route import RandomRoute
@@ -45,6 +46,7 @@ def route(
     G = get_or_create_graph(start_x, start_y)
 
     algorithm_map = {
+        "allstreet": AllStreetsRoute,
         "random": RandomRoute,
         "dfs": DfsRoute,
         "astar": AStarRoute,

@@ -1,5 +1,6 @@
 import time
 from contextlib import contextmanager
+from math import atan2, cos, radians, sin, sqrt
 from pathlib import Path
 
 from loguru import logger
@@ -29,6 +30,30 @@ def time_measure_decorator(msg: str):
         return wrapper
 
     return decorator
+
+
+def haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    R = 6371000
+    dlat = radians(lat2 - lat1)
+    dlon = radians(lon2 - lon1)
+    a = (
+        sin(dlat / 2) ** 2
+        + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2) ** 2
+    )
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+    return R * c
+
+
+def remove_farthest_nodes(
+    graph: MultiDiGraph, center_x: float, center_y: float, radius: float
+) -> MultiDiGraph:
+    nodes_to_remove = []
+    for node, data in graph.nodes(data=True):
+        dist = haversine(center_y, center_x, data["y"], data["x"])
+        if dist > radius:
+            nodes_to_remove.append(node)
+    graph.remove_nodes_from(nodes_to_remove)
+    return graph
 
 
 def route_to_x_y(
