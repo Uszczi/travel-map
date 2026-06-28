@@ -13,6 +13,12 @@
       "skillPath": "skills/frontend-design/SKILL.md",
       "computedHash": "4eabc66183767153e404b39d1b839b1c37f2d82d86f0a0d7e880a579d8d62336"
     },
+    "networkx": {
+      "source": "k-dense-ai/claude-scientific-skills",
+      "sourceType": "github",
+      "skillPath": "skills/networkx/SKILL.md",
+      "computedHash": "42bcd20b330420a69aab0b76473ea1f13365b96ccd8bbb5abd64e0b1351d6f89"
+    },
     "python-testing-patterns": {
       "source": "wshobson/agents",
       "sourceType": "github",
