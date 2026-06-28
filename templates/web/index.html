@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Travel Map — Route Explorer{% endblock %}
+
+{% block content %}
+{% include "partials/header.html" %}
+<div class="layout">
+  <aside class="sidebar">
+    <h1 class="brand">Travel Map</h1>
+
+    <section class="panel">
+      <h2>Find a place</h2>
+      <input
+        type="search"
+        name="q"
+        class="search-input"
+        placeholder="Search address or city…"
+        autocomplete="off"
+        hx-get="/htmx/geocode"
+        hx-trigger="keyup changed delay:400ms, search"
+        hx-target="#geocode-results"
+        hx-indicator="#geocode-spinner"
+      />
+      <span id="geocode-spinner" class="spinner htmx-indicator">searching…</span>
+      <div id="geocode-results" class="results"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Generate a route</h2>
+      <form
+        id="route-form"
+        hx-get="/htmx/route"
+        hx-target="#route-result"
+        hx-indicator="#route-spinner"
+      >
+        <label>
+          Algorithm
+          <select name="algorithm">
+            {% for value, label in algorithms %}
+            <option value="{{ value }}">{{ label }}</option>
+            {% endfor %}
+          </select>
+        </label>
+
+        <label>
+          Distance (m)
+          <input type="number" name="distance" value="6000" min="500" step="500" />
+        </label>
+
+        <label class="checkbox">
+          <input type="checkbox" name="prefer_new" value="true" />
+          Prefer unvisited streets
+        </label>
+
+        <input type="hidden" name="start_x" id="start_x" value="{{ default_x }}" />
+        <input type="hidden" name="start_y" id="start_y" value="{{ default_y }}" />
+        <input type="hidden" name="end_x" id="end_x" />
+        <input type="hidden" name="end_y" id="end_y" />
+
+        <p class="hint">
+          Click the map to set the <strong>start</strong> point,
+          shift-click to set the <strong>end</strong> (for A*).
+        </p>
+
+        <button type="submit">Generate route</button>
+      </form>
+      <span id="route-spinner" class="spinner htmx-indicator">generating…</span>
+    </section>
+
+    <section class="panel">
+      <h2>Visited streets</h2>
+      <button
+        type="button"
+        class="secondary"
+        hx-get="/htmx/visited-routes"
+        hx-target="#visited-result"
+        hx-indicator="#visited-spinner"
+      >
+        Show visited overlay
+      </button>
+      <span id="visited-spinner" class="spinner htmx-indicator">loading…</span>
+      <div id="visited-result"></div>
+    </section>
+
+    <div id="route-result" class="route-result"></div>
+  </aside>
+
+  <main class="map-wrap">
+    <div
+      id="map"
+      data-lat="{{ default_y }}"
+      data-lng="{{ default_x }}"
+    ></div>
+  </main>
+</div>
+{% endblock %}

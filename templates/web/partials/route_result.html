@@ -1,0 +1,16 @@
+<div class="card">
+  <h3>Generated route</h3>
+  <dl class="stats">
+    <div><dt>Distance</dt><dd>{{ "%.0f"|format(route.distance) }} m</dd></div>
+    <div><dt>New</dt><dd>{{ "%.0f"|format(route.total_new) }} m
+      ({{ "%.1f"|format(route.percent_of_new) }}%)</dd></div>
+    <div><dt>Revisited</dt><dd>{{ "%.0f"|format(route.total_old) }} m</dd></div>
+    {% if route.total_gain or route.total_lose %}
+    <div><dt>Elevation</dt><dd>+{{ route.total_gain }} / -{{ route.total_lose }} m</dd></div>
+    {% endif %}
+  </dl>
+</div>
+
+<script>
+  window.TravelMap.drawRoute({{ coords|tojson }});
+</script>

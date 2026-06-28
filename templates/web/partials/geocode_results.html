@@ -1,0 +1,21 @@
+{% if error %}
+<p class="error">{{ error }}</p>
+{% elif query and not items %}
+<p class="muted">No matches for &ldquo;{{ query }}&rdquo;.</p>
+{% elif items %}
+<ul class="geocode-list">
+  {% for item in items %}
+  <li>
+    <button
+      type="button"
+      class="geocode-item"
+      data-lat="{{ item.lat }}"
+      data-lng="{{ item.lng }}"
+      onclick="window.TravelMap.flyTo(this)"
+    >
+      {{ item.label }}
+    </button>
+  </li>
+  {% endfor %}
+</ul>
+{% endif %}
