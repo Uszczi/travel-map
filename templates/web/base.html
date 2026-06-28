@@ -20,6 +20,29 @@
     defer
   ></script>
   <script src="https://unpkg.com/htmx.org@2.0.4" defer></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            surface: "#0f1115",
+            panel: "#1a1d24",
+            "panel-2": "#222631",
+            border: "#2c313c",
+            muted: "#9aa3b2",
+            accent: "#3fb950",
+            "accent-2": "#58a6ff",
+            danger: "#f85149",
+          },
+          borderRadius: {
+            DEFAULT: "10px",
+          },
+        },
+      },
+    };
+  </script>
 </head>
 <body>
   {% block content %}{% endblock %}
