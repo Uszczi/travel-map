@@ -9,5 +9,5 @@ def make_metrics_app():
 
 
 def include_prometheus(app: FastAPI) -> None:
-    metrics_app = make_metrics_app()
-    app.mount("/metrics", metrics_app)
+    # metrics_app = make_metrics_app()
+    # app.mount("/metrics", metrics_app)
