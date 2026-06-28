@@ -77,7 +77,7 @@ async def test_clear_endpoint(client):
     graphs["refactor"] = nx.MultiDiGraph()
     visited_edges.add((1, 2))
 
-    res = await client.get("/clear")
+    res = await client.get("/api/clear")
 
     assert res.status_code == 200
     assert graphs == {}
@@ -85,7 +85,7 @@ async def test_clear_endpoint(client):
 
 
 async def test_route_invalid_algorithm(client):
-    res = await client.get("/route/invalid_algorithm")
+    res = await client.get("/api/route/invalid_algorithm")
 
     assert res.status_code == 422
 
@@ -103,7 +103,7 @@ async def test_route_random_algorithm(
     mock_get_graph.return_value = mock_graph
     mock_nearest_nodes.side_effect = [1, 3]
 
-    res = await client.get("/route/random")
+    res = await client.get("/api/route/random")
 
     assert res.status_code == 200, res.json()
     data = res.json()
@@ -129,7 +129,7 @@ async def test_route_dfs_algorithm(
     mock_get_graph.return_value = mock_graph
     mock_nearest_nodes.side_effect = [1, 3]
 
-    res = await client.get("/route/dfs")
+    res = await client.get("/api/route/dfs")
 
     assert res.status_code == 200, res.json()
 
@@ -147,7 +147,7 @@ async def test_route_astar_algorithm(
     mock_get_graph.return_value = mock_graph
     mock_nearest_nodes.side_effect = [1, 3]
 
-    res = await client.get("/route/astar")
+    res = await client.get("/api/route/astar")
 
     assert res.status_code == 200, res.json()
 
@@ -165,7 +165,7 @@ async def test_route_with_end_coordinates(
     mock_get_graph.return_value = mock_graph
     mock_nearest_nodes.side_effect = [1, 3]
 
-    res = await client.get("/route/random?end_x=19.22&end_y=51.62")
+    res = await client.get("/api/route/random?end_x=19.22&end_y=51.62")
 
     assert res.status_code == 200, res.json()
 
@@ -183,7 +183,7 @@ async def test_route_with_custom_distance(
     mock_get_graph.return_value = mock_graph
     mock_nearest_nodes.side_effect = [1, 3]
 
-    res = await client.get("/route/random?distance=10000")
+    res = await client.get("/api/route/random?distance=10000")
 
     assert res.status_code == 200, res.json()
 
@@ -201,7 +201,7 @@ async def test_route_with_prefer_new(
     mock_get_graph.return_value = mock_graph
     mock_nearest_nodes.side_effect = [1, 3]
 
-    res = await client.get("/route/random?prefer_new=true")
+    res = await client.get("/api/route/random?prefer_new=true")
 
     assert res.status_code == 200, res.json()
 
@@ -210,7 +210,7 @@ async def test_visited_routes_endpoint(client, mock_graph, mock_elevation_servic
     with patch("app.api.route_generation.get_or_create_graph", return_value=mock_graph):
         visited_edges.add((1, 2))
 
-        res = await client.get("/visited-routes")
+        res = await client.get("/api/visited-routes")
 
         assert res.status_code == 200, res.json()
         data = res.json()
@@ -223,7 +223,7 @@ async def test_visited_edges_as_points_endpoint(
     with patch("app.api.route_generation.get_or_create_graph", return_value=mock_graph):
         visited_edges.add((1, 2))
 
-        res = await client.get("/visited-edges-as-points")
+        res = await client.get("/api/visited-edges-as-points")
 
         assert res.status_code == 200, res.json()
         data = res.json()
@@ -243,7 +243,7 @@ async def test_route_response_structure(
     mock_get_graph.return_value = mock_graph
     mock_nearest_nodes.side_effect = [1, 3]
 
-    res = await client.get("/route/random")
+    res = await client.get("/api/route/random")
 
     assert res.status_code == 200
     data = res.json()
@@ -278,7 +278,7 @@ async def test_route_response_skip_elevation(
     mock_get_graph.return_value = mock_graph
     mock_nearest_nodes.side_effect = [1, 3]
 
-    res = await client.get("/route/random?skip_elevation=false")
+    res = await client.get("/api/route/random?skip_elevation=false")
 
     assert res.status_code == 200
     data = res.json()
@@ -312,7 +312,7 @@ async def test_route_response_skip_elevation_true(
     mock_get_graph.return_value = mock_graph
     mock_nearest_nodes.side_effect = [1, 3]
 
-    res = await client.get("/route/random?skip_elevation=true")
+    res = await client.get("/api/route/random?skip_elevation=true")
 
     assert res.status_code == 200
     data = res.json()

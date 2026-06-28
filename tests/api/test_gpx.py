@@ -4,7 +4,7 @@ import pytest
 @pytest.mark.asyncio
 async def test_route_to_gpx(client):
     res = await client.post(
-        "/route-to-gpx",
+        "/api/route-to-gpx",
         json={
             "points": [[48.8566, 2.3522], [52.5200, 13.4050]],
             "title": "Test Track",

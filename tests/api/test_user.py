@@ -12,7 +12,7 @@ from tests.factories import acreate_user
 async def test_register(client, async_session: AsyncSession):
     data = {"email": "someemail@example.com", "password": "SomeStrong123!@#"}
 
-    res = await client.post("/register", json=data)
+    res = await client.post("/api/register", json=data)
 
     assert res.status_code == 200, res.json()
 
@@ -32,7 +32,7 @@ async def test_login(client, async_session):
     )
 
     data = {"username": user.email, "password": "Supersecret"}
-    res = await client.post("/login", data=data)
+    res = await client.post("/api/login", data=data)
 
     res_json = res.json()
     assert res.status_code == 200, res_json
@@ -50,7 +50,7 @@ async def test_refresh(client, async_session):
     refresh_token = issue_refresh_token(user)
 
     data = {"refresh_token": refresh_token}
-    res = await client.post("/refresh", json=data)
+    res = await client.post("/api/refresh", json=data)
 
     res_json = res.json()
     assert res.status_code == 200, res_json
@@ -66,18 +66,18 @@ async def test_register_login_refresh(client, async_session):
     password = "SomeStrong123!@#"
     register_data = {"email": email, "password": password}
 
-    register_res = await client.post("/register", json=register_data)
+    register_res = await client.post("/api/register", json=register_data)
 
     assert register_res.status_code == 200, register_res.json()
 
     login_data = {"username": email, "password": password}
-    login_res = await client.post("/login", data=login_data)
+    login_res = await client.post("/api/login", data=login_data)
 
     login_json = login_res.json()
     assert login_res.status_code == 200, login_json
 
     refresh_data = {"refresh_token": login_json["refresh_token"]}
-    refresh_res = await client.post("/refresh", json=refresh_data)
+    refresh_res = await client.post("/api/refresh", json=refresh_data)
 
     refresh_json = refresh_res.json()
     assert refresh_res.status_code == 200, refresh_json

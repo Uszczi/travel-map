@@ -12,7 +12,7 @@ def mock_get_version():
 
 @pytest.mark.asyncio
 async def test_read_root(client):
-    res = await client.get("/")
+    res = await client.get("/api/")
 
     assert res.status_code == 200, res.json()
     assert res.json() == {"Hello": "World"}
@@ -20,7 +20,7 @@ async def test_read_root(client):
 
 @pytest.mark.asyncio
 async def test_version(mock_get_version, client):
-    res = await client.get("/version")
+    res = await client.get("/api/version")
 
     assert res.status_code == 200, res.json()
     assert res.json() == {"version": "abc1234"}
@@ -33,7 +33,7 @@ async def test_info(mock_get_version, client):
         2026, 6, 26, 12, 0, 0, tzinfo=datetime.timezone.utc
     )
     with patch("app.api.main.start_time", frozen_start):
-        res = await client.get("/info")
+        res = await client.get("/api/info")
 
         assert res.status_code == 200, res.json()
         assert res.json() == {

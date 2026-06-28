@@ -1,5 +1,5 @@
 import sentry_sdk
-from fastapi import FastAPI
+from fastapi import FastAPI, APIRouter
 
 from app.settings import settings
 
@@ -15,13 +15,15 @@ __all__ = ["setup_middlewares", "include_routers", "init_sentry"]
 
 
 def include_routers(app: FastAPI):
-    # TODO automatic imports and includes
-    app.include_router(main_router)
-    app.include_router(route_router)
-    app.include_router(strava_router)
-    app.include_router(gpx_router)
-    app.include_router(geocode_router)
-    app.include_router(user_router)
+    api_router = APIRouter(prefix="/api", tags=["General"])
+    api_router.include_router(main_router)
+    api_router.include_router(route_router)
+    api_router.include_router(strava_router)
+    api_router.include_router(gpx_router)
+    api_router.include_router(geocode_router)
+    api_router.include_router(user_router)
+
+    app.include_router(api_router)
 
 
 # TODO move to extensions

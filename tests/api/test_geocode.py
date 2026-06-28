@@ -28,7 +28,7 @@ def mock_nominatim():
 
 @pytest.mark.asyncio
 async def test_geocode(client, mock_nominatim):
-    res = await client.get("/geocode?q=berlin")
+    res = await client.get("/api/geocode?q=berlin")
     assert res.status_code == 200, res.json()
     assert res.json() == {
         "items": [
@@ -48,7 +48,7 @@ async def test_geocode(client, mock_nominatim):
         ]
     }
 
-    res = await client.get("/geocode?q=berlin&tag=place")
+    res = await client.get("/api/geocode?q=berlin&tag=place")
     assert res.status_code == 200, res.json()
     assert res.json() == {
         "items": [
@@ -68,7 +68,7 @@ async def test_geocode(client, mock_nominatim):
         ]
     }
 
-    res = await client.get("/geocode?lat=52.520008&lng=13.404954")
+    res = await client.get("/api/geocode?lat=52.520008&lng=13.404954")
     assert res.status_code == 200, res.json()
     assert res.json() == {
         "id": 65478,
