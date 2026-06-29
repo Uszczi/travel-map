@@ -3,6 +3,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
 from fastapi_cache import FastAPICache
 from fastapi_cache.decorator import cache
+from loguru import logger
 
 from app.limiter import NOMINATIM_LIMITER
 from app.serializers.geocode import GeocodeItem, GeocodeResponse
@@ -70,16 +71,20 @@ async def geocode(
         )
 
     if q:
+        logger.info("GET /geocode: search q={}, tag={}", q, tag)
         try:
             async with NOMINATIM_LIMITER.slot():
                 items = await nominatim.search(q=q, limit=5, tag=tag)
         except BadRequest:
             raise HTTPException(status_code=400, detail="Query cannot be empty.")
         except FetchFailed:
+            logger.error("Geocode search fetch failed for q={}", q)
             raise HTTPException(status_code=500, detail="Fetch failed")
         except UpstreamError:
+            logger.warning("Geocode search upstream error for q={}", q)
             raise HTTPException(status_code=502, detail="Upstream error")
 
+        logger.debug("Geocode search returned {} items", len(items))
         return GeocodeResponse(items=items)
 
     try:
@@ -90,14 +95,17 @@ async def geocode(
             status_code=400, detail="The lat and lng parameters must be numbers."
         )
 
+    logger.info("GET /geocode: reverse lat={}, lng={}", lat, lng)
     try:
         async with NOMINATIM_LIMITER.slot():
             reverse = await nominatim.reverse(lat=lat, lng=lng)
     except NotFound as e:
         raise HTTPException(status_code=404, detail=str(e))
     except FetchFailed:
+        logger.error("Geocode reverse fetch failed for lat={}, lng={}", lat, lng)
         raise HTTPException(status_code=500, detail="Fetch failed")
     except UpstreamError:
+        logger.warning("Geocode reverse upstream error for lat={}, lng={}", lat, lng)
         raise HTTPException(status_code=502, detail="Upstream error")
 
     return reverse

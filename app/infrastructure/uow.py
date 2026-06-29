@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Callable
 
 # TODO import from sqlmodel
+from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.domain.ports import UnitOfWork
@@ -32,11 +33,13 @@ class SqlAlchemyUoW(UnitOfWork):
         self.users = SqlUserRepository(self.session)
         # self.events.clear()
         # self.outbox.clear()
+        logger.debug("UoW started")
         return self
 
     async def __aexit__(self, exc_type, exc, tb):
         try:
             if exc_type:
+                logger.warning("UoW rollback due to: {}", exc_type.__name__)
                 await self.rollback()
             else:
                 if self._tx.is_active:
@@ -44,11 +47,14 @@ class SqlAlchemyUoW(UnitOfWork):
         finally:
             await self.session.__aexit__(exc_type, exc, tb)  # type: ignore[attr-defined]
             self.session = None
+            logger.debug("UoW closed")
 
     async def commit(self):
+        logger.debug("UoW commit")
         await self.session.flush()
         await self._tx.commit()
 
     async def rollback(self):
+        logger.debug("UoW rollback")
         if self._tx.is_active:
             await self._tx.rollback()

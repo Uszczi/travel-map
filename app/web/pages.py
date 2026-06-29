@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
+from loguru import logger
 
 from app.api.common import DEFAULT_START_X, DEFAULT_START_Y
 
@@ -15,6 +16,7 @@ ALGORITHMS = [
 
 @router.get("/", response_class=HTMLResponse)
 def index(request: Request) -> HTMLResponse:
+    logger.debug("GET /")
     from app.web.templates import templates
 
     return templates.TemplateResponse(
@@ -30,6 +32,7 @@ def index(request: Request) -> HTMLResponse:
 
 @router.get("/debug", response_class=HTMLResponse)
 def debug(request: Request) -> HTMLResponse:
+    logger.debug("GET /debug")
     from app.web.templates import templates
 
     return templates.TemplateResponse(request, "debug.html")

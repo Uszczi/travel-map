@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Cookie, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
+from loguru import logger
 from pydantic import SecretStr
 
 from app.cookies import delete_refresh_cookie, set_access_cookie, set_refresh_cookie
@@ -71,6 +72,7 @@ async def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     uc: LoginUserUserCase = Depends(get_login_user_uc),
 ):
+    logger.info("POST /login for {}", form_data.username)
     try:
         tokens = await uc(
             LoginUserCommand(
@@ -78,10 +80,12 @@ async def login(
             )
         )
     except InvalidCredentials:
+        logger.warning("Login failed for {}", form_data.username)
         raise HTTPException(status_code=400, detail="Invalid username or password.")
 
     resp = JSONResponse(content=tokens.model_dump())
     set_refresh_cookie(resp, tokens.refresh_token)
+    logger.info("Login successful for {}", form_data.username)
     return resp
 
 
@@ -92,6 +96,7 @@ if settings.ENV == "local":
         form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
         uc: LoginUserUserCase = Depends(get_login_user_uc),
     ):
+        logger.info("POST /login-set-access for {}", form_data.username)
         try:
             tokens = await uc(
                 LoginUserCommand(
@@ -99,6 +104,7 @@ if settings.ENV == "local":
                 )
             )
         except InvalidCredentials:
+            logger.warning("Login-set-access failed for {}", form_data.username)
             raise HTTPException(status_code=400, detail="Invalid username or password.")
 
         resp = JSONResponse(content=tokens.model_dump())
@@ -109,6 +115,7 @@ if settings.ENV == "local":
 
 @router.post("/logout")
 async def logout():
+    logger.info("POST /logout")
     resp = JSONResponse({"ok": True})
     delete_refresh_cookie(resp)
     return resp
@@ -122,8 +129,10 @@ async def refresh(
         get_refresh_token_uc,
     ),
 ):
+    logger.debug("POST /refresh")
     token = refresh_cookie or (data.refresh_token if data else None)
     if not token:
+        logger.warning("Refresh: missing token")
         raise HTTPException(status_code=401, detail="Missing refresh token")
 
     tokens = await uc(RefreshTokenCommand(refresh_token=token))
@@ -137,12 +146,14 @@ async def refresh(
 async def register(
     data: UserRegister, uc: RegisterUserUseCase = Depends(get_register_user_uc)
 ) -> UserDetails:
+    logger.info("POST /register for {}", data.email)
     input = data.model_dump()
     input["hashed_password"] = PasswordHelper().hash(input.pop("password"))
 
     try:
         user = await uc(RegisterUserCommand(**input))  # type: ignore
     except UserAlreadyRegistered:
+        logger.warning("Register failed: email {} already used", data.email)
         raise HTTPException(
             status_code=400,
             detail="Email already used.",
@@ -156,6 +167,7 @@ async def activate_account(
     token: str,
     uc: VerifyUserEmailUseCase = Depends(get_verify_user_email_uc),
 ):
+    logger.info("GET /activate")
     msg = await uc(token)
     return msg
 
@@ -165,6 +177,7 @@ async def request_password_reset(
     data: UserEmail,
     uc: RequestPasswordResetUseCase = Depends(get_request_password_reset_uc),
 ):
+    logger.info("POST /password-reset for {}", data.email)
     await uc(email=data.email)
     return {"message": "If the email exists, a reset link has been sent."}
 
@@ -187,4 +200,5 @@ async def confirm_password_reset(
 
 @router.get("/me")
 async def me(user: UserModel = Depends(get_current_user)) -> UserDetails:
+    logger.debug("GET /me for user {}", user.uuid)
     return user  # type: ignore

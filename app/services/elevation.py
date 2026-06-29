@@ -1,4 +1,5 @@
 import requests
+from loguru import logger
 
 from app.utils import time_measure_decorator
 
@@ -10,10 +11,12 @@ class ElevationService:
 
     # TODO make it async
     def close(self):
+        logger.debug("Closing ElevationService session")
         self.session.close()
 
     @time_measure_decorator("Getting elevation took: ")
     def get(self, cords: list[tuple[float, float]]) -> dict[tuple[float, float], int]:
+        logger.debug("Elevation request for {} points", len(cords))
         # TODO handle not working
         return {}
 
@@ -28,6 +31,7 @@ class ElevationService:
         res = {
             (r["latitude"], r["longitude"]): r["elevation"] for r in result["results"]
         }
+        logger.debug("Elevation got {} results", len(res))
         return res
 
     def covert_to_list(self, result: dict[tuple[float, float], int]) -> list[int]:
@@ -44,4 +48,5 @@ class ElevationService:
             elif diff < 0:
                 total_lose += abs(diff)
 
+        logger.debug("Elevation total_gain={}, total_lose={}", total_gain, total_lose)
         return total_gain, total_lose

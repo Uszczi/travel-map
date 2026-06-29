@@ -1,3 +1,4 @@
+from loguru import logger
 from pydantic import BaseModel, EmailStr
 
 from app.domain.locale import Locale
@@ -24,9 +25,13 @@ class RegisterUserUseCase:
         self.email_service = email_service
 
     async def __call__(self, cmd: RegisterUserCommand) -> UserModel:
+        logger.info("Registering user: {}", cmd.email)
         async with self.uow as uow:
             existing = await uow.users.get_by_email(cmd.email)
             if existing:
+                logger.warning(
+                    "Registration failed: email {} already registered", cmd.email
+                )
                 raise UserAlreadyRegistered()
 
             user = UserModel(**cmd.model_dump())
@@ -34,6 +39,7 @@ class RegisterUserUseCase:
             uow.users.add(user)
             await uow.commit()
 
+        logger.info("User {} registered, sending activation email", user.uuid)
         token = issue_activation_token(user)
         activation_url = f"{settings.APP_BASE_URL}/activate?token={token}"
 

@@ -3,6 +3,7 @@ from typing import Any, Optional, Union
 from uuid import uuid4
 
 import jwt
+from loguru import logger
 from pydantic import SecretStr
 
 from app.models import UserModel
@@ -32,7 +33,9 @@ def generate_jwt(
     if lifetime_seconds:
         expire = datetime.now(timezone.utc) + timedelta(seconds=lifetime_seconds)
         payload["exp"] = expire
-    return jwt.encode(payload, _get_secret_value(secret), algorithm=algorithm)
+    token = jwt.encode(payload, _get_secret_value(secret), algorithm=algorithm)
+    logger.debug("Generated JWT: aud={}, sub={}", data.get("aud"), data.get("sub"))
+    return token
 
 
 def decode_jwt(
@@ -41,6 +44,7 @@ def decode_jwt(
     audience: list[str],
     algorithms: list[str] = [JWT_ALGORITHM],
 ) -> dict[str, Any]:
+    logger.debug("Decoding JWT: audience={}", audience)
     return jwt.decode(
         encoded_jwt,
         _get_secret_value(secret),

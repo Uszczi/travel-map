@@ -1,5 +1,6 @@
 from typing import AsyncIterator
 
+from loguru import logger
 from pymongo import MongoClient
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import sessionmaker
@@ -8,9 +9,11 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.settings import settings
 
+logger.info("Connecting to MongoDB at {}", settings.MONGO_URL)
 client = MongoClient(settings.MONGO_URL)
 strava_db = client["strava_db"]
 
+logger.info("Creating SQL engines: sync={}", settings.DB_CONNECTION_STR)
 engine = create_engine(settings.DB_CONNECTION_STR, echo=False)
 async_engine = create_async_engine(
     settings.DB_ASYNC_CONNECTION_STR, echo=False, future=True

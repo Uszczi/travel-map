@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import HTMLResponse
+from loguru import logger
 
 from app.api import route_generation as rg
 from app.api.common import DEFAULT_START_X, DEFAULT_START_Y
@@ -31,6 +32,13 @@ def htmx_route(
     prefer_new: bool = False,
 ) -> HTMLResponse:
     """Generate a route and return an HTML fragment that draws it on the map."""
+    logger.info(
+        "HTMX /route: algorithm={} start=({}, {}) distance={}",
+        algorithm,
+        start_x,
+        start_y,
+        distance,
+    )
     from app.web.templates import templates
 
     route = rg.route(
@@ -57,6 +65,7 @@ def htmx_route(
 @router.get("/visited-routes", response_class=HTMLResponse)
 def htmx_visited_routes(request: Request) -> HTMLResponse:
     """Return an HTML fragment that draws all visited edges on the map."""
+    logger.debug("HTMX /visited-routes")
     from app.web.templates import templates
 
     segments = rg.get_visited_edges()
@@ -75,6 +84,7 @@ async def htmx_geocode(
     nominatim: NominatimService = Depends(get_nominatim_service),
 ) -> HTMLResponse:
     """Return an HTML fragment listing geocoding matches for the search box."""
+    logger.debug("HTMX /geocode: q={}", q)
     from app.web.templates import templates
 
     items: list[GeocodeItem] = []
@@ -87,6 +97,7 @@ async def htmx_geocode(
         except BadRequest:
             error = "Query cannot be empty."
         except (FetchFailed, UpstreamError):
+            logger.warning("HTMX geocode unavailable for q={}", q)
             error = "Geocoding service unavailable."
 
     return templates.TemplateResponse(

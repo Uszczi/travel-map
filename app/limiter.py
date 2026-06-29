@@ -3,6 +3,7 @@ import random
 from contextlib import asynccontextmanager
 
 from aiolimiter import AsyncLimiter
+from loguru import logger
 from redis.asyncio import Redis
 
 from app.redis import get_redis
@@ -24,6 +25,7 @@ class RedisQPSLimiter:
             finally:
                 pass
         else:
+            logger.debug("Rate-limit fallback (local) for key={}", self.key)
             async with self._local_fallback:
                 yield
 
@@ -36,7 +38,8 @@ class RedisQPSLimiter:
                 pttl = await self.redis.pttl(self.key)
                 delay = (pttl / 1000.0) if pttl and pttl > 0 else 0.05
                 await asyncio.sleep(delay + random.uniform(0, 0.05))
-        except Exception:
+        except Exception as e:
+            logger.warning("Rate-limit Redis error: {}", e)
             return False
 
 

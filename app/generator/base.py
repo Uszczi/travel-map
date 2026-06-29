@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
 import networkx as nx
+from loguru import logger
 
 from app.visited_edges import VisitedEdges
 
@@ -41,10 +42,20 @@ class RouteGenerator(ABC):
     ) -> list[int]: ...
 
     def __post_init__(self):
-        print("Removing isolated nodes...")
+        logger.info(
+            "Preprocessing graph: {} nodes, {} edges",
+            self.graph.number_of_nodes(),
+            self.graph.number_of_edges(),
+        )
 
         remove_isolated_nodes(self.graph)
         self.graph = keep_largest_component(self.graph)
+
+        logger.info(
+            "Graph after preprocessing: {} nodes, {} edges",
+            self.graph.number_of_nodes(),
+            self.graph.number_of_edges(),
+        )
 
     def calculate_min_max_length(self, tolerance, distance) -> tuple[float, float]:
         min_length = distance * (1 - tolerance)

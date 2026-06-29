@@ -1,3 +1,4 @@
+from loguru import logger
 from pydantic import EmailStr
 
 from app.domain.locale import Locale
@@ -13,12 +14,15 @@ class RequestPasswordResetUseCase:
         self.email_service = email_service
 
     async def __call__(self, email: EmailStr) -> None:
+        logger.info("Password reset requested for {}", email)
         async with self.uow as uow:
             user = await uow.users.get_by_email(email)
         if not user:
+            logger.debug("Password reset: no user found for {}", email)
             return
 
         token = issue_password_reset_token(user)
+        logger.debug("Password reset token issued for user {}", user.uuid)
         # TODO this url is wrong, there should be to frontend
         reset_url = f"{settings.APP_BASE_URL}/password-reset?token={token}"
 

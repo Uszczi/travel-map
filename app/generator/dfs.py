@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 import networkx as nx
+from loguru import logger
 
 from app import utils
 from app.generator.base import RouteGenerator
@@ -75,6 +76,13 @@ class DfsRoute(RouteGenerator):
         dfs(s, [s], 0.0, 0)
 
         if result is None:
+            logger.warning(
+                "DFS no path for segment {} -> {} (budget {:.1f}m, depth {})",
+                s,
+                t,
+                max_remaining,
+                depth_limit,
+            )
             raise Exception(
                 f"Brak ścieżki DFS dla odcinka {s} -> {t} (limit długości/głębokości?)."
             )
@@ -98,6 +106,14 @@ class DfsRoute(RouteGenerator):
         middle_nodes = middle_nodes or []
 
         min_length, max_length = self.calculate_min_max_length(tolerance, distance)
+        logger.info(
+            "DFS start={} end={} distance={} tolerance={} depth_limit={}",
+            start_node,
+            end_node,
+            distance,
+            tolerance,
+            depth_limit,
+        )
 
         targets: list[int | None] = middle_nodes[:]
         targets.append(end_node)
@@ -133,5 +149,12 @@ class DfsRoute(RouteGenerator):
                 route.extend(seg)
 
             used += self._segment_distance(seg)
+            logger.debug(
+                "DFS segment {} -> {} added, used={:.1f}m",
+                route[-1] if route else None,
+                t,
+                used,
+            )
 
+        logger.info("DFS route generated: {} nodes, {:.1f}m", len(route), used)
         return route

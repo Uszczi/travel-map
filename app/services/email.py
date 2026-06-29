@@ -1,6 +1,7 @@
 from enum import StrEnum
 
 from fastapi_mail import ConnectionConfig, FastMail, MessageSchema, MessageType
+from loguru import logger
 
 import app.settings as app_settings
 from app.domain.locale import Locale
@@ -75,6 +76,7 @@ async def send_activation_email(
     activation_url: str,
     locale: Locale,
 ) -> None:
+    logger.info("Sending activation email to {} (locale={})", recipient_email, locale)
     message = MessageSchema(
         subject=get_email_subject(locale, EmailTemplate.ACTIVATION),
         recipients=[recipient_email],
@@ -88,6 +90,7 @@ async def send_activation_email(
         message,
         template_name=get_email_template(locale, EmailTemplate.ACTIVATION),
     )
+    logger.debug("Activation email sent to {}", recipient_email)
 
 
 async def send_password_reset_email(
@@ -99,6 +102,9 @@ async def send_password_reset_email(
     token_expires_minutes: int | None = None,
     user_name: str | None = None,
 ) -> None:
+    logger.info(
+        "Sending password-reset email to {} (locale={})", recipient_email, locale
+    )
     template_body = {
         "reset_url": reset_url,
         # TODO fix this
@@ -122,3 +128,4 @@ async def send_password_reset_email(
         template_name=get_email_template(locale, EmailTemplate.PASSWORD_RESET),
         plain_template=get_email_plain_template(locale, EmailTemplate.PASSWORD_RESET),
     )
+    logger.debug("Password-reset email sent to {}", recipient_email)

@@ -1,4 +1,5 @@
 from fastapi.responses import JSONResponse
+from loguru import logger
 
 ACCESS_COOKIE_NAME = "access_token"
 REFRESH_COOKIE_NAME = "refresh_token"
@@ -8,6 +9,7 @@ ACCESS_COOKIE_MAX_AGE = 30 * 60  # 30 minutes
 
 
 def set_refresh_cookie(resp: JSONResponse, token: str):
+    logger.debug("Setting refresh cookie")
     resp.set_cookie(
         key=REFRESH_COOKIE_NAME,
         value=token,
@@ -20,6 +22,7 @@ def set_refresh_cookie(resp: JSONResponse, token: str):
 
 
 def set_access_cookie(resp: JSONResponse, token: str):
+    logger.debug("Setting access cookie")
     resp.set_cookie(
         key=ACCESS_COOKIE_NAME,
         value=token,
@@ -32,4 +35,5 @@ def set_access_cookie(resp: JSONResponse, token: str):
 
 
 def delete_refresh_cookie(resp: JSONResponse):
+    logger.debug("Deleting refresh cookie")
     resp.delete_cookie(REFRESH_COOKIE_NAME, path="/refresh")

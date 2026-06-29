@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from math import atan2, cos, radians, sin, sqrt
 
 import networkx as nx
+from loguru import logger
 
 from app import utils
 from app.generator.base import RouteGenerator
@@ -95,6 +96,9 @@ class AStarRoute(RouteGenerator):
                     f = tentative_g + heuristic(self.graph, v, t)
                     heapq.heappush(open_set, (f, v))
 
+        logger.warning(
+            "A* no path for segment {} -> {} (budget {:.1f}m)", s, t, max_remaining
+        )
         raise Exception(f"Brak ścieżki dla odcinka {s} -> {t} (limit długości?).")
 
     def generate(
@@ -115,6 +119,14 @@ class AStarRoute(RouteGenerator):
         middle_nodes = middle_nodes or []
 
         min_length, max_length = self.calculate_min_max_length(tolerance, distance)
+        logger.info(
+            "A* start={} end={} distance={} tolerance={} targets={}",
+            start_node,
+            end_node,
+            distance,
+            tolerance,
+            len(middle_nodes) + (1 if end_node is not None else 0),
+        )
 
         targets: list[int] = middle_nodes[:]
         if end_node is not None:
@@ -146,5 +158,12 @@ class AStarRoute(RouteGenerator):
                 route.extend(seg)
 
             used += self._segment_distance(seg)
+            logger.debug(
+                "A* segment {} -> {} added, used={:.1f}m",
+                route[-1] if route else None,
+                t,
+                used,
+            )
 
+        logger.info("A* route generated: {} nodes, {:.1f}m", len(route), used)
         return route

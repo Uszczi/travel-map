@@ -1,5 +1,6 @@
 import jwt
 from fastapi import HTTPException, status
+from loguru import logger
 from pydantic import BaseModel
 
 from app.domain.ports import UnitOfWork
@@ -22,6 +23,7 @@ class RefreshTokenUseCase:
         self.uow = uow
 
     async def __call__(self, cmd: RefreshTokenCommand) -> TokenPair:
+        logger.debug("Refreshing token")
         async with self.uow as uow:
             try:
                 payload = decode_jwt(
@@ -31,11 +33,13 @@ class RefreshTokenUseCase:
                     algorithms=[JWT_ALGORITHM],
                 )
             except jwt.ExpiredSignatureError:
+                logger.warning("Refresh token expired")
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Refresh token expired",
                 )
             except jwt.InvalidTokenError:
+                logger.warning("Invalid refresh token")
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Invalid refresh token",
@@ -43,6 +47,7 @@ class RefreshTokenUseCase:
 
             sub = payload.get("sub")
             if not sub:
+                logger.warning("Refresh token missing sub")
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Invalid refresh token (no sub)",
@@ -50,6 +55,7 @@ class RefreshTokenUseCase:
 
             user = await uow.users.get(sub)
             if not user:
+                logger.warning("Refresh token user not found: {}", sub)
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Invalid refresh token",
@@ -57,6 +63,7 @@ class RefreshTokenUseCase:
 
             new_access = issue_access_token(user)
             new_refresh = issue_refresh_token(user)
+            logger.info("Token refreshed for user {}", sub)
 
             return TokenPair(
                 access_token=new_access,

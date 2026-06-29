@@ -1,6 +1,7 @@
 from typing import Generic, Iterator, TypeVar
 
 import networkx as nx
+from loguru import logger
 
 from app.models import Segment
 from app.utils import get_distance_between
@@ -25,6 +26,7 @@ class VisitedEdges(Generic[K]):
         return iter(self._map)
 
     def clear(self) -> None:
+        logger.debug("VisitedEdges cleared (had {} entries)", len(self._map))
         self._map.clear()
 
     def add(self, key: K) -> None:
@@ -55,11 +57,18 @@ class VisitedEdges(Generic[K]):
             if (start, end) in self._map or (end, start) in self._map:
                 visited_routes_distance += get_distance_between(graph, start, end)
 
+        logger.debug("VisitedEdges total distance: {:.1f}m", visited_routes_distance)
         return visited_routes_distance
 
     def mark_edges_visited(self, route: list[int]):
+        count_before = len(self._map)
         for u, v in zip(route[:-1], route[1:]):
             self.add((u, v))
+        logger.debug(
+            "VisitedEdges: +{} new edges (total {})",
+            len(self._map) - count_before,
+            len(self._map),
+        )
 
 
 # For more users it has to be refactored

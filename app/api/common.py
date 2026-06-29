@@ -1,4 +1,5 @@
 import osmnx as ox
+from loguru import logger
 from networkx import MultiDiGraph
 
 from app import utils
@@ -55,25 +56,31 @@ def get_or_create_graph(
     bbox: BoundingBox | None = None,
 ) -> MultiDiGraph:
     if start_x is not None and start_y is not None:
-        if G := graphs.get(f"{start_x}_{start_y}"):
+        key = f"{start_x}_{start_y}"
+        if G := graphs.get(key):
+            logger.debug("Using cached graph for coords {}", key)
             return G
 
+        logger.info("Fetching graph for coords {},{}", start_x, start_y)
         with utils.time_measure("ox.graph_from_bbox took: "):
             CITY_BBOX = get_city_bbox(start_x, start_y)
             G = ox.graph_from_bbox(CITY_BBOX, network_type="drive")
-            graphs[f"{start_x}_{start_y}"] = G
+            graphs[key] = G
             return G
 
     if bbox is not None:
         if g := graphs.get(bbox):
+            logger.debug("Using cached graph for bbox {}", bbox)
             return g
 
+        logger.info("Fetching graph for bbox {}", bbox)
         with utils.time_measure("ox.graph_from_bbox took: "):
             G = ox.graph_from_bbox(bbox_to_tuple(bbox), network_type="drive")
         graphs[bbox] = G
         return G
 
     if nominatim_id is not None:
+        logger.info("Fetching graph for nominatim_id={}", nominatim_id)
         with utils.time_measure("ox.graph_from_bbox took: "):
             CITY_BBOX = get_city_bbox(start_x, start_y)
             G = ox.graph_from_bbox(CITY_BBOX, network_type="drive")

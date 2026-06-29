@@ -1,6 +1,6 @@
 import osmnx as ox
 from fastapi import APIRouter, Depends, HTTPException
-
+from loguru import logger
 
 from app import utils
 from app.api.common import (
@@ -40,6 +40,7 @@ def _build_bbox(
 
 @router.get("/clear")
 def clear():
+    logger.info("Clearing graphs and visited edges")
     graphs.clear()
     visited_edges.clear()
 
@@ -65,6 +66,15 @@ def route(
     skip_elevation: bool = True,
     elevation_service: ElevationService = Depends(get_elevation_service),
 ) -> Route:
+    logger.info(
+        "GET /route/{} start=({}, {}) distance={} prefer_new={}",
+        algorithm_type,
+        start_x,
+        start_y,
+        distance,
+        prefer_new,
+    )
+
     start_bbox = _build_bbox(
         start_bbox_south, start_bbox_north, start_bbox_west, start_bbox_east
     )
@@ -119,6 +129,21 @@ def route(
 
     total_gain, total_lose = elevation_service.calculate_total_gain_lose(elevation)
 
+    logger.info(
+        "Route generated: algorithm={} distance={:.0f}m new={:.0f}%",
+        algorithm_type,
+        route_distance,
+        Route(
+            rec=CITY_BBOX,
+            x=x,
+            y=y,
+            distance=route_distance,
+            segments=segments,
+            elevation=elevation,
+            total_gain=total_gain,
+            total_lose=total_lose,
+        ).percent_of_new,
+    )
     return Route(
         rec=CITY_BBOX,
         x=x,

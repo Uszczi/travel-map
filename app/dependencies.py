@@ -3,6 +3,7 @@ from typing import Optional
 
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
+from loguru import logger
 
 from app.db import async_session
 from app.domain.ports import UnitOfWork
@@ -36,6 +37,7 @@ async def get_current_user(
     token = bearer_token or request.cookies.get(ACCESS_COOKIE_NAME)
 
     if not token:
+        logger.warning("Auth: no token provided")
         raise exception
 
     try:
@@ -48,16 +50,19 @@ async def get_current_user(
         )
         # TODO catch explicit exception
     except Exception:
+        logger.warning("Auth: invalid access token")
         raise exception
 
     user_id = payload.get("sub")
     if user_id is None:
+        logger.warning("Auth: no subject in token")
         raise exception
 
     exp = payload.get("exp")
     if exp and datetime.fromtimestamp(exp, tz=timezone.utc) < datetime.now(
         timezone.utc
     ):
+        logger.info("Auth: token expired for user_id={}", user_id)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token has expired.",
@@ -67,10 +72,12 @@ async def get_current_user(
     async with uow as tx:
         user = await tx.users.get(user_id)
         if user is None:
+            logger.warning("Auth: user not found for user_id={}", user_id)
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Could not validate credentials.",
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
+    logger.debug("Auth: user {} authenticated successfully", user_id)
     return user

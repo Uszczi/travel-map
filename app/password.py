@@ -1,6 +1,6 @@
-# import secrets
 from typing import Optional, Union
 
+from loguru import logger
 from pwdlib import PasswordHash
 from pwdlib.hashers.argon2 import Argon2Hasher
 
@@ -15,10 +15,14 @@ class PasswordHelper:
     def verify(
         self, plain_password: str, hashed_password: str
     ) -> tuple[bool, Union[str, None]]:
-        return self.password_hash.verify(plain_password, hashed_password)
+        result = self.password_hash.verify(plain_password, hashed_password)
+        logger.debug("Password verification: {}", result[0])
+        return result
 
     def hash(self, password: str) -> str:
-        return self.password_hash.hash(password)
+        hashed = self.password_hash.hash(password)
+        logger.debug("Password hashed")
+        return hashed
 
     # def generate(self) -> str:
     #     return secrets.token_urlsafe()

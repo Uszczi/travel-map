@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 import networkx as nx
+from loguru import logger
 
 from app import utils
 from app.generator.base import RouteGenerator
@@ -77,6 +78,13 @@ class RandomRoute(RouteGenerator):
                 used += step_len
                 prev, current = current, next_node
 
+        logger.warning(
+            "Random no segment {} -> {} in budget {:.1f}m after {} restarts",
+            s,
+            t,
+            max_remaining,
+            self.SEG_RESTARTS,
+        )
         raise Exception(
             f"Nie udało się znaleźć segmentu {s} -> {t} w budżecie {max_remaining:.1f} m."
         )
@@ -105,6 +113,13 @@ class RandomRoute(RouteGenerator):
         middle_nodes = middle_nodes or []
 
         min_length, max_length = self.calculate_min_max_length(tolerance, distance)
+        logger.info(
+            "RandomRoute start={} end={} distance={} tolerance={}",
+            start_node,
+            end_node,
+            distance,
+            tolerance,
+        )
 
         targets: list[int | None] = middle_nodes[:]
         targets.append(end_node)
@@ -138,5 +153,12 @@ class RandomRoute(RouteGenerator):
                 route.extend(seg)
 
             used_total += self._path_length(seg)
+            logger.debug(
+                "RandomRoute segment {} -> {} added, used={:.1f}m",
+                route[-1] if route else None,
+                t,
+                used_total,
+            )
 
+        logger.info("RandomRoute generated: {} nodes, {:.1f}m", len(route), used_total)
         return route

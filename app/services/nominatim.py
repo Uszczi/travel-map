@@ -1,4 +1,5 @@
 import httpx
+from loguru import logger
 
 from app.serializers.geocode import GeocodeItem
 from app.settings import settings
@@ -41,6 +42,8 @@ class NominatimService:
         if not q or not q.strip():
             raise BadRequest("Empty query.")
 
+        logger.info("Nominatim search: q={}, tag={}, limit={}", q, tag, limit)
+
         params = {
             "key": settings.NOMINATIM_ACCESS_TOKEN,
             "q": q.strip(),
@@ -59,12 +62,15 @@ class NominatimService:
             ) as client:
                 res = await client.get(self.search_url, params=params)
         except httpx.HTTPError as e:
+            logger.error("Nominatim search fetch failed: {}", e)
             raise FetchFailed("Fetch failed") from e
 
         if not res.is_success:
+            logger.warning("Nominatim search upstream error: {}", res.status_code)
             raise UpstreamError(f"Upstream error ({res.status_code})")
 
         raw = res.json()
+        logger.debug("Nominatim search returned {} results", len(raw))
 
         items: list[GeocodeItem] = [
             GeocodeItem(
@@ -80,6 +86,8 @@ class NominatimService:
         return items
 
     async def reverse(self, lat: float, lng: float) -> GeocodeItem:
+        logger.info("Nominatim reverse: lat={}, lng={}", lat, lng)
+
         params = {
             "key": settings.NOMINATIM_ACCESS_TOKEN,
             "format": "json",
@@ -93,9 +101,11 @@ class NominatimService:
             ) as client:
                 res = await client.get(self.reverse_url, params=params)
         except httpx.HTTPError as e:
+            logger.error("Nominatim reverse fetch failed: {}", e)
             raise FetchFailed("Fetch failed") from e
 
         if not res.is_success:
+            logger.warning("Nominatim reverse upstream error: {}", res.status_code)
             raise UpstreamError(f"Upstream error ({res.status_code})")
 
         raw = res.json()
@@ -106,8 +116,10 @@ class NominatimService:
                 if isinstance(raw, dict)
                 else "No address found for these coordinates."
             )
+            logger.warning("Nominatim reverse not found: {}", msg)
             raise NotFound(msg)
 
+        logger.debug("Nominatim reverse got: {}", raw.get("display_name"))
         return GeocodeItem(
             id=raw["place_id"],
             label=raw["display_name"],

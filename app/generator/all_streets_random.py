@@ -2,6 +2,7 @@ import math
 from dataclasses import dataclass
 
 import networkx as nx
+from loguru import logger
 
 from app.generator.base import RouteGenerator
 from app.visited_edges import VisitedEdges
@@ -111,6 +112,12 @@ class AllStreetsRoute(RouteGenerator):
         ignored_nodes: list[int] | None = None,
         middle_nodes: list[int] | None = None,
     ) -> list[int]:
+        logger.info(
+            "AllStreets start={} distance={} unvisited={}",
+            start_node,
+            distance,
+            len(self.graph.edges(keys=True)),
+        )
 
         unvisited_edges = set(self.graph.edges(keys=True))
 
@@ -119,6 +126,12 @@ class AllStreetsRoute(RouteGenerator):
         previous_edge = None  # Track the actual edge we came from (u, v, k)
 
         while unvisited_edges:
+            logger.debug(
+                "AllStreets at node={}, unvisited={}, route_len={}",
+                current,
+                len(unvisited_edges),
+                len(route),
+            )
             outgoing = [
                 e
                 for e in self.graph.out_edges(current, keys=True)
@@ -182,11 +195,16 @@ class AllStreetsRoute(RouteGenerator):
                     current = closest_recovery_node
 
                 except ValueError:
-                    # This happens if there is no possible path to the remaining unvisited edges
-                    # (e.g., the graph is disconnected or directional rules trap the algorithm)
-                    # raise Exception(
-                    #     "Cannot reach remaining unvisited streets. The graph might be disconnected."
-                    # )
-                    pass
+                    logger.warning(
+                        "AllStreets cannot recover at node={}, {} unvisited remain",
+                        current,
+                        len(unvisited_edges),
+                    )
+                    unvisited_edges.clear()
 
+        logger.info(
+            "AllStreets done: route={} nodes, visited={} edges",
+            len(route),
+            len(self.graph.edges(keys=True)) - len(unvisited_edges),
+        )
         return route

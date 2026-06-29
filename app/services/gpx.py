@@ -1,5 +1,6 @@
 import gpxpy
 import gpxpy.gpx
+from loguru import logger
 
 
 class GPXService:
@@ -9,6 +10,7 @@ class GPXService:
         cls, points: list[tuple[float, float]], track_name: str
     ) -> gpxpy.gpx.GPX:
         """Generuje GPX z listy punktów."""
+        logger.info("Generating GPX '{}' with {} points", track_name, len(points))
         gpx = gpxpy.gpx.GPX()
 
         gpx_track = gpxpy.gpx.GPXTrack(name=track_name)
