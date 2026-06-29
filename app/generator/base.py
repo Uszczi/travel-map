@@ -7,6 +7,19 @@ import networkx as nx
 from app.visited_edges import VisitedEdges
 
 
+def keep_largest_component(graph: nx.MultiDiGraph) -> nx.MultiDiGraph:
+    components = list(nx.weakly_connected_components(graph))
+    if not components:
+        return graph
+    largest = max(components, key=len)
+    return graph.subgraph(largest).copy()
+
+
+def remove_isolated_nodes(graph: nx.MultiDiGraph):
+    isolates = list(nx.isolates(graph))
+    graph.remove_nodes_from(isolates)
+
+
 @dataclass
 class RouteGenerator(ABC):
     graph: nx.MultiDiGraph
@@ -26,6 +39,12 @@ class RouteGenerator(ABC):
         ignored_nodes: list[int] | None = None,
         middle_nodes: list[int] | None = None,
     ) -> list[int]: ...
+
+    def __post_init__(self):
+        print("Removing isolated nodes...")
+
+        remove_isolated_nodes(self.graph)
+        self.graph = keep_largest_component(self.graph)
 
     def calculate_min_max_length(self, tolerance, distance) -> tuple[float, float]:
         min_length = distance * (1 - tolerance)
