@@ -52,7 +52,6 @@ async def test_index_page(client):
     assert "/htmx/geocode" in body
 
 
-
 @patch("app.api.route_generation.get_or_create_graph")
 @patch("app.api.route_generation.ox.nearest_nodes")
 async def test_htmx_route_returns_fragment(
@@ -76,9 +75,7 @@ async def test_htmx_route_returns_fragment(
 
 
 async def test_htmx_visited_routes(client, mock_graph):
-    with patch(
-        "app.api.route_generation.get_or_create_graph", return_value=mock_graph
-    ):
+    with patch("app.api.route_generation.get_or_create_graph", return_value=mock_graph):
         visited_edges.add((1, 2))
 
         res = await client.get("/htmx/visited-routes")

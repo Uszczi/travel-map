@@ -1,12 +1,10 @@
+import networkx as nx
 import osmnx as ox
 
 from app.api.common import get_city_bbox
-from app.utils import remove_farthest_nodes
-
 from app.generator.all_streets_random import AllStreetsRoute
+from app.utils import remove_farthest_nodes
 from app.visited_edges import VisitedEdges
-
-import networkx as nx
 
 
 def keep_largest_component(graph: nx.MultiDiGraph) -> nx.MultiDiGraph:

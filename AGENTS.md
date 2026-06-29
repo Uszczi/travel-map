@@ -1,5 +1,8 @@
 # travel-map
 
+> [!IMPORTANT]
+> **Everything must be done through Docker.** For any running, testing, linting, checking, or migration task, agents **must** use the Docker/`just` commands instead of running them locally.
+
 ## Quick start
 
 ```bash

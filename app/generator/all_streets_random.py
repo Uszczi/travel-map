@@ -1,5 +1,6 @@
 import math
 from dataclasses import dataclass
+
 import networkx as nx
 
 from app.generator.base import RouteGenerator
@@ -165,10 +166,7 @@ class AllStreetsRoute(RouteGenerator):
                     route.extend(recovery_path[1:])
                     for i in range(len(recovery_path) - 1):
                         u, v = recovery_path[i], recovery_path[i + 1]
-                        remove_edge_both_directions(
-                            self.graph, unvisited_edges, u, v
-                        )
-
+                        remove_edge_both_directions(self.graph, unvisited_edges, u, v)
 
                     # Track the last edge in the recovery path
                     if len(recovery_path) >= 2:

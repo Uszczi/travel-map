@@ -1,10 +1,9 @@
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import networkx as nx
 import pytest
 
 from app.api.common import graphs
-from app.models import Route, Segment
 from app.visited_edges import visited_edges
 
 pytestmark = [pytest.mark.asyncio]

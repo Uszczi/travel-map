@@ -4,15 +4,13 @@
 
 {% block content %}
 {% include "partials/header.html" %}
-
-<div class="grid grid-cols-[80fr_10fr_10fr] h-screen">
-  <main class="relative">
-    <div
-      id="map"
-      class="w-full h-full"
-      data-lat="{{ default_y }}"
-      data-lng="{{ default_x }}"
-    ></div>
-  </main>
+<main>
+  <div
+    id="map"
+    class="w-full h-full"
+    data-lat="{{ default_y }}"
+    data-lng="{{ default_x }}"
+  ></div>
+</main>
 </div>
 {% endblock %}

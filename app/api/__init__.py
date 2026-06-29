@@ -1,5 +1,5 @@
 import sentry_sdk
-from fastapi import FastAPI, APIRouter
+from fastapi import APIRouter, FastAPI
 
 from app.settings import settings
 

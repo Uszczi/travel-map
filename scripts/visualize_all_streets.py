@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
-from matplotlib.collections import LineCollection
 import networkx as nx
 import osmnx as ox
+from matplotlib.collections import LineCollection
 
 from app.api.common import get_city_bbox
 from app.generator.all_streets_random import (
