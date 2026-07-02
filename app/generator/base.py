@@ -49,7 +49,7 @@ class RouteGenerator(ABC):
         )
 
         remove_isolated_nodes(self.graph)
-        self.graph = keep_largest_component(self.graph)
+        # self.graph = keep_largest_component(self.graph)
 
         logger.info(
             "Graph after preprocessing: {} nodes, {} edges",

@@ -16,6 +16,12 @@ class BoundingBox(BaseModel):
         s, n, w, e = map(float, v)
         return cls(south=s, north=n, west=w, east=e)
 
+    def to_list(self) -> list[float]:
+        return [self.south, self.north, self.west, self.east]
+
+    def center(self) -> tuple[float, float]:
+        return (self.south + self.north) / 2, (self.west + self.east) / 2
+
     def __hash__(self):
         return hash(self.south) + hash(self.north) + hash(self.west) + hash(self.east)
 

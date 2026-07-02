@@ -133,9 +133,7 @@ class AllStreetsRoute(RouteGenerator):
                 len(route),
             )
             outgoing = [
-                e
-                for e in self.graph.out_edges(current, keys=True)
-                if e in unvisited_edges
+                e for e in self.graph.neighbors(current) if e in unvisited_edges
             ]
 
             if outgoing:
@@ -200,7 +198,7 @@ class AllStreetsRoute(RouteGenerator):
                         current,
                         len(unvisited_edges),
                     )
-                    unvisited_edges.clear()
+                    break
 
         logger.info(
             "AllStreets done: route={} nodes, visited={} edges",

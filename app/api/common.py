@@ -64,7 +64,7 @@ def get_or_create_graph(
         logger.info("Fetching graph for coords {},{}", start_x, start_y)
         with utils.time_measure("ox.graph_from_bbox took: "):
             CITY_BBOX = get_city_bbox(start_x, start_y)
-            G = ox.graph_from_bbox(CITY_BBOX, network_type="drive")
+            G = ox.graph_from_bbox(CITY_BBOX, network_type="walk")
             graphs[key] = G
             return G
 
@@ -75,7 +75,8 @@ def get_or_create_graph(
 
         logger.info("Fetching graph for bbox {}", bbox)
         with utils.time_measure("ox.graph_from_bbox took: "):
-            G = ox.graph_from_bbox(bbox_to_tuple(bbox), network_type="drive")
+            # TODO: check which network_type is better
+            G = ox.graph_from_bbox(bbox_to_tuple(bbox), network_type="walk")
         graphs[bbox] = G
         return G
 
